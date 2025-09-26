@@ -1,0 +1,38 @@
+﻿@model QuizAppDotNetFrameWork.Models.User
+@{
+    ViewBag.Title = "Add User";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<div class="container mt-5" style="max-width: 500px;">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0">Add New User</h3>
+        </div>
+        <div class="card-body">
+            @using (Html.BeginForm("AddUser", "Admin", FormMethod.Post))
+            {
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username</label>
+                    <input type="text" class="form-control" id="username" name="Username" required />
+                </div>
+
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="password" name="PasswordHash" required />
+                </div>
+
+                <div class="mb-3">
+                    <label for="role" class="form-label">Role</label>
+                    <select class="form-select" id="role" name="Role" required>
+                        <option value="User" selected>User</option>
+                        <option value="Admin">Admin</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-success w-100">Add User</button>
+            }
+        </div>
+    </div>
+</div>
