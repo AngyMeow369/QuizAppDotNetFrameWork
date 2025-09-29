@@ -8,21 +8,27 @@ namespace QuizAppDotNetFrameWork.Helpers
     {
         public static string HashPassword(string password)
         {
-            using (SHA256 sha = SHA256.Create())
+            using (var sha256 = SHA256.Create())
             {
-                byte[] bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(password));
+                byte[] bytes = Encoding.UTF8.GetBytes(password);
+                byte[] hash = sha256.ComputeHash(bytes);
+
+                // Use this method instead
                 StringBuilder builder = new StringBuilder();
-                foreach (var b in bytes)
-                    builder.Append(b.ToString("x2"));
+                for (int i = 0; i < hash.Length; i++)
+                {
+                    builder.Append(hash[i].ToString("x2"));
+                }
                 return builder.ToString();
             }
         }
 
-        // Verify password against stored hash
         public static bool VerifyPassword(string enteredPassword, string storedHash)
         {
+            if (string.IsNullOrEmpty(storedHash)) return false;
+
             string enteredHash = HashPassword(enteredPassword);
-            return string.Equals(enteredHash, storedHash, StringComparison.OrdinalIgnoreCase);
+            return enteredHash.Equals(storedHash, StringComparison.OrdinalIgnoreCase);
         }
     }
 }

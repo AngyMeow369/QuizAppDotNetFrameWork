@@ -1,0 +1,49 @@
+﻿@model QuizAppDotNetFrameWork.Models.Quiz
+
+@{
+    ViewBag.Title = "Edit Quiz";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-warning text-white">
+                    <h4 class="card-title mb-0">
+                        <i class="bi bi-pencil me-2"></i>Edit Quiz
+                    </h4>
+                </div>
+                <div class="card-body">
+                    @using (Html.BeginForm("EditQuiz", "Quiz", FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.HiddenFor(model => model.QuizId)
+                        @Html.HiddenFor(model => model.CreatedBy)
+                        @Html.HiddenFor(model => model.CreatedOn)
+
+                        <div class="mb-3">
+                            @Html.LabelFor(model => model.Title, new { @class = "form-label fw-bold" })
+                            @Html.TextBoxFor(model => model.Title, new { @class = "form-control", placeholder = "Enter quiz title", required = "required" })
+                            @Html.ValidationMessageFor(model => model.Title, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="mb-3">
+                            @Html.LabelFor(model => model.Description, new { @class = "form-label fw-bold" })
+                            @Html.TextAreaFor(model => model.Description, new { @class = "form-control", rows = "3", placeholder = "Enter quiz description (optional)" })
+                            @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="@Url.Action("ManageQuizzes")" class="btn btn-secondary me-md-2">
+                                <i class="bi bi-arrow-left me-2"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-warning text-white">
+                                <i class="bi bi-check-circle me-2"></i>Update Quiz
+                            </button>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,215 @@
+﻿@model List<QuizAppDotNetFrameWork.Models.Quiz>
+
+@{
+    ViewBag.Title = "Manage Quizzes";
+}
+
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-gradient bg-dark border-secondary">
+                <div class="card-body py-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="card-title h2 mb-2 text-white">
+                                <i class="bi bi-journals me-2"></i>Manage Quizzes
+                            </h1>
+                            <p class="card-text mb-0 text-light opacity-75">Create, edit, and manage all quizzes in the system.</p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <a href="@Url.Action("AddQuiz")" class="btn btn-outline-light btn-lg">
+                                <i class="bi bi-plus-circle me-2"></i>Add New Quiz
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="card shadow-sm border-secondary bg-dark text-light">
+        <div class="card-header bg-dark border-secondary">
+            <h5 class="card-title mb-0 text-light">
+                <i class="bi bi-list-task me-2"></i>All Quizzes
+            </h5>
+        </div>
+        <div class="card-body">
+            @if (Model != null && Model.Count > 0)
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover table-dark">
+                        <thead class="table-secondary">
+                            <tr>
+                                <th class="text-light">Title</th>
+                                <th class="text-light">Description</th>
+                                <th class="text-light">Created On</th>
+                                <th class="text-light">Questions</th>
+                                <th class="text-light">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var quiz in Model)
+                            {
+                                <tr class="text-light">
+                                    <td>
+                                        <strong class="text-white">@quiz.Title</strong>
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(quiz.Description))
+                                        {
+                                            <span class="text-muted">@quiz.Description</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted fst-italic">No description</span>
+                                        }
+                                    </td>
+                                    <td class="text-muted">@quiz.CreatedOn.ToString("MMM dd, yyyy")</td>
+                                    <td>
+                                        <span class="badge bg-secondary">0</span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="@Url.Action("ManageQuestions", new { quizId = quiz.QuizId })"
+                                               class="btn btn-outline-primary" title="Manage Questions">
+                                                <i class="bi bi-question-circle"></i>
+                                            </a>
+                                            <a href="@Url.Action("EditQuiz", new { quizId = quiz.QuizId })"
+                                               class="btn btn-outline-warning" title="Edit Quiz">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a href="@Url.Action("DeleteQuiz", new { quizId = quiz.QuizId })"
+                                               class="btn btn-outline-danger" title="Delete Quiz"
+                                               onclick="return confirm('Are you sure you want to delete this quiz? This action cannot be undone.');">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox fs-1 text-muted d-block mb-3"></i>
+                    <h5 class="text-light">No Quizzes Created Yet</h5>
+                    <p class="text-muted">Get started by creating your first quiz.</p>
+                    <a href="@Url.Action("AddQuiz")" class="btn btn-outline-primary">
+                        <i class="bi bi-plus-circle me-2"></i>Create First Quiz
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    body {
+        background-color: #1a1a1a;
+        color: #ffffff;
+    }
+
+    .bg-gradient {
+        background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%) !important;
+    }
+
+    .card {
+        background-color: #2d3748;
+        border-color: #4a5568;
+    }
+
+    .text-light {
+        color: #e2e8f0 !important;
+    }
+
+    .text-muted {
+        color: #a0aec0 !important;
+    }
+
+    .border-secondary {
+        border-color: #4a5568 !important;
+    }
+
+    .table-dark {
+        background-color: #2d3748;
+        color: #e2e8f0;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #4a5568;
+        color: #ffffff;
+    }
+
+    .table-secondary {
+        background-color: #4a5568 !important;
+        color: #e2e8f0 !important;
+    }
+
+    .btn-outline-light {
+        color: #e2e8f0;
+        border-color: #e2e8f0;
+    }
+
+        .btn-outline-light:hover {
+            background-color: #e2e8f0;
+            border-color: #e2e8f0;
+            color: #1a202c;
+        }
+
+    .btn-outline-primary {
+        color: #63b3ed;
+        border-color: #63b3ed;
+    }
+
+        .btn-outline-primary:hover {
+            background-color: #63b3ed;
+            border-color: #63b3ed;
+            color: #1a202c;
+        }
+
+    .btn-outline-warning {
+        color: #f6e05e;
+        border-color: #f6e05e;
+    }
+
+        .btn-outline-warning:hover {
+            background-color: #f6e05e;
+            border-color: #f6e05e;
+            color: #1a202c;
+        }
+
+    .btn-outline-danger {
+        color: #fc8181;
+        border-color: #fc8181;
+    }
+
+        .btn-outline-danger:hover {
+            background-color: #fc8181;
+            border-color: #fc8181;
+            color: #1a202c;
+        }
+
+    .badge.bg-secondary {
+        background-color: #718096 !important;
+        color: #1a202c;
+    }
+</style>

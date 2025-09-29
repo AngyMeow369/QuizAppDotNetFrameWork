@@ -2,7 +2,6 @@
 @{
     ViewBag.Title = "Edit User";
 }
-
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
 <div class="container mt-5" style="max-width: 500px;">
@@ -13,27 +12,30 @@
         <div class="card-body">
             @using (Html.BeginForm("EditUser", "Admin", FormMethod.Post))
             {
+                @Html.AntiForgeryToken() //  <<< this was missing
                 @Html.HiddenFor(m => m.UserId)
 
                 <div class="mb-3">
-                    <label for="username" class="form-label">Username</label>
+                    <label class="form-label">Username</label>
                     @Html.TextBoxFor(m => m.Username, new { @class = "form-control", required = "required" })
                 </div>
 
                 <div class="mb-3">
-                    <label for="password" class="form-label">Password</label>
-                    <input type="password" class="form-control" id="password" name="PasswordHash" placeholder="Leave blank to keep existing password" />
+                    <label class="form-label">New password</label>
+                    <input type="password" class="form-control" name="newPassword"
+                           placeholder="Leave blank to keep existing password" />
                 </div>
 
                 <div class="mb-3">
-                    <label for="role" class="form-label">Role</label>
-                    <select class="form-select" id="role" name="Role">
+                    <label class="form-label">Role</label>
+                    <select class="form-select" name="Role">
                         <option value="User" @(Model.Role == "User" ? "selected" : "")>User</option>
                         <option value="Admin" @(Model.Role == "Admin" ? "selected" : "")>Admin</option>
                     </select>
                 </div>
 
                 <button type="submit" class="btn btn-primary w-100">Save Changes</button>
+                <a class="btn btn-secondary w-100 mt-2" href="@Url.Action("ManageUsers")">Cancel</a>
             }
         </div>
     </div>

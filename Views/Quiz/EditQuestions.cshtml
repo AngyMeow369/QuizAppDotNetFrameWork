@@ -1,0 +1,163 @@
+﻿@model QuizAppDotNetFrameWork.Models.Question
+@{
+    ViewBag.Title = "Edit Question";
+    var quiz = ViewBag.Quiz as QuizAppDotNetFrameWork.Models.Quiz;
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow-sm border-0">
+                <div class="card-header text-white" style="background: linear-gradient(135deg, #4f86f7 0%, #3366cc 100%);">
+                    <h4 class="card-title mb-0">
+                        <i class="bi bi-pencil me-2"></i>Edit Question
+                    </h4>
+                    <small class="opacity-90">Quiz: @quiz.Title</small>
+                </div>
+                <div class="card-body">
+                    @using (Html.BeginForm("EditQuestion", "Quiz", FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.HiddenFor(model => model.QuestionId)
+                        @Html.HiddenFor(model => model.QuizId)
+
+                        <!-- Question Text -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Question Text</label>
+                            @Html.TextAreaFor(model => model.QuestionText, new
+                            {
+                                @class = "form-control",
+                                rows = "3",
+                                placeholder = "Enter your question here...",
+                                required = "required"
+                            })
+                            @Html.ValidationMessageFor(model => model.QuestionText, "", new { @class = "text-danger" })
+                        </div>
+
+                        <!-- Options Section -->
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <label class="form-label fw-bold">Answer Options</label>
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="addOption()">
+                                    <i class="bi bi-plus me-1"></i>Add Option
+                                </button>
+                            </div>
+
+                            <div id="optionsContainer">
+                                @for (int i = 0; i < Model.Options.Count; i++)
+                                {
+                                    <div class="option-row mb-3 p-3 border rounded">
+                                        @Html.HiddenFor(m => m.Options[i].OptionId)
+                                        @Html.HiddenFor(m => m.Options[i].QuestionId)
+                                        <div class="row g-2">
+                                            <div class="col-md-8">
+                                                @Html.TextBoxFor(m => m.Options[i].OptionText, new
+                                                {
+                                                    @class = "form-control",
+                                                    placeholder = "Option text",
+                                                    required = "required"
+                                                })
+                                            </div>
+                                            <div class="col-md-3">
+                                                @Html.DropDownListFor(m => m.Options[i].isCorrect, new List<SelectListItem> {
+                                                    new SelectListItem { Text = "Incorrect", Value = "false" },
+                                                    new SelectListItem { Text = "Correct Answer", Value = "true" }
+                                                }, new { @class = "form-select" })
+                                            </div>
+                                            <div class="col-md-1">
+                                                <button type="button" class="btn btn-outline-danger w-100"
+                                                        onclick="removeOption(this)"
+                                                        @(Model.Options.Count <= 2 ? "disabled" : "")>
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            <small class="text-muted">At least 2 options are required. Mark one option as correct.</small>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end border-top pt-3">
+                            <a href="@Url.Action("ManageQuestions", new { quizId = quiz.QuizId })" class="btn btn-secondary me-md-2">
+                                <i class="bi bi-arrow-left me-2"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle me-2"></i>Update Question
+                            </button>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let optionCount = @Model.Options.Count;
+
+    function addOption() {
+        const container = document.getElementById('optionsContainer');
+        const newOption = document.createElement('div');
+        newOption.className = 'option-row mb-3 p-3 border rounded';
+        newOption.innerHTML = `
+            <input type="hidden" name="Options[${optionCount}].OptionId" value="0" />
+            <input type="hidden" name="Options[${optionCount}].QuestionId" value="@Model.QuestionId" />
+            <div class="row g-2">
+                <div class="col-md-8">
+                    <input type="text" name="Options[${optionCount}].OptionText"
+                           class="form-control" placeholder="Option text" required>
+                </div>
+                <div class="col-md-3">
+                    <select name="Options[${optionCount}].isCorrect" class="form-select">
+                        <option value="false">Incorrect</option>
+                        <option value="true">Correct Answer</option>
+                    </select>
+                </div>
+                <div class="col-md-1">
+                    <button type="button" class="btn btn-outline-danger w-100" onclick="removeOption(this)">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+        container.appendChild(newOption);
+        optionCount++;
+
+        // Enable delete buttons if we have more than 2 options
+        if (optionCount > 2) {
+            document.querySelectorAll('.option-row .btn-outline-danger').forEach(btn => {
+                btn.disabled = false;
+            });
+        }
+    }
+
+    function removeOption(button) {
+        const optionRow = button.closest('.option-row');
+        if (document.querySelectorAll('.option-row').length > 2) {
+            optionRow.remove();
+            optionCount--;
+
+            // Disable delete buttons if we have exactly 2 options
+            if (optionCount === 2) {
+                document.querySelectorAll('.option-row .btn-outline-danger').forEach(btn => {
+                    btn.disabled = true;
+                });
+            }
+        } else {
+            alert('At least 2 options are required.');
+        }
+    }
+</script>
+
+<style>
+    .option-row {
+        background-color: #f8f9fa;
+        transition: background-color 0.2s ease;
+    }
+
+        .option-row:hover {
+            background-color: #e9ecef;
+        }
+</style>

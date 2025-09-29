@@ -1,0 +1,177 @@
+﻿@model List<QuizAppDotNetFrameWork.Models.Question>
+@{
+    ViewBag.Title = "Manage Questions";
+    var quiz = ViewBag.Quiz as QuizAppDotNetFrameWork.Models.Quiz;
+}
+
+<div class="container mt-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-gradient bg-primary text-white">
+                <div class="card-body py-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="card-title h2 mb-2">
+                                <i class="bi bi-question-circle me-2"></i>Manage Questions
+                            </h1>
+                            <p class="card-text mb-0 opacity-75">
+                                Managing questions for: <strong>@quiz.Title</strong>
+                            </p>
+                            @if (!string.IsNullOrEmpty(quiz.Description))
+                            {
+                                <small class="opacity-75">@quiz.Description</small>
+                            }
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <a href="@Url.Action("AddQuestion", new { quizId = quiz.QuizId })" class="btn btn-light btn-lg me-2">
+                                <i class="bi bi-plus-circle me-2"></i>Add Question
+                            </a>
+                            <a href="@Url.Action("ManageQuizzes")" class="btn btn-outline-light btn-sm">
+                                <i class="bi bi-arrow-left me-1"></i>Back
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Questions List -->
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">
+                <i class="bi bi-list-task me-2"></i>Questions (@Model.Count)
+            </h5>
+            <span class="badge bg-primary">Quiz ID: @quiz.QuizId</span>
+        </div>
+        <div class="card-body">
+            @if (Model != null && Model.Count > 0)
+            {
+                <div class="accordion" id="questionsAccordion">
+                    @for (int i = 0; i < Model.Count; i++)
+                    {
+                        var question = Model[i];
+                        <div class="accordion-item border-0 mb-3">
+                            <h2 class="accordion-header" id="heading@(i)">
+                                <button class="accordion-button collapsed bg-light rounded-3" type="button"
+                                        data-bs-toggle="collapse" data-bs-target="#collapse@(i)"
+                                        aria-expanded="false" aria-controls="collapse@(i)">
+                                    <div class="d-flex justify-content-between align-items-center w-100 me-3">
+                                        <div>
+                                            <span class="badge bg-primary me-2">@(i + 1)</span>
+                                            <strong>@question.QuestionText</strong>
+                                        </div>
+                                        <div>
+                                            <span class="badge bg-secondary me-2">
+                                                @(question.Options?.Count ?? 0) Options
+                                            </span>
+                                            <span class="badge bg-success">
+                                                @(question.Options?.Count(o => o.isCorrect) ?? 0) Correct
+                                            </span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </h2>
+                            <div id="collapse@(i)" class="accordion-collapse collapse"
+                                 aria-labelledby="heading@(i)" data-bs-parent="#questionsAccordion">
+                                <div class="accordion-body bg-white">
+                                    <!-- Question Actions -->
+                                    <div class="d-flex gap-2 mb-3">
+                                        <a href="@Url.Action("EditQuestion", new { questionId = question.QuestionId })"
+                                           class="btn btn-warning btn-sm">
+                                            <i class="bi bi-pencil me-1"></i>Edit
+                                        </a>
+                                        <a href="@Url.Action("DeleteQuestion", new { questionId = question.QuestionId })"
+                                           class="btn btn-danger btn-sm"
+                                           onclick="return confirm('Are you sure you want to delete this question and all its options?');">
+                                            <i class="bi bi-trash me-1"></i>Delete
+                                        </a>
+                                    </div>
+
+                                    <!-- Options List -->
+                                    <h6 class="mb-3">Options:</h6>
+                                    @if (question.Options != null && question.Options.Count > 0)
+                                    {
+                                        <div class="row">
+                                            @foreach (var option in question.Options)
+                                            {
+                                                <div class="col-md-6 mb-2">
+                                                    <div class="card @(option.isCorrect ? "border-success" : "border-light")">
+                                                        <div class="card-body py-2">
+                                                            <div class="d-flex justify-content-between align-items-center">
+                                                                <span>@option.OptionText</span>
+                                                                @if (option.isCorrect)
+                                                                {
+                                                                    <span class="badge bg-success">
+                                                                        <i class="bi bi-check-lg me-1"></i>Correct
+                                                                    </span>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <span class="badge bg-secondary">Incorrect</span>
+                                                                }
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <p class="text-muted">No options available for this question.</p>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-question-circle fs-1 text-muted d-block mb-3"></i>
+                    <h5 class="text-muted">No Questions Yet</h5>
+                    <p class="text-muted">Start by adding the first question to this quiz.</p>
+                    <a href="@Url.Action("AddQuestion", new { quizId = quiz.QuizId })" class="btn btn-primary">
+                        <i class="bi bi-plus-circle me-2"></i>Add First Question
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-gradient {
+        background: linear-gradient(135deg, #4f86f7 0%, #3366cc 100%) !important;
+    }
+
+    .accordion-button:not(.collapsed) {
+        background-color: #e9ecef;
+        color: #000;
+    }
+
+    .accordion-button:focus {
+        box-shadow: none;
+        border-color: rgba(0,0,0,.125);
+    }
+</style>

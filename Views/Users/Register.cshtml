@@ -13,6 +13,7 @@
         <div class="card-body">
             @using (Html.BeginForm("Register", "Users", FormMethod.Post))
             {
+                @Html.Hidden("role", "User")
                 <div class="mb-3">
                     <label for="username" class="form-label">Username</label>
                     <input type="text" class="form-control" id="username" name="username" placeholder="Choose a username" required />
@@ -23,7 +24,7 @@
                     <input type="password" class="form-control" id="password" name="password" placeholder="Create a password" required />
                 </div>
 
-               
+
 
 
                 <button type="submit" class="btn btn-primary w-100">

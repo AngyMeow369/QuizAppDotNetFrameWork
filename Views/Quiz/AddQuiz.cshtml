@@ -1,0 +1,123 @@
+﻿@model QuizAppDotNetFrameWork.Models.Quiz
+
+@{
+    ViewBag.Title = "Add New Quiz";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-secondary bg-dark text-light">
+                <div class="card-header bg-dark border-secondary">
+                    <h4 class="card-title mb-0 text-success">
+                        <i class="bi bi-plus-circle me-2"></i>Add New Quiz
+                    </h4>
+                </div>
+                <div class="card-body">
+                    @using (Html.BeginForm("AddQuiz", "Quiz", FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken()
+
+                        <div class="mb-3">
+                            @Html.LabelFor(model => model.Title, new { @class = "form-label fw-bold text-light" })
+                            @Html.TextBoxFor(model => model.Title, new
+                            {
+                                @class = "form-control bg-dark text-light border-secondary",
+                                placeholder = "Enter quiz title",
+                                required = "required"
+                            })
+                            @Html.ValidationMessageFor(model => model.Title, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="mb-3">
+                            @Html.LabelFor(model => model.Description, new { @class = "form-label fw-bold text-light" })
+                            @Html.TextAreaFor(model => model.Description, new
+                            {
+                                @class = "form-control bg-dark text-light border-secondary",
+                                rows = "3",
+                                placeholder = "Enter quiz description (optional)"
+                            })
+                            @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end border-top border-secondary pt-3">
+                            <a href="@Url.Action("ManageQuizzes")" class="btn btn-outline-secondary me-md-2">
+                                <i class="bi bi-arrow-left me-2"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-outline-success">
+                                <i class="bi bi-check-circle me-2"></i>Create Quiz
+                            </button>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    body {
+        background-color: #1a1a1a;
+        color: #ffffff;
+    }
+
+    .card {
+        background-color: #2d3748;
+        border-color: #4a5568;
+    }
+
+    .text-light {
+        color: #e2e8f0 !important;
+    }
+
+    .border-secondary {
+        border-color: #4a5568 !important;
+    }
+
+    .form-control {
+        background-color: #1a202c !important;
+        border-color: #4a5568 !important;
+        color: #e2e8f0 !important;
+    }
+
+        .form-control:focus {
+            background-color: #1a202c !important;
+            border-color: #63b3ed !important;
+            color: #e2e8f0 !important;
+            box-shadow: 0 0 0 0.2rem rgba(99, 179, 237, 0.25);
+        }
+
+        .form-control::placeholder {
+            color: #718096 !important;
+        }
+
+    .btn-outline-secondary {
+        color: #a0aec0;
+        border-color: #a0aec0;
+    }
+
+        .btn-outline-secondary:hover {
+            background-color: #a0aec0;
+            border-color: #a0aec0;
+            color: #1a202c;
+        }
+
+    .btn-outline-success {
+        color: #68d391;
+        border-color: #68d391;
+    }
+
+        .btn-outline-success:hover {
+            background-color: #68d391;
+            border-color: #68d391;
+            color: #1a202c;
+        }
+
+    .text-danger {
+        color: #fc8181 !important;
+    }
+
+    .card-header.bg-dark {
+        background-color: #2d3748 !important;
+    }
+</style>

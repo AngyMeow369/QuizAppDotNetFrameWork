@@ -1,0 +1,164 @@
+﻿@model QuizAppDotNetFrameWork.Models.Question
+@{
+    ViewBag.Title = "Add Question";
+    var quiz = ViewBag.Quiz as QuizAppDotNetFrameWork.Models.Quiz;
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow-sm border-0">
+                <div class="card-header text-white" style="background: linear-gradient(135deg, #4f86f7 0%, #3366cc 100%);">
+                    <h4 class="card-title mb-0">
+                        <i class="bi bi-plus-circle me-2"></i>Add New Question
+                    </h4>
+                    <small class="opacity-90">Quiz: @quiz.Title</small>
+                </div>
+                <div class="card-body">
+                    @using (Html.BeginForm("AddQuestion", "Quiz", FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.HiddenFor(model => model.QuizId)
+
+                        <!-- Question Text -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Question Text</label>
+                            @Html.TextAreaFor(model => model.QuestionText, new
+                            {
+                                @class = "form-control",
+                                rows = "3",
+                                placeholder = "Enter your question here...",
+                                required = "required"
+                            })
+                            @Html.ValidationMessageFor(model => model.QuestionText, "", new { @class = "text-danger" })
+                        </div>
+
+                        <!-- Options Section -->
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <label class="form-label fw-bold">Answer Options</label>
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="addOption()">
+                                    <i class="bi bi-plus me-1"></i>Add Option
+                                </button>
+                            </div>
+
+                            <div id="optionsContainer">
+                                <!-- Option 1 -->
+                                <div class="option-row mb-3 p-3 border rounded">
+                                    <div class="row g-2">
+                                        <div class="col-md-8">
+                                            <input type="text" name="options[0].OptionText"
+                                                   class="form-control" placeholder="Option text" required>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <select name="options[0].isCorrect" class="form-select">
+                                                <option value="false">Incorrect</option>
+                                                <option value="true">Correct Answer</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-1">
+                                            <button type="button" class="btn btn-outline-danger w-100" onclick="removeOption(this)" disabled>
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Option 2 -->
+                                <div class="option-row mb-3 p-3 border rounded">
+                                    <div class="row g-2">
+                                        <div class="col-md-8">
+                                            <input type="text" name="options[1].OptionText"
+                                                   class="form-control" placeholder="Option text" required>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <select name="options[1].isCorrect" class="form-select">
+                                                <option value="false">Incorrect</option>
+                                                <option value="true">Correct Answer</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-1">
+                                            <button type="button" class="btn btn-outline-danger w-100" onclick="removeOption(this)">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <small class="text-muted">At least 2 options are required. Mark one option as correct.</small>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end border-top pt-3">
+                            <a href="@Url.Action("ManageQuestions", new { quizId = quiz.QuizId })" class="btn btn-secondary me-md-2">
+                                <i class="bi bi-arrow-left me-2"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle me-2"></i>Save Question
+                            </button>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let optionCount = 2;
+
+    function addOption() {
+        const container = document.getElementById('optionsContainer');
+        const newOption = document.createElement('div');
+        newOption.className = 'option-row mb-3 p-3 border rounded';
+        newOption.innerHTML = `
+            <div class="row g-2">
+                <div class="col-md-8">
+                    <input type="text" name="options[${optionCount}].OptionText"
+                           class="form-control" placeholder="Option text" required>
+                </div>
+                <div class="col-md-3">
+                    <select name="options[${optionCount}].isCorrect" class="form-select">
+                        <option value="false">Incorrect</option>
+                        <option value="true">Correct Answer</option>
+                    </select>
+                </div>
+                <div class="col-md-1">
+                    <button type="button" class="btn btn-outline-danger w-100" onclick="removeOption(this)">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+        container.appendChild(newOption);
+        optionCount++;
+    }
+
+    function removeOption(button) {
+        const optionRow = button.closest('.option-row');
+        if (document.querySelectorAll('.option-row').length > 2) {
+            optionRow.remove();
+            // Reindex remaining options
+            const options = document.querySelectorAll('.option-row');
+            options.forEach((row, index) => {
+                const inputs = row.querySelectorAll('input, select');
+                inputs[0].name = `options[${index}].OptionText`;
+                inputs[1].name = `options[${index}].isCorrect`;
+            });
+            optionCount = options.length;
+        } else {
+            alert('At least 2 options are required.');
+        }
+    }
+</script>
+
+<style>
+    .option-row {
+        background-color: #f8f9fa;
+        transition: background-color 0.2s ease;
+    }
+
+        .option-row:hover {
+            background-color: #e9ecef;
+        }
+</style>

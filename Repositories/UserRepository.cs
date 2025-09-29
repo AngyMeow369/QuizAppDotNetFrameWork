@@ -1,5 +1,6 @@
 ﻿using QuizAppDotNetFrameWork.Models;
 using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
@@ -15,7 +16,32 @@ namespace QuizAppDotNetFrameWork.Repositories
             connectionString = ConfigurationManager.ConnectionStrings["QuizAppConnection"].ConnectionString;
         }
 
+        // Returns every user row (no filter)
+        public List<User> GetAllUsers()
+        {
+            var users = new List<User>();
 
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlCommand cmd = new SqlCommand("spGetAllUsers", conn))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                conn.Open();
+
+                using (SqlDataReader r = cmd.ExecuteReader())
+                {
+                    while (r.Read())
+                    {
+                        users.Add(new User
+                        {
+                            UserId = Convert.ToInt32(r["UserId"]),
+                            Username = r["Username"].ToString(),
+                            Role = r["Role"].ToString()
+                        });
+                    }
+                }
+            }
+            return users;   // never null
+        }
 
         //public int AddUser(string username, string passwordHash, string role)
         //{

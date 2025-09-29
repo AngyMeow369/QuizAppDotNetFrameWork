@@ -196,6 +196,14 @@
     <Content Include="Views\Admin\ManageUsers.cshtml" />
     <Content Include="Views\Admin\AddUser.cshtml" />
     <Content Include="Views\Admin\EditUser.cshtml" />
+    <Content Include="Views\Quiz\ManageQuizzes.cshtml" />
+    <Content Include="Views\Quiz\AddQuiz.cshtml" />
+    <Content Include="Views\Quiz\EditQuiz.cshtml" />
+    <Content Include="Views\Quiz\Questions.cshtml" />
+    <Content Include="Views\Quiz\ManageQuestions.cshtml" />
+    <Content Include="Views\Quiz\AddQuestion.cshtml" />
+    <Content Include="Views\Quiz\EditQuestions.cshtml" />
+    <Content Include="Views\Quiz\QuestionsBank.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -36,7 +36,7 @@ namespace QuizAppDotNetFrameWork.Controllers
             //UserRepository userRepo = new UserRepository();
             int newUserId = _userRepo.AddUser(username, hashedPassword, role);
 
-            ViewBag.Message = "Registered successfully! User ID: " + newUserId;
+            ViewBag.Message = "Registered successfully! User Name" + username;
             return View();
 
         }
