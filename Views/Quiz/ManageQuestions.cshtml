@@ -84,7 +84,7 @@
                                                 @(question.Options?.Count ?? 0) Options
                                             </span>
                                             <span class="badge bg-success">
-                                                @(question.Options?.Count(o => o.isCorrect) ?? 0) Correct
+                                                @(question.Options?.Count(o => o.IsCorrect) ?? 0) Correct
                                             </span>
                                         </div>
                                     </div>
@@ -114,11 +114,11 @@
                                             @foreach (var option in question.Options)
                                             {
                                                 <div class="col-md-6 mb-2">
-                                                    <div class="card @(option.isCorrect ? "border-success" : "border-light")">
+                                                    <div class="card @(option.IsCorrect ? "border-success" : "border-light")">
                                                         <div class="card-body py-2">
                                                             <div class="d-flex justify-content-between align-items-center">
                                                                 <span>@option.OptionText</span>
-                                                                @if (option.isCorrect)
+                                                                @if (option.IsCorrect)
                                                                 {
                                                                     <span class="badge bg-success">
                                                                         <i class="bi bi-check-lg me-1"></i>Correct

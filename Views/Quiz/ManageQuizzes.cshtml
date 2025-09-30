@@ -44,33 +44,37 @@
     }
 
     <div class="card shadow-sm border-secondary bg-dark text-light">
-        <div class="card-header bg-dark border-secondary">
+        <div class="card-header bg-dark border-secondary d-flex justify-content-between align-items-center">
             <h5 class="card-title mb-0 text-light">
-                <i class="bi bi-list-task me-2"></i>All Quizzes
+                <i class="bi bi-list-task me-2"></i>All Quizzes <span class="badge bg-primary ms-2">@Model.Count</span>
             </h5>
+            <small class="text-muted">@DateTime.Now.ToString("MMM dd, yyyy")</small>
         </div>
         <div class="card-body">
             @if (Model != null && Model.Count > 0)
             {
                 <div class="table-responsive">
                     <table class="table table-hover table-dark">
-                        <thead class="table-secondary">
+                        <thead>
                             <tr>
-                                <th class="text-light">Title</th>
-                                <th class="text-light">Description</th>
-                                <th class="text-light">Created On</th>
-                                <th class="text-light">Questions</th>
-                                <th class="text-light">Actions</th>
+                                <th class="text-white border-secondary">Title</th>
+                                <th class="text-white border-secondary">Description</th>
+                                <th class="text-white border-secondary">Created On</th>
+                                <th class="text-white border-secondary">Questions</th>
+                                <th class="text-white border-secondary">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach (var quiz in Model)
                             {
+                                // Get actual question count for this quiz
+                                var questionCount = new QuizAppDotNetFrameWork.Repositories.QuizRepository().GetQuestionsByQuizId(quiz.QuizId).Count;
+
                                 <tr class="text-light">
-                                    <td>
+                                    <td class="border-secondary">
                                         <strong class="text-white">@quiz.Title</strong>
                                     </td>
-                                    <td>
+                                    <td class="border-secondary">
                                         @if (!string.IsNullOrEmpty(quiz.Description))
                                         {
                                             <span class="text-muted">@quiz.Description</span>
@@ -80,11 +84,13 @@
                                             <span class="text-muted fst-italic">No description</span>
                                         }
                                     </td>
-                                    <td class="text-muted">@quiz.CreatedOn.ToString("MMM dd, yyyy")</td>
-                                    <td>
-                                        <span class="badge bg-secondary">0</span>
+                                    <td class="text-muted border-secondary">@quiz.CreatedOn.ToString("MMM dd, yyyy")</td>
+                                    <td class="border-secondary">
+                                        <span class="badge @(questionCount > 0 ? "bg-success" : "bg-secondary")">
+                                            @questionCount
+                                        </span>
                                     </td>
-                                    <td>
+                                    <td class="border-secondary">
                                         <div class="btn-group btn-group-sm">
                                             <a href="@Url.Action("ManageQuestions", new { quizId = quiz.QuizId })"
                                                class="btn btn-outline-primary" title="Manage Questions">
@@ -152,6 +158,7 @@
     .table-dark {
         background-color: #2d3748;
         color: #e2e8f0;
+        border-color: #4a5568;
     }
 
     .table-hover tbody tr:hover {
@@ -159,9 +166,14 @@
         color: #ffffff;
     }
 
-    .table-secondary {
-        background-color: #4a5568 !important;
-        color: #e2e8f0 !important;
+    .table th {
+        border-color: #4a5568 !important;
+        font-weight: 600;
+    }
+
+    .table td {
+        border-color: #4a5568 !important;
+        vertical-align: middle;
     }
 
     .btn-outline-light {
@@ -210,6 +222,16 @@
 
     .badge.bg-secondary {
         background-color: #718096 !important;
+        color: #1a202c;
+    }
+
+    .badge.bg-success {
+        background-color: #48bb78 !important;
+        color: #1a202c;
+    }
+
+    .badge.bg-primary {
+        background-color: #4299e1 !important;
         color: #1a202c;
     }
 </style>

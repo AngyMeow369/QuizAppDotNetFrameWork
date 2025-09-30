@@ -1,0 +1,96 @@
+﻿@{
+    ViewBag.Title = "Quiz Results";
+    var quiz = ViewBag.Quiz as QuizAppDotNetFrameWork.Models.Quiz;
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-success text-white text-center">
+                    <h4 class="card-title mb-0">
+                        <i class="bi bi-trophy me-2"></i>Quiz Completed!
+                    </h4>
+                </div>
+                <div class="card-body text-center">
+                    <!-- Score Display -->
+                    <div class="score-circle mx-auto mb-4">
+                        <div class="circle-progress">
+                            <span class="progress-value">@ViewBag.Percentage.ToString("0")%</span>
+                        </div>
+                    </div>
+
+                    <h3 class="text-success">@ViewBag.Score/@ViewBag.TotalQuestions Correct</h3>
+                    <h5 class="text-muted mb-4">@quiz.Title</h5>
+
+                    <!-- Grade Badge -->
+                    <div class="mb-4">
+                        <span class="badge bg-primary fs-6 p-2">Grade: @ViewBag.Grade</span>
+                    </div>
+
+                    <!-- Performance Message -->
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        @if (ViewBag.Percentage >= 80)
+                        {
+                            <strong>Excellent!</strong> @:You have a great understanding of this topic.
+                        }
+                        else if (ViewBag.Percentage >= 60)
+                        {
+                            <strong>Good job!</strong> @:You passed the quiz successfully.
+                        }
+                        else
+                        {
+                            <strong>Keep practicing!</strong> @:Review the material and try again.
+                        }
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-grid gap-2 d-md-flex justify-content-center">
+                        <a href="@Url.Action("Questions", new { quizId = quiz.QuizId })" class="btn btn-warning me-md-2">
+                            <i class="bi bi-arrow-repeat me-2"></i>Retry Quiz
+                        </a>
+                        <a href="@Url.Action("Index")" class="btn btn-primary">
+                            <i class="bi bi-list me-2"></i>Back to Quizzes
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .score-circle {
+        width: 150px;
+        height: 150px;
+        position: relative;
+    }
+
+    .circle-progress {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: conic-gradient(#198754 @(ViewBag.Percentage*3.6)deg, #e9ecef 0deg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
+
+    .circle-progress::before {
+        content: '';
+        position: absolute;
+        width: 130px;
+        height: 130px;
+        border-radius: 50%;
+        background: white;
+    }
+
+    .progress-value {
+        position: relative;
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #198754;
+    }
+</style>

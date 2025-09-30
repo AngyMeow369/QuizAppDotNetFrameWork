@@ -258,7 +258,7 @@ namespace QuizAppDotNetFrameWork.Repositories
                             OptionId = Convert.ToInt32(reader["OptionId"]),
                             QuestionId = Convert.ToInt32(reader["QuestionId"]),
                             OptionText = reader["OptionText"].ToString(),
-                            isCorrect = Convert.ToBoolean(reader["IsCorrect"])
+                            IsCorrect = Convert.ToBoolean(reader["IsCorrect"])
                         });
                     }
                 }
@@ -269,7 +269,7 @@ namespace QuizAppDotNetFrameWork.Repositories
         // Add new option
         public void AddOption(Option option)
         {
-            string isCorrect = option.isCorrect ? "true" : "false";
+            string isCorrect = option.IsCorrect ? "true" : "false";
             string json = $@"{{ ""QuestionId"": {option.QuestionId}, ""OptionText"": ""{option.OptionText.Replace("\"", "\\\"")}"", ""IsCorrect"": {isCorrect} }}";
 
             using (SqlConnection conn = new SqlConnection(connectionString))
@@ -286,7 +286,7 @@ namespace QuizAppDotNetFrameWork.Repositories
         // Update option
         public void UpdateOption(Option option)
         {
-            string isCorrect = option.isCorrect ? "true" : "false";
+            string isCorrect = option.IsCorrect ? "true" : "false";
             string json = $@"{{ ""OptionId"": {option.OptionId}, ""QuestionId"": {option.QuestionId}, ""OptionText"": ""{option.OptionText.Replace("\"", "\\\"")}"", ""IsCorrect"": {isCorrect} }}";
 
             using (SqlConnection conn = new SqlConnection(connectionString))
@@ -326,6 +326,121 @@ namespace QuizAppDotNetFrameWork.Repositories
                 q.Options = GetOptionsByQuestionId(q.QuestionId);
             }
             return questions;
+        }
+
+        // ========== QUIZ ATTEMPTS & RESULTS METHODS ==========
+
+        // Save quiz attempt
+        // Save quiz attempt - FIXED JSON version
+        public int SaveQuizAttempt(int userId, int quizId, int score, int totalQuestions, string grade)
+        {
+            string json = $@"{{
+        ""UserId"": {userId},
+        ""QuizId"": {quizId},
+        ""Score"": {score},
+        ""TotalQuestions"": {totalQuestions},
+        ""Grade"": ""{grade}""
+    }}";
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlCommand cmd = new SqlCommand("spSaveQuizAttempt", conn))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@json", json);  // Only ONE parameter - @json
+
+                conn.Open();
+                var result = cmd.ExecuteScalar();
+                return Convert.ToInt32(result);
+            }
+        }
+
+        // Save user response
+        // Save user response - JSON version
+        // Save user response - INDIVIDUAL PARAMETERS version
+        public void SaveUserResponse(int userId, int questionId, int selectedOptionId, bool isCorrect, int attemptId)
+        {
+            string isCorrectStr = isCorrect ? "true" : "false";
+            string json = $@"{{
+                ""UserId"": {userId},
+                ""QuestionId"": {questionId},
+                ""SelectedOptionId"": {selectedOptionId},
+                ""IsCorrect"": {isCorrectStr},
+                ""AttemptId"": {attemptId}
+            }}";
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlCommand cmd = new SqlCommand("spSaveUserResponse", conn))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@json", json);  // Only ONE parameter - @json
+
+                conn.Open();
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        // Get user's quiz attempts
+        public List<QuizAttempt> GetUserQuizAttempts(int userId)
+        {
+            var attempts = new List<QuizAttempt>();
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlCommand cmd = new SqlCommand("spGetUserQuizAttempts", conn))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@UserId", userId);
+
+                conn.Open();
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        attempts.Add(new QuizAttempt
+                        {
+                            AttemptId = Convert.ToInt32(reader["AttemptId"]),
+                            UserId = Convert.ToInt32(reader["UserId"]),
+                            QuizId = Convert.ToInt32(reader["QuizId"]),
+                            Score = Convert.ToInt32(reader["Score"]),
+                            TotalQuestions = Convert.ToInt32(reader["TotalQuestions"]),
+                            Grade = reader["Grade"].ToString(),
+                            CompletedOn = Convert.ToDateTime(reader["CompletedOn"]),
+                            QuizTitle = reader["QuizTitle"].ToString()
+                        });
+                    }
+                }
+            }
+            return attempts;
+        }
+
+        // Get quiz attempt by ID
+        public QuizAttempt GetQuizAttemptById(int attemptId)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlCommand cmd = new SqlCommand("spGetQuizAttemptById", conn))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@AttemptId", attemptId);
+
+                conn.Open();
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        return new QuizAttempt
+                        {
+                            AttemptId = Convert.ToInt32(reader["AttemptId"]),
+                            UserId = Convert.ToInt32(reader["UserId"]),
+                            QuizId = Convert.ToInt32(reader["QuizId"]),
+                            Score = Convert.ToInt32(reader["Score"]),
+                            TotalQuestions = Convert.ToInt32(reader["TotalQuestions"]),
+                            Grade = reader["Grade"].ToString(),
+                            CompletedOn = Convert.ToDateTime(reader["CompletedOn"]),
+                            QuizTitle = reader["QuizTitle"].ToString()
+                        };
+                    }
+                }
+            }
+            return null;
         }
 
 

@@ -5,11 +5,12 @@
 }
 
 <div class="container mt-4">
-    <div class="card shadow-sm border-0">
-        <div class="card-header bg-primary text-white">
-            <h4 class="card-title mb-0">
+    <div class="card shadow-sm border-secondary bg-dark text-light">
+        <div class="card-header bg-dark border-secondary">
+            <h4 class="card-title mb-0 text-white">
                 <i class="bi bi-question-circle me-2"></i>@ViewBag.QuizTitle
             </h4>
+            <small class="text-muted">Answer all questions before submitting</small>
         </div>
         <div class="card-body">
             @if (Model != null && Model.Count > 0)
@@ -19,26 +20,41 @@
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="quizId" value="@ViewBag.QuizId" />
 
+                    <!-- Progress Indicator -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <small class="text-muted">Progress</small>
+                            <small class="text-muted"><span id="answeredCount">0</span>/@Model.Count answered</small>
+                        </div>
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar bg-success" id="progressBar" style="width: 0%"></div>
+                        </div>
+                    </div>
+
                     for (int i = 0; i < Model.Count; i++)
                     {
-                        <div class="question-card mb-4 p-4 border rounded">
-                            <h5 class="question-text mb-3">
+                        var question = Model[i];
+                        <div class="question-card mb-4 p-4 border-secondary rounded bg-dark">
+                            <h5 class="question-text mb-3 text-white">
                                 <span class="badge bg-primary me-2">@(i + 1)</span>
-                                @Model[i].QuestionText
+                                @question.QuestionText
                             </h5>
 
                             <div class="options-list">
-                                @if (Model[i].Options != null && Model[i].Options.Count > 0)
+                                @if (question.Options != null && question.Options.Count > 0)
                                 {
-                                    for (int j = 0; j < Model[i].Options.Count; j++)
+                                    for (int j = 0; j < question.Options.Count; j++)
                                     {
+                                        var option = question.Options[j];
                                         <div class="form-check mb-2">
+                                            <!-- FIXED: Simple name format that ASP.NET can parse -->
                                             <input class="form-check-input" type="radio"
-                                                   name="selectedOptions[@Model[i].QuestionId]"
-                                                   value="@Model[i].Options[j].OptionId"
-                                                   id="option_@Model[i].Options[j].OptionId" />
-                                            <label class="form-check-label" for="option_@Model[i].Options[j].OptionId">
-                                                @Model[i].Options[j].OptionText
+                                                   name="q_@question.QuestionId"
+                                                   value="@option.OptionId"
+                                                   id="option_@question.QuestionId@j"
+                                                   data-question="@question.QuestionId" />
+                                            <label class="form-check-label text-light" for="option_@question.QuestionId@j">
+                                                @option.OptionText
                                             </label>
                                         </div>
                                     }
@@ -52,7 +68,7 @@
                     }
 
                     <div class="d-grid">
-                        <button type="submit" class="btn btn-success btn-lg">
+                        <button type="submit" class="btn btn-success btn-lg" id="submitBtn" disabled>
                             <i class="bi bi-send-check me-2"></i>Submit Quiz
                         </button>
                     </div>
@@ -62,9 +78,9 @@
             {
                 <div class="text-center py-5">
                     <i class="bi bi-question-circle fs-1 text-muted d-block mb-3"></i>
-                    <h5 class="text-muted">No Questions Available</h5>
+                    <h5 class="text-light">No Questions Available</h5>
                     <p class="text-muted">This quiz doesn't have any questions yet.</p>
-                    <a href="@Url.Action("Index")" class="btn btn-primary">
+                    <a href="@Url.Action("Index")" class="btn btn-outline-primary">
                         <i class="bi bi-arrow-left me-2"></i>Back to Quizzes
                     </a>
                 </div>
@@ -74,17 +90,131 @@
 </div>
 
 <style>
+    body {
+        background-color: #1a1a1a;
+        color: #ffffff;
+    }
+
     .question-card {
-        background-color: #f8f9fa;
-        transition: background-color 0.2s ease;
+        background-color: #2d3748 !important;
+        border-color: #4a5568 !important;
+        transition: all 0.3s ease;
     }
 
         .question-card:hover {
-            background-color: #e9ecef;
+            border-color: #63b3ed !important;
+            transform: translateY(-2px);
         }
 
-    .form-check-input:checked {
-        background-color: #198754;
-        border-color: #198754;
+    .form-check-input {
+        background-color: #4a5568;
+        border-color: #718096;
     }
+
+        .form-check-input:checked {
+            background-color: #48bb78;
+            border-color: #48bb78;
+        }
+
+        .form-check-input:focus {
+            box-shadow: 0 0 0 0.2rem rgba(72, 187, 120, 0.25);
+        }
+
+    .form-check-label {
+        color: #e2e8f0 !important;
+    }
+
+    .border-secondary {
+        border-color: #4a5568 !important;
+    }
+
+    .bg-dark {
+        background-color: #2d3748 !important;
+    }
+
+    .progress {
+        background-color: #4a5568;
+    }
+
+    .btn-success {
+        background-color: #48bb78;
+        border-color: #48bb78;
+    }
+
+        .btn-success:disabled {
+            background-color: #2d3748;
+            border-color: #4a5568;
+            color: #a0aec0;
+        }
+
+        .btn-success:hover:not(:disabled) {
+            background-color: #38a169;
+            border-color: #38a169;
+        }
 </style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const totalQuestions = @Model.Count;
+        const answeredQuestions = new Set();
+        const submitBtn = document.getElementById('submitBtn');
+        const answeredCount = document.getElementById('answeredCount');
+        const progressBar = document.getElementById('progressBar');
+
+        // Update progress when an option is selected
+        document.querySelectorAll('input[type="radio"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                const questionId = this.getAttribute('data-question');
+
+                if (this.checked) {
+                    answeredQuestions.add(questionId);
+                }
+
+                updateProgress();
+            });
+        });
+
+        function updateProgress() {
+            const count = answeredQuestions.size;
+            const percentage = (count / totalQuestions) * 100;
+
+            answeredCount.textContent = count;
+            progressBar.style.width = percentage + '%';
+
+            // Enable submit button only when all questions are answered
+            if (count === totalQuestions) {
+                submitBtn.disabled = false;
+                progressBar.classList.add('bg-success');
+            } else {
+                submitBtn.disabled = true;
+                progressBar.classList.remove('bg-success');
+                progressBar.classList.add('bg-warning');
+            }
+        }
+
+        // Form validation before submit
+        document.getElementById('quizForm').addEventListener('submit', function(e) {
+            if (answeredQuestions.size < totalQuestions) {
+                e.preventDefault();
+                alert('Please answer all questions before submitting!');
+                return false;
+            }
+
+            // Show loading state
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Submitting...';
+
+            // Debug logging
+            console.log('=== FORM SUBMISSION DATA ===');
+            const formData = new FormData(this);
+            for (let [key, value] of formData.entries()) {
+                console.log(`${key}: ${value}`);
+            }
+            const radioButtons = document.querySelectorAll('input[type="radio"]:checked');
+            console.log(`Checked radio buttons: ${radioButtons.length}`);
+        });
+
+        // Initialize progress
+        updateProgress();
+    });
+</script>

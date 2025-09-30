@@ -19,27 +19,24 @@
             </button>
             <div class="collapse navbar-collapse d-sm-inline-flex justify-content-between">
                 <ul class="navbar-nav flex-grow-1">
-                    <li class="nav-item">@Html.ActionLink("Home", "Index", "Home", new { area = "" }, new { @class = "nav-link" })</li>
-
-                    <!-- Show different menus based on user role -->
-                    @if (Session["Username"] != null)
+                    @if (Session["Username"] != null) // User is logged in
                     {
-                        if (Session["Role"]?.ToString() == "Admin")
+                        if (Session["Role"]?.ToString() == "Admin") // Admin role
                         {
                             <li class="nav-item">@Html.ActionLink("Dashboard", "Index", "Admin", new { area = "" }, new { @class = "nav-link" })</li>
                             <li class="nav-item">@Html.ActionLink("Manage Quizzes", "ManageQuizzes", "Quiz", new { area = "" }, new { @class = "nav-link" })</li>
                             <li class="nav-item">@Html.ActionLink("Manage Users", "ManageUsers", "Admin", new { area = "" }, new { @class = "nav-link" })</li>
                         }
-                        else
+                        else // Regular user role
                         {
                             <li class="nav-item">@Html.ActionLink("My Quizzes", "Index", "Quiz", new { area = "" }, new { @class = "nav-link" })</li>
                             <li class="nav-item">@Html.ActionLink("Results", "Results", "Quiz", new { area = "" }, new { @class = "nav-link" })</li>
                         }
                     }
-                    else
+                    else // User is not logged in
                     {
-                        <li class="nav-item">@Html.ActionLink("About", "About", "Home", new { area = "" }, new { @class = "nav-link" })</li>
-                        <li class="nav-item">@Html.ActionLink("Contact", "Contact", "Home", new { area = "" }, new { @class = "nav-link" })</li>
+                        <li class="nav-item">@Html.ActionLink("Login", "Login", "Users", null, new { @class = "nav-link" })</li>
+                        <li class="nav-item">@Html.ActionLink("Register", "Register", "Users", null, new { @class = "nav-link" })</li>
                     }
                 </ul>
 
@@ -56,8 +53,8 @@
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                                 <li><span class="dropdown-item-text">Signed in as <strong>@Session["Username"]</strong></span></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li>@Html.ActionLink("Profile", "Profile", "Users", null, new { @class = "dropdown-item" })</li>
-                                <li>@Html.ActionLink("Change Password", "ChangePassword", "Users", null, new { @class = "dropdown-item" })</li>
+                                <li>@Html.ActionLink("Profile", "Profile", "Users", null, new { @class = "dropdown-item dropdown-item-black" })</li>
+                                <li>@Html.ActionLink("Change Password", "ChangePassword", "Users", null, new { @class = "dropdown-item dropdown-item-black" })</li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
                                     @Html.ActionLink("Logout", "Logout", "Users", null, new
@@ -67,17 +64,27 @@
                                     })
                                 </li>
                             </ul>
+
                         </li>
-                    }
-                    else
-                    {
-                        <li class="nav-item">@Html.ActionLink("Login", "Login", "Users", null, new { @class = "nav-link" })</li>
-                        <li class="nav-item">@Html.ActionLink("Register", "Register", "Users", null, new { @class = "nav-link" })</li>
                     }
                 </ul>
             </div>
         </div>
     </nav>
+
+    <style>
+        .dropdown-item-black {
+            background-color: black; /* Set background color to black */
+            color: white; /* Set text color to white for contrast */
+        }
+
+            .dropdown-item-black:hover {
+                background-color: #333; /* Darker shade on hover */
+                color: white; /* Keep text color white on hover */
+            }
+    </style>
+
+
 
     <!-- Success/Error Messages -->
     @if (TempData["SuccessMessage"] != null)

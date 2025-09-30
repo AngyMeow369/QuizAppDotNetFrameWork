@@ -1,8 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Web.Mvc;
+﻿using QuizAppDotNetFrameWork.Models;
 using QuizAppDotNetFrameWork.Repositories;
-using QuizAppDotNetFrameWork.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web.Mvc;
 
 namespace QuizAppDotNetFrameWork.Controllers
 {
@@ -403,21 +404,143 @@ namespace QuizAppDotNetFrameWork.Controllers
             }
         }
 
-        // -----------------------------------
-        // USER RESPONSE SUBMISSION (For Future)
-        // -----------------------------------
-        /*
         [HttpPost]
-        public ActionResult SubmitResponse(UserResponse response)
+        public ActionResult SubmitQuiz(int quizId, FormCollection form)
         {
-            if (Session["UserId"] != null)
+            if (Session["UserId"] == null)
             {
-                response.UserId = Convert.ToInt32(Session["UserId"]);
-                // quizRepo.SubmitUserResponse(response); // To be implemented
-                return Json(new { success = true });
+                return RedirectToAction("Login", "Users");
             }
-            return Json(new { success = false, message = "User not logged in" });
+
+            // Parse answers from form collection using the new naming convention
+            var selectedOptions = new Dictionary<int, int>();
+
+            foreach (string key in form.AllKeys)
+            {
+                if (key.StartsWith("q_") && !string.IsNullOrEmpty(form[key]))
+                {
+                    int questionId = int.Parse(key.Substring(2)); // Remove "q_" prefix
+                    int selectedOptionId = int.Parse(form[key]);
+                    selectedOptions[questionId] = selectedOptionId;
+
+                    // Debug output
+                    System.Diagnostics.Debug.WriteLine($"Found answer: Q{questionId} -> Option{selectedOptionId}");
+                }
+            }
+
+            System.Diagnostics.Debug.WriteLine($"Total answers found: {selectedOptions.Count}");
+
+            int userId = Convert.ToInt32(Session["UserId"]);
+            int score = 0;
+            var allQuestions = quizRepo.GetQuestionsWithOptions(quizId);
+            int totalQuestions = allQuestions.Count;
+
+            foreach (var question in allQuestions)
+            {
+                if (selectedOptions.ContainsKey(question.QuestionId))
+                {
+                    int selectedOptionId = selectedOptions[question.QuestionId];
+                    var selectedOption = question.Options.FirstOrDefault(o => o.OptionId == selectedOptionId);
+
+                    if (selectedOption != null && selectedOption.IsCorrect)
+                    {
+                        score++;
+                        System.Diagnostics.Debug.WriteLine($"✓ Correct: Q{question.QuestionId}");
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine($"✗ Wrong: Q{question.QuestionId}");
+                    }
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"❌ No answer: Q{question.QuestionId}");
+                }
+            }
+
+            System.Diagnostics.Debug.WriteLine($"Final Score: {score}/{totalQuestions}");
+
+            // Calculate percentage and grade
+            double percentage = totalQuestions > 0 ? (double)score / totalQuestions * 100 : 0;
+            string grade = GetGrade(percentage);
+
+            // Save quiz attempt
+            int attemptId = quizRepo.SaveQuizAttempt(userId, quizId, score, totalQuestions, grade);
+
+            // Save individual responses
+            foreach (var kvp in selectedOptions)
+            {
+                var question = allQuestions.FirstOrDefault(q => q.QuestionId == kvp.Key);
+                bool isCorrect = question?.Options.Any(o => o.OptionId == kvp.Value && o.IsCorrect) == true;
+                quizRepo.SaveUserResponse(userId, kvp.Key, kvp.Value, isCorrect, attemptId);
+            }
+
+            // Redirect to results page
+            return RedirectToAction("QuizResults", new
+            {
+                quizId = quizId,
+                score = score,
+                totalQuestions = totalQuestions,
+                percentage = percentage,
+                grade = grade
+            });
         }
-        */
+
+        // Display user's quiz results
+        public ActionResult Results()
+        {
+            if (Session["UserId"] == null)
+            {
+                return RedirectToAction("Login", "Users");
+            }
+
+            int userId = Convert.ToInt32(Session["UserId"]);
+
+            // Get all quiz attempts for this user
+            var userAttempts = quizRepo.GetUserQuizAttempts(userId);
+
+            // Calculate statistics
+            ViewBag.TotalAttempts = userAttempts.Count;
+            ViewBag.AverageScore = userAttempts.Count > 0 ? userAttempts.Average(a => a.Percentage) : 0;
+            ViewBag.BestScore = userAttempts.Count > 0 ? userAttempts.Max(a => a.Percentage) : 0;
+
+            return View(userAttempts);
+        }
+
+        private string GetGrade(double percentage)
+        {
+            if (percentage >= 90) return "A+";
+            else if (percentage >= 80) return "A";
+            else if (percentage >= 70) return "B";
+            else if (percentage >= 60) return "C";
+            else if (percentage >= 50) return "D";
+            else return "F";
+        }
+
+        public ActionResult QuizResults(int quizId, int score, int totalQuestions, double percentage, string grade)
+        {
+            if (Session["UserId"] == null)
+            {
+                return RedirectToAction("Login", "Users");
+            }
+
+            // FIX: Get quiz by ID from repository
+            var quiz = quizRepo.GetQuizById(quizId);
+
+            if (quiz == null)
+            {
+                // If quiz not found, redirect to quiz list
+                TempData["ErrorMessage"] = "Quiz not found.";
+                return RedirectToAction("Index");
+            }
+
+            ViewBag.Quiz = quiz;
+            ViewBag.Score = score;
+            ViewBag.TotalQuestions = totalQuestions;
+            ViewBag.Percentage = percentage;
+            ViewBag.Grade = grade;
+
+            return View();
+        }
     }
 }

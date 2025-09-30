@@ -8,19 +8,19 @@
     <!-- Welcome Header -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="card bg-gradient bg-success text-white">
+            <div class="card bg-gradient bg-dark border-secondary">
                 <div class="card-body py-4">
                     <div class="row align-items-center">
                         <div class="col-md-8">
-                            <h1 class="card-title h2 mb-2">
+                            <h1 class="card-title h2 mb-2 text-white">
                                 <i class="bi bi-journals me-2"></i>Available Quizzes
                             </h1>
-                            <p class="card-text mb-0 opacity-75">Welcome, <strong>@ViewBag.Username</strong>. Choose a quiz to start your assessment.</p>
+                            <p class="card-text mb-0 text-light opacity-75">Welcome, <strong class="text-warning">@ViewBag.Username</strong>. Choose a quiz to start your assessment.</p>
                         </div>
                         <div class="col-md-4 text-md-end">
-                            <div class="bg-light bg-opacity-25 rounded p-3 d-inline-block">
-                                <small class="text-uppercase fw-bold opacity-75">Status</small>
-                                <div class="h5 mb-0">Ready</div>
+                            <div class="bg-dark bg-opacity-50 border border-secondary rounded p-3 d-inline-block">
+                                <small class="text-uppercase fw-bold text-light opacity-75">Status</small>
+                                <div class="h5 mb-0 text-success">Ready</div>
                             </div>
                         </div>
                     </div>
@@ -31,8 +31,8 @@
 
     <!-- Quiz Statistics -->
     <div class="row mb-4">
-        <div class="col-md-4 mb-3">
-            <div class="card border-0 bg-primary bg-opacity-10">
+        <div class="col-md-3 mb-3">
+            <div class="card border-secondary bg-dark text-light">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
@@ -44,8 +44,21 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mb-3">
-            <div class="card border-0 bg-warning bg-opacity-10">
+        <div class="col-md-3 mb-3">
+            <div class="card border-secondary bg-dark text-light">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-muted mb-1">Total Questions</h6>
+                            <h3 class="text-info mb-0">@(Model.Sum(q => new QuizAppDotNetFrameWork.Repositories.QuizRepository().GetQuestionsByQuizId(q.QuizId).Count))</h3>
+                        </div>
+                        <i class="bi bi-question-circle text-info fs-1"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card border-secondary bg-dark text-light">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
@@ -57,15 +70,15 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mb-3">
-            <div class="card border-0 bg-info bg-opacity-10">
+        <div class="col-md-3 mb-3">
+            <div class="card border-secondary bg-dark text-light">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="card-title text-muted mb-1">In Progress</h6>
-                            <h3 class="text-info mb-0">0</h3>
+                            <h6 class="card-title text-muted mb-1">Avg. Score</h6>
+                            <h3 class="text-success mb-0">--%</h3>
                         </div>
-                        <i class="bi bi-clock text-info fs-1"></i>
+                        <i class="bi bi-graph-up text-success fs-1"></i>
                     </div>
                 </div>
             </div>
@@ -75,11 +88,22 @@
     <!-- Quizzes List -->
     <div class="row">
         <div class="col-12">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-light">
-                    <h5 class="card-title mb-0">
+            <div class="card shadow-sm border-secondary bg-dark text-light">
+                <div class="card-header bg-dark border-secondary d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0 text-light">
                         <i class="bi bi-list-task me-2"></i>Your Available Quizzes
+                        <span class="badge bg-primary ms-2">@Model.Count</span>
                     </h5>
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-filter me-1"></i>Sort By
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-dark">
+                            <li><a class="dropdown-item" href="#">Newest First</a></li>
+                            <li><a class="dropdown-item" href="#">Most Questions</a></li>
+                            <li><a class="dropdown-item" href="#">Alphabetical</a></li>
+                        </ul>
+                    </div>
                 </div>
                 <div class="card-body">
                     @if (Model != null && Model.Count > 0)
@@ -87,14 +111,25 @@
                         <div class="row">
                             @foreach (var quiz in Model)
                             {
-                                <div class="col-lg-6 mb-4">
-                                    <div class="card h-100 border quiz-card">
-                                        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                                            <h6 class="mb-0">@quiz.Title</h6>
-                                            <span class="badge bg-light text-dark">New</span>
+                                var questionCount = new QuizAppDotNetFrameWork.Repositories.QuizRepository().GetQuestionsByQuizId(quiz.QuizId).Count;
+                                var estimatedTime = questionCount * 1; // 1 minute per question
+
+                                <div class="col-xl-4 col-lg-6 mb-4">
+                                    <div class="card h-100 border-secondary bg-dark text-light quiz-card">
+                                        <div class="card-header bg-dark border-secondary d-flex justify-content-between align-items-center">
+                                            <h6 class="mb-0 text-truncate text-white">@quiz.Title</h6>
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-outline-secondary border-0" type="button" data-bs-toggle="dropdown">
+                                                    <i class="bi bi-three-dots"></i>
+                                                </button>
+                                                <ul class="dropdown-menu dropdown-menu-dark">
+                                                    <li><a class="dropdown-item" href="#"><i class="bi bi-info-circle me-2"></i>Quiz Details</a></li>
+                                                    <li><a class="dropdown-item" href="#"><i class="bi bi-clock me-2"></i>View History</a></li>
+                                                </ul>
+                                            </div>
                                         </div>
                                         <div class="card-body">
-                                            <p class="card-text text-muted">
+                                            <p class="card-text text-muted mb-3">
                                                 @if (!string.IsNullOrEmpty(quiz.Description))
                                                 {
                                                     @quiz.Description
@@ -104,18 +139,48 @@
                                                     <em>No description available</em>
                                                 }
                                             </p>
-                                            <div class="quiz-meta">
-                                                <small class="text-muted">
-                                                    <i class="bi bi-calendar me-1"></i>Created: @quiz.CreatedOn.ToString("MMM dd, yyyy")
-                                                </small>
+
+                                            <!-- Quiz Metadata -->
+                                            <div class="quiz-meta mb-3">
+                                                <div class="row g-2 text-center">
+                                                    <div class="col-4">
+                                                        <div class="border border-secondary rounded p-2">
+                                                            <small class="text-muted d-block">Questions</small>
+                                                            <strong class="text-white">@questionCount</strong>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-4">
+                                                        <div class="border border-secondary rounded p-2">
+                                                            <small class="text-muted d-block">Time</small>
+                                                            <strong class="text-white">@estimatedTime min</strong>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-4">
+                                                        <div class="border border-secondary rounded p-2">
+                                                            <small class="text-muted d-block">Difficulty</small>
+                                                            <strong class="text-warning">Medium</strong>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
+
+                                            <!-- Progress Bar (for attempted quizzes) -->
+                                            <div class="progress mb-2" style="height: 4px;">
+                                                <div class="progress-bar bg-success" style="width: 0%"></div>
+                                            </div>
+                                            <small class="text-muted">Not attempted</small>
                                         </div>
-                                        <div class="card-footer bg-transparent">
+                                        <div class="card-footer bg-dark border-secondary">
                                             <div class="d-grid gap-2">
                                                 <a href="@Url.Action("Questions", "Quiz", new { quizId = quiz.QuizId })"
                                                    class="btn btn-success btn-sm">
                                                     <i class="bi bi-play-circle me-1"></i>Start Quiz
                                                 </a>
+                                            </div>
+                                            <div class="mt-2 text-center">
+                                                <small class="text-muted">
+                                                    <i class="bi bi-calendar me-1"></i>Created: @quiz.CreatedOn.ToString("MMM dd, yyyy")
+                                                </small>
                                             </div>
                                         </div>
                                     </div>
@@ -127,7 +192,7 @@
                     {
                         <div class="text-center py-5">
                             <i class="bi bi-inbox fs-1 text-muted d-block mb-3"></i>
-                            <h5 class="text-muted">No Quizzes Available</h5>
+                            <h5 class="text-light">No Quizzes Available</h5>
                             <p class="text-muted">There are no quizzes assigned to you at the moment.</p>
                             <small class="text-muted">Please check back later or contact your administrator.</small>
                         </div>
@@ -140,20 +205,20 @@
     <!-- Quick Actions -->
     <div class="row mt-4">
         <div class="col-12">
-            <div class="card border-0 bg-light">
+            <div class="card border-secondary bg-dark text-light">
                 <div class="card-body text-center py-3">
                     <div class="row">
                         <div class="col-md-4 mb-2 mb-md-0">
                             <i class="bi bi-clock-history text-primary me-2"></i>
-                            <small>View your quiz history and results</small>
+                            <small class="text-muted">View your quiz history and results</small>
                         </div>
                         <div class="col-md-4 mb-2 mb-md-0">
                             <i class="bi bi-graph-up text-success me-2"></i>
-                            <small>Track your progress and scores</small>
+                            <small class="text-muted">Track your progress and scores</small>
                         </div>
                         <div class="col-md-4">
                             <i class="bi bi-info-circle text-info me-2"></i>
-                            <small>Need help? Contact administrator</small>
+                            <small class="text-muted">Need help? Contact administrator</small>
                         </div>
                     </div>
                 </div>
@@ -163,8 +228,30 @@
 </div>
 
 <style>
+    body {
+        background-color: #1a1a1a;
+        color: #ffffff;
+    }
+
     .bg-gradient {
-        background: linear-gradient(135deg, #198754 0%, #146c43 100%) !important;
+        background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%) !important;
+    }
+
+    .card {
+        background-color: #2d3748;
+        border-color: #4a5568;
+    }
+
+    .text-light {
+        color: #e2e8f0 !important;
+    }
+
+    .text-muted {
+        color: #a0aec0 !important;
+    }
+
+    .border-secondary {
+        border-color: #4a5568 !important;
     }
 
     .quiz-card {
@@ -172,7 +259,86 @@
     }
 
         .quiz-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            border-color: #63b3ed !important;
         }
+
+    .dropdown-menu-dark {
+        background-color: #2d3748;
+        border: 1px solid #4a5568;
+    }
+
+    .dropdown-item {
+        color: #e2e8f0;
+    }
+
+        .dropdown-item:hover {
+            background-color: #4a5568;
+            color: #ffffff;
+        }
+
+    .progress {
+        background-color: #4a5568;
+    }
+
+    .btn-success {
+        background-color: #48bb78;
+        border-color: #48bb78;
+    }
+
+        .btn-success:hover {
+            background-color: #38a169;
+            border-color: #38a169;
+        }
+
+    /* Responsive adjustments */
+    @@media (max-width: 768px) {
+        .card-header .dropdown {
+            display: none;
+        }
+
+        .quiz-meta .row .col-4 {
+            margin-bottom: 0.5rem;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .container {
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+
+        .card-body {
+            padding: 1rem;
+        }
+    }
 </style>
+
+<script>
+    // Add some interactivity
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add click animation to quiz cards
+        const quizCards = document.querySelectorAll('.quiz-card');
+        quizCards.forEach(card => {
+            card.addEventListener('click', function(e) {
+                if (!e.target.closest('a') && !e.target.closest('.dropdown')) {
+                    this.style.transform = 'scale(0.98)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 150);
+                }
+            });
+        });
+
+        // Update local time
+        function updateLocalTime() {
+            const now = new Date();
+            document.getElementById('currentTime').textContent =
+                now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        setInterval(updateLocalTime, 60000);
+        updateLocalTime();
+    });
+</script>

@@ -1,0 +1,90 @@
+﻿@model List<QuizAppDotNetFrameWork.Models.QuizAttempt>
+@{
+    ViewBag.Title = "My Quiz Results";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>My Quiz Results</h2>
+
+@if (Model == null || !Model.Any())
+{
+    <div class="alert alert-info">
+        <p>You haven't taken any quizzes yet.</p>
+        <a href="@Url.Action("Index")" class="btn btn-primary">Take a Quiz</a>
+    </div>
+}
+else
+{
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <h5 class="card-title">Total Attempts</h5>
+                    <p class="card-text display-4">@ViewBag.TotalAttempts</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <h5 class="card-title">Average Score</h5>
+                    <p class="card-text display-4">@ViewBag.AverageScore.ToString("0.0")%</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-info">
+                <div class="card-body">
+                    <h5 class="card-title">Best Score</h5>
+                    <p class="card-text display-4">@ViewBag.BestScore.ToString("0.0")%</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h4>Quiz Attempt History</h4>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Quiz Title</th>
+                        <th>Date Completed</th>
+                        <th>Score</th>
+                        <th>Grade</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var attempt in Model)
+                    {
+                        <tr>
+                            <td>@attempt.QuizTitle</td>
+                            <td>@attempt.CompletedOn.ToString("MMM dd, yyyy hh:mm tt")</td>
+                            <td>@attempt.Score / @attempt.TotalQuestions</td>
+                            <td>
+                                <span class="badge @(attempt.Grade == "F" ? "bg-danger" : "bg-success")">
+                                    @attempt.Grade
+                                </span>
+                            </td>
+                            <td>
+                                <a href="@Url.Action("QuizResults", new { 
+                                    quizId = attempt.QuizId, 
+                                    score = attempt.Score, 
+                                    totalQuestions = attempt.TotalQuestions, 
+                                    percentage = attempt.Percentage, 
+                                    grade = attempt.Grade 
+                                })" class="btn btn-sm btn-outline-primary">
+                                    View Details
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+} }
+}
