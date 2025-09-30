@@ -143,6 +143,7 @@
     <Content Include="Views\Admin\ViewAssignments.cshtml" />
     <Content Include="Views\Admin\QuizAssignments.cshtml" />
     <Content Include="Views\Quiz\EditQuestion.cshtml" />
+    <Content Include="Views\Quiz\AddQuestion.cshtml" />
     <None Include="Views\Quiz\Results.cshtml" />
   </ItemGroup>
   <ItemGroup>
