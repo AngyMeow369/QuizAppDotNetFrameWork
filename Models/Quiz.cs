@@ -12,5 +12,9 @@ namespace QuizAppDotNetFrameWork.Models
         public string Description { get; set; }
         public int CreatedBy { get; set; }
         public DateTime CreatedOn { get; set; }
+
+        // Will be auto-calculated
+        public int TimeLimitMinutes { get; set; } 
+        
     }
 }

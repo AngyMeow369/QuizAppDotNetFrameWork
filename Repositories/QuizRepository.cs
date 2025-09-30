@@ -443,6 +443,124 @@ namespace QuizAppDotNetFrameWork.Repositories
             return null;
         }
 
+        // ========== QUIZ ASSIGNMENT METHODS ==========
+
+        // Assign quiz to user
+        public void AssignQuizToUser(int userId, int quizId, DateTime dueDate)
+        {
+            string json = $@"{{
+        ""UserId"": {userId},
+        ""QuizId"": {quizId},
+        ""DueDate"": ""{dueDate:yyyy-MM-dd HH:mm:ss}""
+    }}";
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlCommand cmd = new SqlCommand("spAssignQuizToUser", conn))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@json", json);
+                conn.Open();
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        // Get assigned quizzes for a specific user
+        public List<UserQuizAssignment> GetAssignedQuizzesByUser(int userId)
+        {
+            var assignments = new List<UserQuizAssignment>();
+            string json = $@"{{ ""UserId"": {userId} }}";
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlCommand cmd = new SqlCommand("spGetAssignedQuizzes", conn))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@json", json);
+
+                conn.Open();
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        var assignment = new UserQuizAssignment
+                        {
+                            AssignmentId = Convert.ToInt32(reader["AssignmentId"]),
+                            UserId = Convert.ToInt32(reader["UserId"]),
+                            QuizId = Convert.ToInt32(reader["QuizId"]),
+                            AssignedOn = Convert.ToDateTime(reader["AssignedOn"]),
+                            DueDate = Convert.ToDateTime(reader["DueDate"]),
+                            IsCompleted = Convert.ToBoolean(reader["IsCompleted"]),
+                            AttemptId = reader["AttemptId"] == DBNull.Value ? (int?)null : Convert.ToInt32(reader["AttemptId"]),
+                            QuizTitle = reader["QuizTitle"].ToString(),
+                            QuestionCount = Convert.ToInt32(reader["QuestionCount"])
+                        };
+
+                        // Auto-calculate time limit (1 minute per question)
+                        assignment.TimeLimitMinutes = assignment.QuestionCount * 1;
+
+                        assignments.Add(assignment);
+                    }
+                }
+            }
+            return assignments;
+        }
+
+        // Get all assignments for admin view
+        public List<UserQuizAssignment> GetAllQuizAssignments()
+        {
+            var assignments = new List<UserQuizAssignment>();
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlCommand cmd = new SqlCommand("spGetAllQuizAssignments", conn))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                conn.Open();
+
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        var assignment = new UserQuizAssignment
+                        {
+                            AssignmentId = Convert.ToInt32(reader["AssignmentId"]),
+                            UserId = Convert.ToInt32(reader["UserId"]),
+                            QuizId = Convert.ToInt32(reader["QuizId"]),
+                            AssignedOn = Convert.ToDateTime(reader["AssignedOn"]),
+                            DueDate = Convert.ToDateTime(reader["DueDate"]),
+                            IsCompleted = Convert.ToBoolean(reader["IsCompleted"]),
+                            AttemptId = reader["AttemptId"] == DBNull.Value ? (int?)null : Convert.ToInt32(reader["AttemptId"]),
+                            Username = reader["Username"].ToString(),
+                            QuizTitle = reader["QuizTitle"].ToString(),
+                            QuestionCount = Convert.ToInt32(reader["QuestionCount"])
+                        };
+
+                        // Auto-calculate time limit
+                        assignment.TimeLimitMinutes = assignment.QuestionCount * 1;
+
+                        assignments.Add(assignment);
+                    }
+                }
+            }
+            return assignments;
+        }
+
+        // Mark assignment as completed
+        public void CompleteQuizAssignment(int assignmentId, int attemptId)
+        {
+            string json = $@"{{
+        ""AssignmentId"": {assignmentId},
+        ""AttemptId"": {attemptId}
+    }}";
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlCommand cmd = new SqlCommand("spCompleteQuizAssignment", conn))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@json", json);
+                conn.Open();
+                cmd.ExecuteNonQuery();
+            }
+        }
+
 
     }
 }
