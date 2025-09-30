@@ -16,7 +16,7 @@
                                 <i class="bi bi-question-circle me-2"></i>@ViewBag.QuizTitle
                             </h1>
                             <p class="card-text mb-0 text-light opacity-75">
-                                Answer all questions before submitting. Time remaining: 
+                                Answer all questions before submitting. Time remaining:
                                 <strong id="timeRemaining">Calculating...</strong>
                             </p>
                         </div>
@@ -45,8 +45,8 @@
                     <div class="list-group list-group-flush" id="questionNav">
                         @for (int i = 0; i < Model.Count; i++)
                         {
-                            <a href="#question-@(i + 1)" 
-                               class="list-group-item list-group-item-action bg-dark text-light question-nav-item" 
+                            <a href="#question-@(i + 1)"
+                               class="list-group-item list-group-item-action bg-dark text-light question-nav-item"
                                data-question-index="@i">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <span>Question @(i + 1)</span>
@@ -400,7 +400,8 @@
                 timer: null,
                 timeLimit: @(Model.Count * 60), // 1 minute per question in seconds
                 timeRemaining: @(Model.Count * 60),
-                reviewMode: false
+                reviewMode: false,
+                selections: {} // Track selections by question ID
             };
 
             // DOM elements
@@ -433,12 +434,12 @@
             function startTimer() {
                 quizState.timer = setInterval(() => {
                     quizState.timeRemaining--;
-                    
+
                     if (quizState.timeRemaining <= 0) {
                         endQuizTimeUp();
                         return;
                     }
-                    
+
                     updateTimerDisplay();
                 }, 1000);
             }
@@ -447,10 +448,10 @@
                 const minutes = Math.floor(quizState.timeRemaining / 60);
                 const seconds = quizState.timeRemaining % 60;
                 const timeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-                
+
                 elements.timeRemaining.textContent = timeString;
                 elements.timeStat.textContent = timeString;
-                
+
                 // Color coding for time
                 if (quizState.timeRemaining < 300) { // 5 minutes
                     elements.timeRemaining.className = 'text-danger fw-bold';
@@ -467,13 +468,14 @@
 
             // Event listeners
             function setupEventListeners() {
-                // Radio button changes
+                // Radio button changes - FIXED: Properly handle option selection
                 document.querySelectorAll('input[type="radio"]').forEach(radio => {
                     radio.addEventListener('change', function() {
                         const questionIndex = parseInt(this.getAttribute('data-question-index'));
                         const questionId = this.getAttribute('data-question');
-                        
-                        handleAnswer(questionIndex, questionId, this.value);
+                        const optionId = this.value;
+
+                        handleAnswer(questionIndex, questionId, optionId);
                     });
                 });
 
@@ -503,10 +505,10 @@
 
                 // Review mode toggle
                 elements.reviewModeBtn.addEventListener('click', toggleReviewMode);
-                
+
                 // Mark all for review
                 elements.markAllBtn.addEventListener('click', markAllForReview);
-                
+
                 // Clear all answers
                 elements.clearAllBtn.addEventListener('click', clearAllAnswers);
 
@@ -524,20 +526,25 @@
                 });
             }
 
-            // Answer handling
+            // Answer handling - FIXED: Improved selection tracking
             function handleAnswer(questionIndex, questionId, optionId) {
+                console.log(`Question ${questionIndex} (ID: ${questionId}) - Selected option: ${optionId}`);
+
+                // Store the selection
+                quizState.selections[questionId] = optionId;
+
                 // Update answered questions
                 quizState.answeredQuestions.add(questionIndex);
-                
+
                 // Update question time
                 const currentTime = Math.floor((Date.now() - quizState.startTime) / 1000);
                 quizState.questionTimes[questionIndex] = currentTime;
-                
+
                 // Update UI
                 updateQuestionStatus(questionIndex, 'answered');
-                updateOptionSelection(questionIndex, optionId);
+                updateOptionSelection(questionIndex, questionId, optionId);
                 updateDisplay();
-                
+
                 // Auto-save
                 saveProgress();
             }
@@ -552,7 +559,7 @@
                     document.getElementById(`review-${questionIndex}`).style.display = 'inline-block';
                     document.querySelector(`.question-nav-item[data-question-index="${questionIndex}"]`).classList.add('marked');
                 }
-                
+
                 updateQuestionCard(questionIndex);
                 saveProgress();
             }
@@ -560,7 +567,7 @@
             function toggleReviewMode() {
                 quizState.reviewMode = !quizState.reviewMode;
                 document.body.classList.toggle('review-mode', quizState.reviewMode);
-                
+
                 if (quizState.reviewMode) {
                     elements.reviewModeBtn.innerHTML = '<i class="bi bi-eye-slash me-1"></i>Exit Review';
                     elements.reviewModeBtn.classList.remove('btn-outline-warning');
@@ -582,34 +589,52 @@
 
             function clearAllAnswers() {
                 if (confirm('Are you sure you want to clear all answers? This cannot be undone.')) {
+                    // Clear all radio buttons
                     document.querySelectorAll('input[type="radio"]').forEach(radio => {
                         radio.checked = false;
                     });
-                    
+
+                    // Reset state
                     quizState.answeredQuestions.clear();
+                    quizState.selections = {};
+
+                    // Reset UI
+                    for (let i = 0; i < quizState.totalQuestions; i++) {
+                        updateQuestionStatus(i, 'unanswered');
+                        document.getElementById(`selection-status-${i}`).textContent = 'No selection';
+
+                        // Remove selected class from all options
+                        const questionCard = document.getElementById(`question-${i + 1}`);
+                        if (questionCard) {
+                            questionCard.querySelectorAll('.option-item').forEach(item => {
+                                item.classList.remove('selected');
+                            });
+                        }
+                    }
+
                     updateDisplay();
                     saveProgress();
                 }
             }
 
-            // UI updates
+            // UI updates - FIXED: Improved selection display
             function updateDisplay() {
                 const answeredCount = quizState.answeredQuestions.size;
                 const percentage = (answeredCount / quizState.totalQuestions) * 100;
-                
+
                 // Progress bar
                 elements.progressBar.style.width = `${percentage}%`;
                 elements.progressText.textContent = `${answeredCount}/${quizState.totalQuestions}`;
                 elements.progressPercentage.textContent = `${Math.round(percentage)}%`;
-                
+
                 // Stats
                 elements.answeredStat.textContent = answeredCount;
                 elements.remainingStat.textContent = quizState.totalQuestions - answeredCount;
-                
+
                 // Submit button
                 const allAnswered = answeredCount === quizState.totalQuestions;
                 elements.submitBtn.disabled = !allAnswered;
-                
+
                 if (allAnswered) {
                     elements.submitStatus.textContent = 'All questions answered! Ready to submit.';
                     elements.submitStatus.className = 'text-success mb-0';
@@ -619,7 +644,7 @@
                     elements.submitStatus.className = 'text-warning mb-0';
                     document.querySelector('.submit-section').classList.remove('ready');
                 }
-                
+
                 // Progress bar color
                 if (percentage === 100) {
                     elements.progressBar.className = 'progress-bar bg-success';
@@ -634,10 +659,10 @@
                 const navItem = document.querySelector(`.question-nav-item[data-question-index="${questionIndex}"]`);
                 const statusBadge = document.getElementById(`status-${questionIndex}`);
                 const questionCard = document.getElementById(`question-${questionIndex + 1}`);
-                
+
                 navItem.classList.remove('answered', 'marked');
                 questionCard.classList.remove('answered', 'marked-review');
-                
+
                 if (status === 'answered') {
                     navItem.classList.add('answered');
                     questionCard.classList.add('answered');
@@ -649,50 +674,72 @@
                     statusBadge.textContent = '!';
                     statusBadge.className = 'badge bg-warning status-badge';
                 } else {
+                    navItem.classList.add('unanswered');
+                    questionCard.classList.add('unanswered');
                     statusBadge.textContent = '○';
                     statusBadge.className = 'badge bg-secondary status-badge';
                 }
             }
 
-            function updateOptionSelection(questionIndex, optionId) {
+            // FIXED: Improved option selection highlighting
+            function updateOptionSelection(questionIndex, questionId, optionId) {
+                console.log(`Updating selection for question ${questionIndex}: option ${optionId}`);
+
                 // Update selection status text
                 document.getElementById(`selection-status-${questionIndex}`).textContent = 'Selected';
-                
-                // Highlight selected option
+
+                // Get the question card
                 const questionCard = document.getElementById(`question-${questionIndex + 1}`);
+                if (!questionCard) {
+                    console.error(`Question card not found for index ${questionIndex}`);
+                    return;
+                }
+
+                // Remove selected class from all options in this question
                 questionCard.querySelectorAll('.option-item').forEach(item => {
                     item.classList.remove('selected');
                 });
-                
-                const selectedOption = questionCard.querySelector(`input[value="${optionId}"]`).closest('.option-item');
-                if (selectedOption) {
-                    selectedOption.classList.add('selected');
+
+                // Add selected class to the chosen option
+                const selectedRadio = questionCard.querySelector(`input[type="radio"][value="${optionId}"]`);
+                if (selectedRadio) {
+                    const selectedOption = selectedRadio.closest('.option-item');
+                    if (selectedOption) {
+                        selectedOption.classList.add('selected');
+                        console.log(`Successfully highlighted option ${optionId}`);
+                    } else {
+                        console.error(`Option item not found for option ${optionId}`);
+                    }
+                } else {
+                    console.error(`Radio button not found for option ${optionId}`);
                 }
             }
 
             function updateQuestionCard(questionIndex) {
                 const questionCard = document.getElementById(`question-${questionIndex + 1}`);
-                questionCard.classList.toggle('marked-review', quizState.markedForReview.has(questionIndex));
+                if (questionCard) {
+                    questionCard.classList.toggle('marked-review', quizState.markedForReview.has(questionIndex));
+                }
             }
 
             function scrollToQuestion(questionIndex) {
                 const questionElement = document.getElementById(`question-${questionIndex + 1}`);
                 if (questionElement) {
                     questionElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    
+
                     // Highlight current question
                     document.querySelectorAll('.question-card').forEach(card => {
                         card.classList.remove('current');
                     });
                     questionElement.classList.add('current');
-                    
+
                     setTimeout(() => {
                         questionElement.classList.remove('current');
                     }, 2000);
                 }
             }
 
-            // Progress persistence
+            // Progress persistence - FIXED: Improved selection saving/loading
             function saveProgress() {
                 const progress = {
                     answered: Array.from(quizState.answeredQuestions),
@@ -700,79 +747,81 @@
                     times: quizState.questionTimes,
                     startTime: quizState.startTime,
                     timeRemaining: quizState.timeRemaining,
-                    selections: getCurrentSelections()
+                    selections: quizState.selections
                 };
-                
+
                 localStorage.setItem(`quizProgress_@ViewBag.QuizId`, JSON.stringify(progress));
-                console.log('Progress saved');
+                console.log('Progress saved:', progress);
             }
 
             function loadSavedProgress() {
                 const saved = localStorage.getItem(`quizProgress_@ViewBag.QuizId`);
                 if (saved) {
                     const progress = JSON.parse(saved);
-                    
+
                     if (confirm('Found saved progress. Would you like to continue where you left off?')) {
                         // Restore answered questions
                         progress.answered.forEach(index => {
                             quizState.answeredQuestions.add(index);
                         });
-                        
+
                         // Restore marked questions
                         progress.marked.forEach(index => {
                             quizState.markedForReview.add(index);
                         });
-                        
+
                         // Restore times
                         quizState.questionTimes = progress.times;
                         quizState.startTime = progress.startTime;
                         quizState.timeRemaining = progress.timeRemaining;
-                        
+
                         // Restore selections
+                        quizState.selections = progress.selections || {};
+
+                        // Restore radio button states and UI
                         restoreSelections(progress.selections);
-                        
-                        console.log('Progress loaded');
+
+                        console.log('Progress loaded:', progress);
                     } else {
                         localStorage.removeItem(`quizProgress_@ViewBag.QuizId`);
                     }
                 }
             }
 
-            function getCurrentSelections() {
-                const selections = {};
-                document.querySelectorAll('input[type="radio"]:checked').forEach(radio => {
-                    const questionId = radio.getAttribute('data-question');
-                    selections[questionId] = radio.value;
-                });
-                return selections;
-            }
-
             function restoreSelections(selections) {
+                if (!selections) return;
+
                 for (const [questionId, optionId] of Object.entries(selections)) {
                     const radio = document.querySelector(`input[name="q_${questionId}"][value="${optionId}"]`);
                     if (radio) {
                         radio.checked = true;
                         const questionIndex = parseInt(radio.getAttribute('data-question-index'));
-                        handleAnswer(questionIndex, questionId, optionId);
+
+                        // Update UI for this selection
+                        updateQuestionStatus(questionIndex, 'answered');
+                        updateOptionSelection(questionIndex, questionId, optionId);
                     }
                 }
+                updateDisplay();
             }
 
             // Form submission
             function handleFormSubmit(e) {
-                if (quizState.answeredQuestions.size < quizState.totalQuestions) {
+                const answeredCount = quizState.answeredQuestions.size;
+
+                if (answeredCount < quizState.totalQuestions) {
                     e.preventDefault();
-                    alert(`Please answer all ${quizState.totalQuestions - quizState.answeredQuestions.size} remaining questions before submitting.`);
+                    alert(`Please answer all ${quizState.totalQuestions - answeredCount} remaining questions before submitting.`);
                     return false;
                 }
 
                 // Show loading state
                 elements.submitBtn.disabled = true;
                 elements.submitBtn.querySelector('.submit-text').textContent = 'Submitting...';
-                
+
                 // Clear saved progress
                 localStorage.removeItem(`quizProgress_@ViewBag.QuizId`);
-                
+
                 // Add time spent data
                 const totalTime = Math.floor((Date.now() - quizState.startTime) / 1000);
                 const timeInput = document.createElement('input');
@@ -780,7 +829,8 @@
                 timeInput.name = 'totalTime';
                 timeInput.value = totalTime;
                 elements.quizForm.appendChild(timeInput);
-                
+
+                console.log('Submitting quiz with selections:', quizState.selections);
                 return true;
             }
 
