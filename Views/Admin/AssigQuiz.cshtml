@@ -1,0 +1,170 @@
+﻿@model dynamic
+@{
+    ViewBag.Title = "Assign Quiz to Users";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title mb-0">
+                        <i class="bi bi-send-check me-2"></i>Assign Quiz to Users
+                    </h4>
+                </div>
+                <div class="card-body">
+                    @using (Html.BeginForm("AssignQuiz", "Admin", FormMethod.Post, new { @class = "needs-validation", novalidate = "true" }))
+                    {
+                        @Html.AntiForgeryToken()
+
+                        <!-- Quiz Selection -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="quizId" class="form-label">Select Quiz *</label>
+                                <select class="form-select" id="quizId" name="quizId" required>
+                                    <option value="">-- Choose a Quiz --</option>
+                                    @foreach (var quiz in ViewBag.Quizzes)
+                                    {
+                                        <option value="@quiz.QuizId">@quiz.Title</option>
+                                    }
+                                </select>
+                                <div class="invalid-feedback">Please select a quiz.</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="dueDate" class="form-label">Due Date *</label>
+                                <input type="datetime-local" class="form-control" id="dueDate" name="dueDate" required
+                                       min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")">
+                                <div class="invalid-feedback">Please select a future due date.</div>
+                            </div>
+                        </div>
+
+                        <!-- Users Selection -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <label class="form-label">Select Users *</label>
+                                <div class="card">
+                                    <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+                                        @if (ViewBag.Users != null && ViewBag.Users.Count > 0)
+                                        {
+                                            foreach (var user in ViewBag.Users)
+                                            {
+                                                <div class="form-check mb-2">
+                                                    <input class="form-check-input user-checkbox" type="checkbox"
+                                                           name="userIds" value="@user.UserId" id="user_@user.UserId">
+                                                    <label class="form-check-label" for="user_@user.UserId">
+                                                        @user.Username <span class="badge bg-secondary ms-2">@user.Role</span>
+                                                    </label>
+                                                </div>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <p class="text-muted">No users available.</p>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" id="selectAllBtn">Select All</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" id="deselectAllBtn">Deselect All</button>
+                                </div>
+                                <div class="invalid-feedback" id="usersError" style="display: none;">Please select at least one user.</div>
+                            </div>
+                        </div>
+
+                        <!-- Selected Quiz Info -->
+                        <div class="row mb-4" id="quizInfo" style="display: none;">
+                            <div class="col-12">
+                                <div class="alert alert-info">
+                                    <h6 class="alert-heading">Quiz Information</h6>
+                                    <div id="quizDetails">Loading quiz details...</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="row">
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="bi bi-send-check me-1"></i>Assign Quiz
+                                </button>
+                                <a href="@Url.Action("ViewAssignments")" class="btn btn-outline-secondary">
+                                    <i class="bi bi-list-ul me-1"></i>View Assignments
+                                </a>
+                                <a href="@Url.Action("ManageQuizzes", "Quiz")" class="btn btn-outline-secondary">
+                                    <i class="bi bi-arrow-left me-1"></i>Back to Quizzes
+                                </a>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Form validation
+            const form = document.querySelector('.needs-validation');
+            const userCheckboxes = document.querySelectorAll('.user-checkbox');
+            const usersError = document.getElementById('usersError');
+
+            form.addEventListener('submit', function (event) {
+                let userSelected = false;
+                userCheckboxes.forEach(checkbox => {
+                    if (checkbox.checked) userSelected = true;
+                });
+
+                if (!userSelected) {
+                    usersError.style.display = 'block';
+                    event.preventDefault();
+                    event.stopPropagation();
+                } else {
+                    usersError.style.display = 'none';
+                }
+
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+
+                form.classList.add('was-validated');
+            });
+
+            // Select All / Deselect All
+            document.getElementById('selectAllBtn').addEventListener('click', function () {
+                userCheckboxes.forEach(checkbox => checkbox.checked = true);
+            });
+
+            document.getElementById('deselectAllBtn').addEventListener('click', function () {
+                userCheckboxes.forEach(checkbox => checkbox.checked = false);
+            });
+
+            // Quiz info display
+            const quizSelect = document.getElementById('quizId');
+            const quizInfo = document.getElementById('quizInfo');
+            const quizDetails = document.getElementById('quizDetails');
+
+            quizSelect.addEventListener('change', function () {
+                const quizId = this.value;
+                if (quizId) {
+                    // In a real app, you'd fetch quiz details via AJAX
+                    quizInfo.style.display = 'block';
+                    quizDetails.innerHTML = `
+                        <strong>Quiz:</strong> ${quizSelect.options[quizSelect.selectedIndex].text}<br>
+                        <small class="text-muted">Time limit will be automatically calculated (1 minute per question)</small>
+                    `;
+                } else {
+                    quizInfo.style.display = 'none';
+                }
+            });
+
+            // Set minimum datetime to current time
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            document.getElementById('dueDate').min = now.toISOString().slice(0, 16);
+        });
+    </script>
+}

@@ -27,63 +27,47 @@
         </div>
     </div>
 
-    <!-- Quick Stats Row -->
+    <!-- Quick Actions Row -->
     <div class="row mb-4">
-        <div class="col-md-3 mb-3">
-            <div class="card border-secondary bg-dark text-light">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-title text-muted mb-1">Total Users</h6>
-                            <h3 class="text-success mb-0">--</h3>
-                        </div>
-                        <i class="bi bi-people-fill text-success fs-1"></i>
-                    </div>
+        <div class="col-md-4 mb-3">
+            <div class="card border-secondary bg-dark text-light h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-send-check text-primary fs-1 mb-3"></i>
+                    <h5 class="card-title">Assign Quizzes</h5>
+                    <p class="card-text text-muted">Assign quizzes to users with automatic time limits</p>
+                    <a href="@Url.Action("AssignQuiz", "Admin")" class="btn btn-primary w-100">
+                        <i class="bi bi-send-check me-2"></i>Assign Quiz
+                    </a>
                 </div>
             </div>
         </div>
-        <div class="col-md-3 mb-3">
-            <div class="card border-secondary bg-dark text-light">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-title text-muted mb-1">Total Quizzes</h6>
-                            <h3 class="text-info mb-0">--</h3>
-                        </div>
-                        <i class="bi bi-file-text-fill text-info fs-1"></i>
-                    </div>
+        <div class="col-md-4 mb-3">
+            <div class="card border-secondary bg-dark text-light h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-list-check text-success fs-1 mb-3"></i>
+                    <h5 class="card-title">View Assignments</h5>
+                    <p class="card-text text-muted">Monitor all quiz assignments and completion status</p>
+                    <a href="@Url.Action("ViewAssignments", "Admin")" class="btn btn-success w-100">
+                        <i class="bi bi-list-check me-2"></i>View Assignments
+                    </a>
                 </div>
             </div>
         </div>
-        <div class="col-md-3 mb-3">
-            <div class="card border-secondary bg-dark text-light">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-title text-muted mb-1">Active Exams</h6>
-                            <h3 class="text-warning mb-0">--</h3>
-                        </div>
-                        <i class="bi bi-clock-fill text-warning fs-1"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="card border-secondary bg-dark text-light">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-title text-muted mb-1">Completed</h6>
-                            <h3 class="text-purple mb-0">--</h3>
-                        </div>
-                        <i class="bi bi-check-circle-fill text-purple fs-1"></i>
-                    </div>
+        <div class="col-md-4 mb-3">
+            <div class="card border-secondary bg-dark text-light h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-plus-circle text-warning fs-1 mb-3"></i>
+                    <h5 class="card-title">Create Quiz</h5>
+                    <p class="card-text text-muted">Quickly create a new quiz with questions and options</p>
+                    <a href="@Url.Action("AddQuiz", "Quiz")" class="btn btn-warning w-100">
+                        <i class="bi bi-plus-circle me-2"></i>Create Quiz
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Management Cards - FIXED -->
+    <!-- Management Cards -->
     <div class="row">
         <div class="col-md-4 mb-4">
             <div class="card shadow-sm border-secondary bg-dark text-light h-100">
@@ -134,6 +118,41 @@
         <div class="col-md-4 mb-4">
             <div class="card shadow-sm border-secondary bg-dark text-light h-100">
                 <div class="card-header bg-dark border-secondary">
+                    <h5 class="card-title mb-0 text-warning">
+                        <i class="bi bi-send-check me-2"></i>Quiz Assignments
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text text-light">Assign quizzes to specific users with deadlines and automatic time limits (1 minute per question).</p>
+                    <ul class="list-unstyled text-light">
+                        <li><i class="bi bi-send-check text-primary me-2"></i>Assign to users</li>
+                        <li><i class="bi bi-clock text-warning me-2"></i>Set due dates</li>
+                        <li><i class="bi bi-graph-up text-success me-2"></i>Track progress</li>
+                    </ul>
+                </div>
+                <div class="card-footer bg-dark border-secondary">
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <a href="@Url.Action("AssignQuiz", "Admin")" class="btn btn-outline-warning w-100">
+                                <i class="bi bi-send-check me-1"></i>Assign
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <a href="@Url.Action("ViewAssignments", "Admin")" class="btn btn-outline-info w-100">
+                                <i class="bi bi-eye me-1"></i>View
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Management Cards -->
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm border-secondary bg-dark text-light h-100">
+                <div class="card-header bg-dark border-secondary">
                     <h5 class="card-title mb-0 text-info">
                         <i class="bi bi-question-circle me-2"></i>Question Bank
                     </h5>
@@ -153,22 +172,53 @@
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Recent Activity Section -->
-    <div class="row mt-2">
-        <div class="col-12">
-            <div class="card shadow-sm border-secondary bg-dark text-light">
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm border-secondary bg-dark text-light h-100">
                 <div class="card-header bg-dark border-secondary">
-                    <h5 class="card-title mb-0 text-light">
-                        <i class="bi bi-activity me-2"></i>Recent Activity
+                    <h5 class="card-title mb-0 text-purple">
+                        <i class="bi bi-graph-up me-2"></i>Results & Analytics
                     </h5>
                 </div>
                 <div class="card-body">
-                    <div class="text-center text-muted py-4">
-                        <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary"></i>
-                        <p class="text-light">No recent activity to display</p>
-                        <small class="text-muted">User attempts and system activities will appear here</small>
+                    <p class="card-text text-light">View quiz results, user performance, and system analytics. Track completion rates and scores.</p>
+                    <ul class="list-unstyled text-light">
+                        <li><i class="bi bi-graph-up text-purple me-2"></i>Performance analytics</li>
+                        <li><i class="bi bi-clock-history text-info me-2"></i>Completion tracking</li>
+                        <li><i class="bi bi-trophy text-warning me-2"></i>Score analysis</li>
+                    </ul>
+                </div>
+                <div class="card-footer bg-dark border-secondary">
+                    <a href="@Url.Action("Results", "Quiz")" class="btn btn-outline-purple w-100">
+                        <i class="bi bi-arrow-right-circle me-2"></i>View Results
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats Footer -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card border-secondary bg-dark text-light">
+                <div class="card-body text-center py-3">
+                    <div class="row">
+                        <div class="col-md-3 mb-2 mb-md-0">
+                            <i class="bi bi-lightning-charge text-primary me-2"></i>
+                            <small class="text-muted">Quick assignment with 1-click</small>
+                        </div>
+                        <div class="col-md-3 mb-2 mb-md-0">
+                            <i class="bi bi-clock text-success me-2"></i>
+                            <small class="text-muted">Automatic time calculation</small>
+                        </div>
+                        <div class="col-md-3 mb-2 mb-md-0">
+                            <i class="bi bi-bell text-warning me-2"></i>
+                            <small class="text-muted">Deadline tracking</small>
+                        </div>
+                        <div class="col-md-3">
+                            <i class="bi bi-graph-up text-info me-2"></i>
+                            <small class="text-muted">Progress monitoring</small>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -189,6 +239,17 @@
     .text-purple {
         color: #6f42c1 !important;
     }
+
+    .btn-outline-purple {
+        color: #6f42c1;
+        border-color: #6f42c1;
+    }
+
+        .btn-outline-purple:hover {
+            background-color: #6f42c1;
+            border-color: #6f42c1;
+            color: #1a202c;
+        }
 
     .bg-gradient {
         background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%) !important;
@@ -242,5 +303,26 @@
             background-color: #76e4f7;
             border-color: #76e4f7;
             color: #1a202c;
+        }
+
+    .btn-outline-warning {
+        color: #f6e05e;
+        border-color: #f6e05e;
+    }
+
+        .btn-outline-warning:hover {
+            background-color: #f6e05e;
+            border-color: #f6e05e;
+            color: #1a202c;
+        }
+
+    /* Hover effects for cards */
+    .card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 </style>

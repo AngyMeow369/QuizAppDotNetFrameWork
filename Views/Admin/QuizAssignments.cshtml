@@ -1,0 +1,156 @@
+﻿@model List<QuizAppDotNetFrameWork.Models.UserQuizAssignment>
+@{
+    ViewBag.Title = "Quiz Assignments";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="card-title mb-0">
+                        <i class="bi bi-people me-2"></i>Assignments for: @ViewBag.QuizTitle
+                    </h4>
+                    <div>
+                        <a href="@Url.Action("ViewAssignments")" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-arrow-left me-1"></i>All Assignments
+                        </a>
+                        <a href="@Url.Action("AssignQuiz")" class="btn btn-success btn-sm">
+                            <i class="bi bi-plus-circle me-1"></i>New Assignment
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (Model != null && Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Assigned On</th>
+                                        <th>Due Date</th>
+                                        <th>Status</th>
+                                        <th>Score</th>
+                                        <th>Time Taken</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var assignment in Model)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <strong>@assignment.Username</strong>
+                                            </td>
+                                            <td>@assignment.AssignedOn.ToString("MMM dd, yyyy")</td>
+                                            <td>
+                                                <span class="@(assignment.IsOverdue ? "text-danger fw-bold" : "")">
+                                                    @assignment.DueDate.ToString("MMM dd, yyyy hh:mm tt")
+                                                </span>
+                                            </td>
+                                            <td>
+                                                @if (assignment.IsCompleted)
+                                                {
+                                                    <span class="badge bg-success">Completed</span>
+                                                }
+                                                else if (assignment.IsOverdue)
+                                                {
+                                                    <span class="badge bg-danger">Overdue</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-warning">Pending</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (assignment.IsCompleted && assignment.AttemptId.HasValue)
+                                                {
+                                                    <span class="fw-bold text-primary">View Results</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">--</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (assignment.IsCompleted)
+                                                {
+                                                    <span class="text-success">Completed</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">--</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (assignment.IsCompleted && assignment.AttemptId.HasValue)
+                                                {
+                                                    <a href="@Url.Action("QuizResults", "Quiz", new {
+                                                        quizId = assignment.QuizId,
+                                                        score = 0, // You might want to fetch actual score
+                                                        totalQuestions = assignment.QuestionCount,
+                                                        percentage = 0,
+                                                        grade = "N/A"
+                                                    })"
+                                                       class="btn btn-outline-info btn-sm">
+                                                        <i class="bi bi-graph-up me-1"></i>Results
+                                                    </a>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">No results yet</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Quiz Summary -->
+                        <div class="row mt-4">
+                            <div class="col-md-12">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Quiz Summary</h6>
+                                        <div class="row text-center">
+                                            <div class="col-md-3">
+                                                <h4>@Model.Count</h4>
+                                                <small class="text-muted">Total Assigned</small>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <h4 class="text-success">@Model.Count(a => a.IsCompleted)</h4>
+                                                <small class="text-muted">Completed</small>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <h4 class="text-warning">@Model.Count(a => !a.IsCompleted && !a.IsOverdue)</h4>
+                                                <small class="text-muted">Pending</small>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <h4 class="text-danger">@Model.Count(a => a.IsOverdue)</h4>
+                                                <small class="text-muted">Overdue</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="bi bi-people display-1 text-muted"></i>
+                            <h4 class="text-muted mt-3">No Assignments for This Quiz</h4>
+                            <p class="text-muted">This quiz hasn't been assigned to any users yet.</p>
+                            <a href="@Url.Action("AssignQuiz")" class="btn btn-success">
+                                <i class="bi bi-plus-circle me-1"></i>Assign This Quiz
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -561,6 +561,47 @@ namespace QuizAppDotNetFrameWork.Repositories
             }
         }
 
+        // Get assignments for a specific quiz
+        public List<UserQuizAssignment> GetQuizAssignmentsByQuiz(int quizId)
+        {
+            var assignments = new List<UserQuizAssignment>();
+            string json = $@"{{ ""QuizId"": {quizId} }}";
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlCommand cmd = new SqlCommand("spGetQuizAssignmentsByQuiz", conn))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@json", json);
+
+                conn.Open();
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        var assignment = new UserQuizAssignment
+                        {
+                            AssignmentId = Convert.ToInt32(reader["AssignmentId"]),
+                            UserId = Convert.ToInt32(reader["UserId"]),
+                            QuizId = Convert.ToInt32(reader["QuizId"]),
+                            AssignedOn = Convert.ToDateTime(reader["AssignedOn"]),
+                            DueDate = Convert.ToDateTime(reader["DueDate"]),
+                            IsCompleted = Convert.ToBoolean(reader["IsCompleted"]),
+                            AttemptId = reader["AttemptId"] == DBNull.Value ? (int?)null : Convert.ToInt32(reader["AttemptId"]),
+                            Username = reader["Username"].ToString(),
+                            QuizTitle = reader["QuizTitle"].ToString(),
+                            QuestionCount = Convert.ToInt32(reader["QuestionCount"])
+                        };
+
+                        // Auto-calculate time limit (1 minute per question)
+                        assignment.TimeLimitMinutes = assignment.QuestionCount * 1;
+
+                        assignments.Add(assignment);
+                    }
+                }
+            }
+            return assignments;
+        }
+
 
     }
 }
