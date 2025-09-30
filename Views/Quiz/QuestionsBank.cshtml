@@ -1,7 +1,14 @@
 ﻿@model List<QuizAppDotNetFrameWork.Models.Question>
+@using QuizAppDotNetFrameWork.Repositories
 
 @{
     ViewBag.Title = "Questions Bank";
+    var quizRepo = new QuizRepository();
+    var allQuizzes = quizRepo.GetAllQuizzes();
+
+    // Group questions by quiz for category navigation
+    var questionsByQuiz = Model.GroupBy(q => q.QuizId)
+                              .ToDictionary(g => g.Key, g => g.ToList());
 }
 
 <div class="container mt-4">
@@ -15,11 +22,11 @@
                                 <i class="bi bi-collection me-2"></i>Questions Bank
                             </h1>
                             <p class="card-text mb-0 text-light opacity-75">
-                                Central repository of all questions across all quizzes.
+                                Browse questions by quiz categories. Total: <strong>@Model.Count questions</strong> across <strong>@questionsByQuiz.Count quizzes</strong>.
                             </p>
                         </div>
                         <div class="col-md-4 text-md-end">
-                            <a href="@Url.Action("ManageQuizzes")" class="btn btn-outline-light btn-sm">
+                            <a href="@Url.Action("ManageQuizzes", "Quiz")" class="btn btn-outline-light btn-sm">
                                 <i class="bi bi-arrow-left me-1"></i>Back to Quizzes
                             </a>
                         </div>
@@ -29,60 +36,184 @@
         </div>
     </div>
 
-    <div class="card shadow-sm border-secondary bg-dark text-light">
-        <div class="card-header bg-dark border-secondary">
-            <h5 class="card-title mb-0 text-light">
-                <i class="bi bi-list-task me-2"></i>All Questions (@Model.Count)
-            </h5>
-        </div>
-        <div class="card-body">
-            @if (Model != null && Model.Count > 0)
-            {
-                <div class="row">
-                    @foreach (var question in Model)
-                    {
-                        <div class="col-md-6 mb-3">
-                            <div class="card border-secondary bg-dark text-light">
-                                <div class="card-body">
-                                    <h6 class="card-title">@question.QuestionText</h6>
-                                    <div class="question-meta">
-                                        <small class="text-muted">
-                                            Quiz: @(ViewBag.QuizTitles?[question.QuizId] ?? "Unknown Quiz") |
-                                            Options: @(question.Options?.Count ?? 0)
-                                        </small>
-                                    </div>
-                                    @if (question.Options != null && question.Options.Count > 0)
-                                    {
-                                        <div class="mt-2">
-                                            @foreach (var option in question.Options)
-                                            {
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="radio" disabled
-                                                           @(option.IsCorrect ? "checked" : "")>
-                                                    <label class="form-check-label small @(option.IsCorrect ? "text-success fw-bold" : "text-muted")">
-                                                        @option.OptionText
-                                                    </label>
-                                                </div>
-                                            }
-                                        </div>
-                                    }
-                                </div>
+    <div class="row">
+        <!-- Quiz Categories Sidebar -->
+        <div class="col-md-3 mb-4">
+            <div class="card shadow-sm border-secondary bg-dark text-light">
+                <div class="card-header bg-dark border-secondary">
+                    <h5 class="card-title mb-0 text-light">
+                        <i class="bi bi-folder me-2"></i>Quiz Categories
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        <a href="javascript:void(0)" class="list-group-item list-group-item-action bg-dark text-light category-filter active" data-quiz-id="all">
+                            <i class="bi bi-collection me-2"></i>All Questions
+                            <span class="badge bg-primary float-end">@Model.Count</span>
+                        </a>
+                        @foreach (var quiz in allQuizzes)
+                        {
+                            var questionCount = questionsByQuiz.ContainsKey(quiz.QuizId) ? questionsByQuiz[quiz.QuizId].Count : 0;
+                            if (questionCount > 0)
+                            {
+                                <a href="javascript:void(0)" class="list-group-item list-group-item-action bg-dark text-light category-filter" data-quiz-id="@quiz.QuizId">
+                                    <i class="bi bi-file-text me-2"></i>@quiz.Title
+                                    <span class="badge bg-secondary float-end">@questionCount</span>
+                                </a>
+                            }
+                        }
+                    </div>
+                </div>
+                <div class="card-footer bg-dark border-secondary">
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Click on a quiz to filter questions
+                    </small>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="card shadow-sm border-secondary bg-dark text-light mt-3">
+                <div class="card-body text-center">
+                    <h6 class="text-primary mb-3">Quick Stats</h6>
+                    <div class="row">
+                        <div class="col-6 mb-2">
+                            <div class="border border-secondary rounded p-2">
+                                <small class="text-muted d-block">Quizzes</small>
+                                <strong class="text-white">@questionsByQuiz.Count</strong>
                             </div>
                         </div>
-                    }
+                        <div class="col-6 mb-2">
+                            <div class="border border-secondary rounded p-2">
+                                <small class="text-muted d-block">Questions</small>
+                                <strong class="text-white">@Model.Count</strong>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="border border-secondary rounded p-2">
+                                <small class="text-muted d-block">Avg/Quiz</small>
+                                <strong class="text-white">@(questionsByQuiz.Count > 0 ? (Model.Count / questionsByQuiz.Count) : 0)</strong>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="border border-secondary rounded p-2">
+                                <small class="text-muted d-block">Options</small>
+                                <strong class="text-white">@Model.Sum(q => q.Options?.Count ?? 0)</strong>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            }
-            else
-            {
-                <div class="text-center py-5">
-                    <i class="bi bi-collection fs-1 text-muted d-block mb-3"></i>
-                    <h5 class="text-light">No Questions Available</h5>
-                    <p class="text-muted">Questions will appear here as you add them to quizzes.</p>
-                    <a href="@Url.Action("ManageQuizzes")" class="btn btn-outline-primary">
-                        <i class="bi bi-plus-circle me-2"></i>Add Questions to Quizzes
-                    </a>
+            </div>
+        </div>
+
+        <!-- Questions Content -->
+        <div class="col-md-9">
+            <div class="card shadow-sm border-secondary bg-dark text-light">
+                <div class="card-header bg-dark border-secondary d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0 text-light">
+                        <i class="bi bi-list-task me-2"></i>
+                        <span id="currentCategory">All Questions</span>
+                        <span class="badge bg-primary ms-2" id="questionCount">@Model.Count</span>
+                    </h5>
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-sort-down me-1"></i>Sort
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-dark">
+                            <li><a class="dropdown-item sort-option active" href="#" data-sort="quiz">By Quiz</a></li>
+                            <li><a class="dropdown-item sort-option" href="#" data-sort="options">By Options Count</a></li>
+                        </ul>
+                    </div>
                 </div>
-            }
+                <div class="card-body">
+                    <div id="questionsContainer">
+                        @if (Model != null && Model.Count > 0)
+                        {
+                            <div class="row" id="questionsGrid">
+                                @foreach (var question in Model)
+                                {
+                                    var quiz = allQuizzes.FirstOrDefault(q => q.QuizId == question.QuizId);
+                                    <div class="col-12 mb-3 question-item" data-quiz-id="@question.QuizId" data-options-count="@(question.Options?.Count ?? 0)">
+                                        <div class="card border-secondary bg-dark text-light question-card">
+                                            <div class="card-body">
+                                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                                    <h6 class="card-title text-light mb-0">@question.QuestionText</h6>
+                                                    <span class="badge bg-secondary">@(question.Options?.Count ?? 0) options</span>
+                                                </div>
+
+                                                <div class="question-meta mb-3">
+                                                    <small class="text-muted">
+                                                        <i class="bi bi-file-text me-1"></i>Quiz: <strong>@(quiz?.Title ?? "Unknown Quiz")</strong>
+                                                    </small>
+                                                </div>
+
+                                                @if (question.Options != null && question.Options.Count > 0)
+                                                {
+                                                    <div class="options-container">
+                                                        <small class="text-muted d-block mb-2">Options:</small>
+                                                        <div class="row">
+                                                            @foreach (var option in question.Options)
+                                                            {
+                                                                <div class="col-md-6 mb-2">
+                                                                    <div class="border border-secondary rounded p-2 @(option.IsCorrect ? "border-success bg-success bg-opacity-10" : "")">
+                                                                        <div class="form-check mb-0">
+                                                                            <input class="form-check-input" type="radio" disabled
+                                                                                   @(option.IsCorrect ? "checked" : "")>
+                                                                            <label class="form-check-label small @(option.IsCorrect ? "text-success fw-bold" : "text-light")">
+                                                                                @option.OptionText
+                                                                                @if (option.IsCorrect)
+                                                                                {
+                                                                                    <i class="bi bi-check-circle-fill ms-1 text-success"></i>
+                                                                                }
+                                                                            </label>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="alert alert-warning bg-warning bg-opacity-10 border-warning">
+                                                        <small><i class="bi bi-exclamation-triangle me-1"></i>No options available for this question</small>
+                                                    </div>
+                                                }
+                                            </div>
+                                            <div class="card-footer bg-dark border-secondary d-flex justify-content-between align-items-center">
+                                                <small class="text-muted">
+                                                    Quiz ID: @question.QuizId | Question ID: @question.QuestionId
+                                                </small>
+                                                <div class="btn-group btn-group-sm">
+                                                    <a href="@Url.Action("EditQuestion", "Quiz", new { questionId = question.QuestionId })"
+                                                       class="btn btn-outline-warning btn-sm">
+                                                        <i class="bi bi-pencil-square"></i>
+                                                    </a>
+                                                    <a href="@Url.Action("ManageQuestions", "Quiz", new { quizId = question.QuizId })"
+                                                       class="btn btn-outline-info btn-sm">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-center py-5">
+                                <i class="bi bi-collection fs-1 text-muted d-block mb-3"></i>
+                                <h5 class="text-light">No Questions Available</h5>
+                                <p class="text-muted">Questions will appear here as you add them to quizzes.</p>
+                                <a href="@Url.Action("ManageQuizzes", "Quiz")" class="btn btn-outline-primary">
+                                    <i class="bi bi-plus-circle me-2"></i>Add Questions to Quizzes
+                                </a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -92,8 +223,115 @@
         background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%) !important;
     }
 
+    .list-group-item {
+        border-color: #4a5568 !important;
+    }
+
+        .list-group-item.active {
+            background-color: #63b3ed !important;
+            border-color: #63b3ed !important;
+            color: #1a202c !important;
+        }
+
+        .list-group-item:hover:not(.active) {
+            background-color: #4a5568 !important;
+            color: #e2e8f0 !important;
+        }
+
+    .question-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+        .question-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            border-color: #63b3ed !important;
+        }
+
     .form-check-input:checked {
         background-color: #68d391;
         border-color: #68d391;
     }
+
+    .options-container .border-success {
+        border-color: #68d391 !important;
+    }
 </style>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Category filtering
+            const categoryFilters = document.querySelectorAll('.category-filter');
+            const questionItems = document.querySelectorAll('.question-item');
+            const currentCategory = document.getElementById('currentCategory');
+            const questionCount = document.getElementById('questionCount');
+
+            categoryFilters.forEach(filter => {
+                filter.addEventListener('click', function () {
+                    // Update active state
+                    categoryFilters.forEach(f => f.classList.remove('active'));
+                    this.classList.add('active');
+
+                    const quizId = this.getAttribute('data-quiz-id');
+
+                    // Update header
+                    if (quizId === 'all') {
+                        currentCategory.textContent = 'All Questions';
+                        questionCount.textContent = '@Model.Count';
+                    } else {
+                        const quizTitle = this.querySelector('.badge').previousSibling.textContent.trim();
+                        currentCategory.textContent = quizTitle;
+                        const count = this.querySelector('.badge').textContent;
+                        questionCount.textContent = count;
+                    }
+
+                    // Filter questions
+                    let visibleCount = 0;
+                    questionItems.forEach(item => {
+                        if (quizId === 'all' || item.getAttribute('data-quiz-id') === quizId) {
+                            item.style.display = 'block';
+                            visibleCount++;
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+
+                    // Update count if showing all
+                    if (quizId === 'all') {
+                        questionCount.textContent = visibleCount;
+                    }
+                });
+            });
+
+            // Sorting functionality
+            const sortOptions = document.querySelectorAll('.sort-option');
+            const questionsGrid = document.getElementById('questionsGrid');
+
+            sortOptions.forEach(option => {
+                option.addEventListener('click', function (e) {
+                    e.preventDefault();
+
+                    // Update active state
+                    sortOptions.forEach(o => o.classList.remove('active'));
+                    this.classList.add('active');
+
+                    const sortType = this.getAttribute('data-sort');
+                    const questionArray = Array.from(questionsGrid.querySelectorAll('.question-item'));
+
+                    questionArray.sort((a, b) => {
+                        if (sortType === 'quiz') {
+                            return a.getAttribute('data-quiz-id') - b.getAttribute('data-quiz-id');
+                        } else if (sortType === 'options') {
+                            return b.getAttribute('data-options-count') - a.getAttribute('data-options-count');
+                        }
+                        return 0;
+                    });
+
+                    // Reappend sorted items
+                    questionArray.forEach(item => questionsGrid.appendChild(item));
+                });
+            });
+        });
+    </script>
+}

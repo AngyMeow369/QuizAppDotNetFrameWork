@@ -142,6 +142,7 @@
     <Content Include="Views\Admin\AssigQuiz.cshtml" />
     <Content Include="Views\Admin\ViewAssignments.cshtml" />
     <Content Include="Views\Admin\QuizAssignments.cshtml" />
+    <Content Include="Views\Quiz\EditQuestion.cshtml" />
     <None Include="Views\Quiz\Results.cshtml" />
   </ItemGroup>
   <ItemGroup>
@@ -207,8 +208,7 @@
     <Content Include="Views\Quiz\EditQuiz.cshtml" />
     <Content Include="Views\Quiz\Questions.cshtml" />
     <Content Include="Views\Quiz\ManageQuestions.cshtml" />
-    <Content Include="Views\Quiz\AddQuestion.cshtml" />
-    <Content Include="Views\Quiz\EditQuestions.cshtml" />
+    <Content Include="Views\Admin\AddQuestion.cshtml" />
     <Content Include="Views\Quiz\QuestionsBank.cshtml" />
     <Content Include="Views\Quiz\QuizResults.cshtml" />
   </ItemGroup>
