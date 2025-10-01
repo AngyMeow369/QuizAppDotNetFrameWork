@@ -37,7 +37,7 @@
                     </h5>
                 </div>
                 <div class="card-body">
-                    @using (Html.BeginForm("AssignQuiz", "Admin", FormMethod.Post, new { @class = "needs-validation", novalidate = "true" }))
+                    @using (Html.BeginForm("AssignQuiz", "Admin", FormMethod.Post, new { @class = "needs-validation", novalidate = "true", id = "assignQuizForm" }))
                     {
                         @Html.AntiForgeryToken()
 
@@ -88,7 +88,7 @@
                         <div class="mb-4">
                             <label for="dueDate" class="form-label">Due Date *</label>
                             <input type="datetime-local" class="form-control" id="dueDate" name="dueDate" required>
-                            <div class="invalid-feedback">Please set a due date.</div>
+                            <div class="invalid-feedback">Please set a valid future date and time.</div>
                             <small class="text-muted">Users will have until this date to complete the quiz.</small>
                         </div>
 
@@ -180,29 +180,89 @@
 @section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const form = document.querySelector('.needs-validation');
+            const form = document.getElementById('assignQuizForm');
+            const dueDateInput = document.getElementById('dueDate');
+
+            // Function to get current date-time in local timezone for datetime-local input
+            function getCurrentLocalDateTime() {
+                const now = new Date();
+                // Subtract timezone offset to get local time
+                const timezoneOffset = now.getTimezoneOffset() * 60000;
+                const localTime = new Date(now.getTime() - timezoneOffset);
+                return localTime.toISOString().slice(0, 16);
+            }
+
+            // Set minimum due date to current date and time
+            dueDateInput.min = getCurrentLocalDateTime();
+
+            // Custom validation for due date
+            function validateDueDate() {
+                const dueDateValue = dueDateInput.value;
+                if (!dueDateValue) {
+                    dueDateInput.setCustomValidity('Please set a due date.');
+                    return false;
+                }
+
+                const selectedDate = new Date(dueDateValue);
+                const currentDate = new Date();
+
+                if (selectedDate <= currentDate) {
+                    dueDateInput.setCustomValidity('Due date must be in the future. Please select a future date and time.');
+                    return false;
+                }
+
+                dueDateInput.setCustomValidity('');
+                return true;
+            }
+
+            // Validate due date on input change
+            dueDateInput.addEventListener('change', validateDueDate);
+            dueDateInput.addEventListener('input', validateDueDate);
 
             form.addEventListener('submit', function (event) {
                 // Check if at least one user is selected
                 const selectedUsers = document.querySelectorAll('input[name="userIds"]:checked');
-                if (selectedUsers.length === 0) {
+                const userSelectionValid = selectedUsers.length > 0;
+
+                // Validate due date
+                const dueDateValid = validateDueDate();
+
+                // Custom user selection validation
+                if (!userSelectionValid) {
                     event.preventDefault();
                     event.stopPropagation();
+
+                    // Find the user selection container to show error
+                    const userContainer = document.querySelector('input[name="userIds"]').closest('.border');
+                    userContainer.style.borderColor = '#dc3545';
+
                     alert('Please select at least one user.');
+                    return;
+                } else {
+                    const userContainer = document.querySelector('input[name="userIds"]').closest('.border');
+                    userContainer.style.borderColor = '';
                 }
 
-                if (!form.checkValidity()) {
+                if (!form.checkValidity() || !dueDateValid) {
                     event.preventDefault();
                     event.stopPropagation();
+
+                    // Show specific error for due date if invalid
+                    if (!dueDateValid) {
+                        dueDateInput.focus();
+                    }
                 }
 
                 form.classList.add('was-validated');
             });
 
-            // Set minimum due date to tomorrow
-            const dueDateInput = document.getElementById('dueDate');
-            const today = new Date();
-            dueDateInput.min = today.toISOString().slice(0, 16);
+            // Real-time validation as user interacts
+            dueDateInput.addEventListener('blur', function () {
+                validateDueDate();
+            });
+
+            // Initialize with current time validation
+            validateDueDate();
         });
     </script>
 }
@@ -221,5 +281,14 @@
         background-color: rgba(102, 217, 232, 0.1) !important;
         border-color: #66d9e8 !important;
         color: #66d9e8;
+    }
+
+    /* Style for invalid due date */
+    #dueDate:invalid {
+        border-color: #dc3545;
+    }
+
+    #dueDate:valid {
+        border-color: #198754;
     }
 </style>
