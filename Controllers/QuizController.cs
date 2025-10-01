@@ -693,6 +693,80 @@ namespace QuizAppDotNetFrameWork.Controllers
             return View(assignments);
         }
 
+        // Admin Results - View all users' quiz attempts
+        public ActionResult AdminResults(string sortBy = "date", string sortOrder = "desc", int page = 1, string searchUser = "")
+        {
+            if (Session["Role"] == null || Session["Role"].ToString() != "Admin")
+            {
+                return RedirectToAction("Login", "Users");
+            }
+
+            // Get ALL quiz attempts for admin view
+            var allAttempts = quizRepo.GetAllQuizAttempts();
+            // Apply search filter
+            if (!string.IsNullOrEmpty(searchUser))
+            {
+                allAttempts = allAttempts.Where(a =>
+                    (a.Username != null && a.Username.ToLower().Contains(searchUser.ToLower())) ||
+                    (a.QuizTitle != null && a.QuizTitle.ToLower().Contains(searchUser.ToLower()))
+                ).ToList();
+            }
+
+            // Apply sorting
+            switch (sortBy.ToLower())
+            {
+                case "score":
+                    allAttempts = sortOrder == "desc" ?
+                        allAttempts.OrderByDescending(a => a.Percentage).ToList() :
+                        allAttempts.OrderBy(a => a.Percentage).ToList();
+                    break;
+                case "quiz":
+                    allAttempts = sortOrder == "desc" ?
+                        allAttempts.OrderByDescending(a => a.QuizTitle).ToList() :
+                        allAttempts.OrderBy(a => a.QuizTitle).ToList();
+                    break;
+                case "user":
+                    allAttempts = sortOrder == "desc" ?
+                        allAttempts.OrderByDescending(a => a.Username).ToList() :
+                        allAttempts.OrderBy(a => a.Username).ToList();
+                    break;
+                default: // date
+                    allAttempts = sortOrder == "desc" ?
+                        allAttempts.OrderByDescending(a => a.CompletedOn).ToList() :
+                        allAttempts.OrderBy(a => a.CompletedOn).ToList();
+                    break;
+            }
+
+            // Pagination
+            var pageSize = 10;
+            var totalItems = allAttempts.Count;
+            var totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+
+            // Ensure page is within valid range
+            page = Math.Max(1, Math.Min(page, totalPages));
+
+            var pagedAttempts = allAttempts
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            // Calculate admin statistics
+            ViewBag.TotalAttempts = totalItems;
+            ViewBag.TotalUsers = allAttempts.Select(a => a.UserId).Distinct().Count();
+            ViewBag.TotalQuizzes = allAttempts.Select(a => a.QuizId).Distinct().Count();
+            ViewBag.AverageScore = allAttempts.Any() ? allAttempts.Average(a => a.Percentage) : 0;
+            ViewBag.BestScore = allAttempts.Any() ? allAttempts.Max(a => a.Percentage) : 0;
+
+            // Pagination info
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.SortBy = sortBy;
+            ViewBag.SortOrder = sortOrder;
+            ViewBag.SearchUser = searchUser;
+
+            return View(pagedAttempts);
+        }
+
 
 
     }

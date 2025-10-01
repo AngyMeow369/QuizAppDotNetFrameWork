@@ -145,6 +145,7 @@
     <Content Include="Views\Quiz\AddQuestion.cshtml" />
     <Content Include="Views\Admin\AssignQuiz.cshtml" />
     <Content Include="Views\Quiz\AssignedQuizzes.cshtml" />
+    <Content Include="Views\Quiz\AdminResults.cshtml" />
     <None Include="Views\Quiz\Results.cshtml" />
   </ItemGroup>
   <ItemGroup>

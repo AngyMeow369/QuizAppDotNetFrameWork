@@ -36,32 +36,32 @@
         <div class="col-md-3 mb-3">
             <div class="card border-secondary bg-dark text-light">
                 <div class="card-body text-center py-3">
-                    <h5 class="text-primary mb-1">@Model.Count(u => u.Role == "Admin")</h5>
-                    <small class="text-muted">Administrators</small>
+                    <h3 class="text-primary mb-1">@Model.Count(u => u.Role == "Admin")</h3>
+                    <strong class="text-light">Administrators</strong>
                 </div>
             </div>
         </div>
         <div class="col-md-3 mb-3">
             <div class="card border-secondary bg-dark text-light">
                 <div class="card-body text-center py-3">
-                    <h5 class="text-info mb-1">@Model.Count(u => u.Role == "User")</h5>
-                    <small class="text-muted">Regular Users</small>
+                    <h3 class="text-info mb-1">@Model.Count(u => u.Role == "User")</h3>
+                    <strong class="text-light">Regular Users</strong>
                 </div>
             </div>
         </div>
         <div class="col-md-3 mb-3">
             <div class="card border-secondary bg-dark text-light">
                 <div class="card-body text-center py-3">
-                    <h5 class="text-success mb-1">@Model.Count</h5>
-                    <small class="text-muted">Total Active</small>
+                    <h3 class="text-success mb-1">@Model.Count</h3>
+                    <strong class="text-light">Total Active</strong>
                 </div>
             </div>
         </div>
         <div class="col-md-3 mb-3">
             <div class="card border-secondary bg-dark text-light">
                 <div class="card-body text-center py-3">
-                    <h5 class="text-warning mb-1">@DateTime.Now.ToString("MMM yyyy")</h5>
-                    <small class="text-muted">Last Updated</small>
+                    <h3 class="text-warning mb-1">@DateTime.Now.ToString("MMM yyyy")</h3>
+                    <strong class="text-light">Last Updated</strong>
                 </div>
             </div>
         </div>
@@ -187,15 +187,15 @@
                                         <div class="row">
                                             <div class="col-md-4 mb-2 mb-md-0">
                                                 <i class="bi bi-person-plus text-success me-2"></i>
-                                                <small class="text-muted">Add new users to the system</small>
+                                                <small class="text-light opacity-90">Add new users to the system</small>
                                             </div>
                                             <div class="col-md-4 mb-2 mb-md-0">
                                                 <i class="bi bi-shield-check text-warning me-2"></i>
-                                                <small class="text-muted">Manage user roles and permissions</small>
+                                                <small class="text-light opacity-90">Manage user roles and permissions</small>
                                             </div>
                                             <div class="col-md-4">
                                                 <i class="bi bi-graph-up text-info me-2"></i>
-                                                <small class="text-muted">Monitor user activity and performance</small>
+                                                <small class="text-light opacity-90">Monitor user activity and performance</small>
                                             </div>
                                         </div>
                                     </div>
@@ -220,7 +220,7 @@
     </div>
 </div>
 
-<!-- User Details Modal -->
+<!-- User Details Modal - MOVED OUTSIDE THE IF BLOCK -->
 <div class="modal fade" id="userDetailsModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content bg-dark text-light">
@@ -249,6 +249,16 @@
         width: 40px;
         height: 40px;
         font-size: 1rem;
+    }
+
+    .text-muted {
+        color: #a0aec0 !important; /* Light gray that's visible on dark backgrounds */
+    }
+
+    /* Or override completely for dark theme */
+    .card .text-muted {
+        color: #e2e8f0 !important;
+        opacity: 0.9;
     }
 
     .table-hover tbody tr:hover {

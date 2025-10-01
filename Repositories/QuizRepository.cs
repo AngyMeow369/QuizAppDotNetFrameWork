@@ -623,6 +623,43 @@ namespace QuizAppDotNetFrameWork.Repositories
             }
         }
 
+        // Get all quiz attempts for admin view - JSON version
+        public List<QuizAttempt> GetAllQuizAttempts()
+        {
+            var attempts = new List<QuizAttempt>();
+
+            // Empty JSON since we want all attempts
+            string json = @"{}";
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlCommand cmd = new SqlCommand("spGetAllQuizAttempts", conn))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@json", json);
+
+                conn.Open();
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        attempts.Add(new QuizAttempt
+                        {
+                            AttemptId = Convert.ToInt32(reader["AttemptId"]),
+                            UserId = Convert.ToInt32(reader["UserId"]),
+                            QuizId = Convert.ToInt32(reader["QuizId"]),
+                            Score = Convert.ToInt32(reader["Score"]),
+                            TotalQuestions = Convert.ToInt32(reader["TotalQuestions"]),
+                            Grade = reader["Grade"].ToString(),
+                            CompletedOn = Convert.ToDateTime(reader["CompletedOn"]),
+                            Username = reader["Username"].ToString(),
+                            QuizTitle = reader["QuizTitle"].ToString()
+                        });
+                    }
+                }
+            }
+            return attempts;
+        }
+
 
     }
 }
