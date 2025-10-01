@@ -1,0 +1,225 @@
+﻿@{
+    ViewBag.Title = "Assign Quiz";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-gradient bg-dark border-secondary">
+                <div class="card-body py-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="card-title h2 mb-2 text-white">
+                                <i class="bi bi-send-check me-2"></i>Assign Quiz to Users
+                            </h1>
+                            <p class="card-text mb-0 text-light opacity-75">
+                                Select a quiz and assign it to users with a due date
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <a href="@Url.Action("ViewAssignments", "Admin")" class="btn btn-outline-light btn-sm">
+                                <i class="bi bi-list-check me-1"></i>View Assignments
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-secondary bg-dark text-light">
+                <div class="card-header bg-dark border-secondary">
+                    <h5 class="card-title mb-0 text-light">
+                        <i class="bi bi-send-check me-2"></i>Assignment Details
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @using (Html.BeginForm("AssignQuiz", "Admin", FormMethod.Post, new { @class = "needs-validation", novalidate = "true" }))
+                    {
+                        @Html.AntiForgeryToken()
+
+                        <!-- Quiz Selection -->
+                        <div class="mb-4">
+                            <label for="quizId" class="form-label">Select Quiz *</label>
+                            <select class="form-select" id="quizId" name="quizId" required>
+                                <option value="">Choose a quiz...</option>
+                                @if (ViewBag.Quizzes != null)
+                                {
+                                    foreach (var quiz in ViewBag.Quizzes)
+                                    {
+                                        <option value="@quiz.QuizId">@quiz.Title</option>
+                                    }
+                                }
+                            </select>
+                            <div class="invalid-feedback">Please select a quiz.</div>
+                        </div>
+
+                        <!-- User Selection -->
+                        <div class="mb-4">
+                            <label class="form-label">Select Users *</label>
+                            <div class="border border-secondary rounded p-3 bg-dark">
+                                @if (ViewBag.Users != null)
+                                {
+                                    foreach (var user in ViewBag.Users)
+                                    {
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox"
+                                                   name="userIds"
+                                                   value="@user.UserId"
+                                                   id="user_@user.UserId">
+                                            <label class="form-check-label text-light" for="user_@user.UserId">
+                                                @user.Username (@user.Role)
+                                            </label>
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <p class="text-muted mb-0">No users available.</p>
+                                }
+                            </div>
+                            <div class="invalid-feedback">Please select at least one user.</div>
+                        </div>
+
+                        <!-- Due Date -->
+                        <div class="mb-4">
+                            <label for="dueDate" class="form-label">Due Date *</label>
+                            <input type="datetime-local" class="form-control" id="dueDate" name="dueDate" required>
+                            <div class="invalid-feedback">Please set a due date.</div>
+                            <small class="text-muted">Users will have until this date to complete the quiz.</small>
+                        </div>
+
+                        <!-- Auto Time Limit Info -->
+                        <div class="alert alert-info bg-dark border-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>Automatic Time Limit:</strong> Each question gets 1 minute.
+                            Time limit is calculated automatically based on question count.
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-send-check me-1"></i>Assign Quiz
+                            </button>
+                            <a href="@Url.Action("Index", "Admin")" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle me-1"></i>Cancel
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Help -->
+        <div class="col-md-4">
+            <div class="card shadow-sm border-secondary bg-dark text-light">
+                <div class="card-header bg-dark border-secondary">
+                    <h5 class="card-title mb-0 text-light">
+                        <i class="bi bi-info-circle me-2"></i>Assignment Tips
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6 class="text-primary">Quiz Selection</h6>
+                        <small class="text-muted">Choose from all available quizzes in the system.</small>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="text-success">User Selection</h6>
+                        <small class="text-muted">Select multiple users to assign the same quiz.</small>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="text-warning">Due Dates</h6>
+                        <small class="text-muted">
+                            • Set realistic timeframes<br>
+                            • Consider user schedules<br>
+                            • Automatic reminders
+                        </small>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="text-info">Time Limits</h6>
+                        <small class="text-muted">
+                            • 1 minute per question<br>
+                            • Calculated automatically<br>
+                            • Ensures fair timing
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="card shadow-sm border-secondary bg-dark text-light mt-3">
+                <div class="card-header bg-dark border-secondary">
+                    <h5 class="card-title mb-0 text-light">
+                        <i class="bi bi-lightning-charge me-2"></i>Quick Stats
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6 mb-3">
+                            <div class="border border-secondary rounded p-2">
+                                <small class="text-muted d-block">Available Quizzes</small>
+                                <strong class="text-white">@(ViewBag.Quizzes?.Count ?? 0)</strong>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="border border-secondary rounded p-2">
+                                <small class="text-muted d-block">Active Users</small>
+                                <strong class="text-white">@(ViewBag.Users?.Count ?? 0)</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.querySelector('.needs-validation');
+
+            form.addEventListener('submit', function (event) {
+                // Check if at least one user is selected
+                const selectedUsers = document.querySelectorAll('input[name="userIds"]:checked');
+                if (selectedUsers.length === 0) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    alert('Please select at least one user.');
+                }
+
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+
+                form.classList.add('was-validated');
+            });
+
+            // Set minimum due date to tomorrow
+            const dueDateInput = document.getElementById('dueDate');
+            const today = new Date();
+            dueDateInput.min = today.toISOString().slice(0, 16);
+        });
+    </script>
+}
+
+<style>
+    .bg-gradient {
+        background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%) !important;
+    }
+
+    .form-check-input:checked {
+        background-color: #68d391;
+        border-color: #68d391;
+    }
+
+    .alert-info {
+        background-color: rgba(102, 217, 232, 0.1) !important;
+        border-color: #66d9e8 !important;
+        color: #66d9e8;
+    }
+</style>
