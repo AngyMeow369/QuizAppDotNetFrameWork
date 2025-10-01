@@ -83,13 +83,16 @@ namespace QuizAppDotNetFrameWork.Repositories
         }
 
         // Delete quiz
+        // Delete quiz - FIXED to use JSON
         public void DeleteQuiz(int quizId)
         {
+            string json = $@"{{ ""QuizId"": {quizId} }}";
+
             using (SqlConnection conn = new SqlConnection(connectionString))
             using (SqlCommand cmd = new SqlCommand("spDeleteQuiz", conn))
             {
                 cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@QuizId", quizId);
+                cmd.Parameters.AddWithValue("@QuizData", json); // Use JSON parameter
 
                 conn.Open();
                 cmd.ExecuteNonQuery();
@@ -189,6 +192,7 @@ namespace QuizAppDotNetFrameWork.Repositories
         }
 
         // Delete question
+        // Delete question - FIXED to use JSON
         public void DeleteQuestion(int questionId)
         {
             string json = $@"{{ ""QuestionId"": {questionId} }}";
@@ -197,7 +201,7 @@ namespace QuizAppDotNetFrameWork.Repositories
             using (SqlCommand cmd = new SqlCommand("spDeleteQuestion", conn))
             {
                 cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@QuestionData", json);
+                cmd.Parameters.AddWithValue("@QuestionData", json); // Use JSON parameter
 
                 conn.Open();
                 cmd.ExecuteNonQuery();
@@ -301,6 +305,7 @@ namespace QuizAppDotNetFrameWork.Repositories
         }
 
         // Delete option
+        // Delete option - FIXED to use JSON
         public void DeleteOption(int optionId)
         {
             string json = $@"{{ ""OptionId"": {optionId} }}";
@@ -309,7 +314,7 @@ namespace QuizAppDotNetFrameWork.Repositories
             using (SqlCommand cmd = new SqlCommand("spDeleteOption", conn))
             {
                 cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@OptionData", json);
+                cmd.Parameters.AddWithValue("@OptionData", json); // Use JSON parameter
 
                 conn.Open();
                 cmd.ExecuteNonQuery();

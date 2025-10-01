@@ -275,6 +275,7 @@ namespace QuizAppDotNetFrameWork.Controllers
         }
 
         // Edit question (GET)
+        // Edit question (GET) - ADD THIS!
         public ActionResult EditQuestion(int questionId)
         {
             if (Session["Role"] == null || Session["Role"].ToString() != "Admin")
@@ -293,7 +294,7 @@ namespace QuizAppDotNetFrameWork.Controllers
             return View(question);
         }
 
-        // Edit question (POST)
+        // Edit question (POST) - REPLACE YOUR CURRENT ONE
         [HttpPost]
         public ActionResult EditQuestion(Question question, List<Option> options)
         {
@@ -309,17 +310,25 @@ namespace QuizAppDotNetFrameWork.Controllers
                     // Update the question
                     quizRepo.UpdateQuestion(question);
 
-                    // Update options (simplified - in real scenario, you might want to handle updates more carefully)
-                    // First delete existing options, then add new ones
-                    var existingOptions = quizRepo.GetOptionsByQuestionId(question.QuestionId);
-                    foreach (var existingOption in existingOptions)
+                    // Validate options
+                    if (options == null || options.Count(o => !string.IsNullOrEmpty(o.OptionText)) < 2)
                     {
-                        quizRepo.DeleteOption(existingOption.OptionId);
+                        ModelState.AddModelError("", "At least 2 options are required.");
                     }
-
-                    // Add updated options
-                    if (options != null)
+                    else if (options.Count(o => o.IsCorrect) != 1)
                     {
+                        ModelState.AddModelError("", "Exactly one option must be marked as correct.");
+                    }
+                    else
+                    {
+                        // Update options (delete existing and add new ones)
+                        var existingOptions = quizRepo.GetOptionsByQuestionId(question.QuestionId);
+                        foreach (var existingOption in existingOptions)
+                        {
+                            quizRepo.DeleteOption(existingOption.OptionId);
+                        }
+
+                        // Add updated options
                         foreach (var option in options)
                         {
                             if (!string.IsNullOrEmpty(option.OptionText))
@@ -328,10 +337,10 @@ namespace QuizAppDotNetFrameWork.Controllers
                                 quizRepo.AddOption(option);
                             }
                         }
-                    }
 
-                    TempData["SuccessMessage"] = "Question and options updated successfully!";
-                    return RedirectToAction("ManageQuestions", new { quizId = question.QuizId });
+                        TempData["SuccessMessage"] = "Question and options updated successfully!";
+                        return RedirectToAction("ManageQuestions", new { quizId = question.QuizId });
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -341,6 +350,47 @@ namespace QuizAppDotNetFrameWork.Controllers
 
             ViewBag.Quiz = quizRepo.GetQuizById(question.QuizId);
             return View(question);
+        }
+
+        // ADD THIS HELPER METHOD TO YOUR QUIZCONTROLLER CLASS
+        private List<Option> ParseOptionsFromForm(FormCollection form, int questionId)
+        {
+            var options = new List<Option>();
+
+            // Look for option fields in the form
+            int i = 0;
+            while (true)
+            {
+                string optionText = form[$"Options[{i}].OptionText"];
+                string isCorrectValue = form[$"Options[{i}].IsCorrect"];
+
+                // Stop if no more options found
+                if (string.IsNullOrEmpty(optionText))
+                    break;
+
+                // Parse the OptionId if it exists
+                int optionId = 0;
+                string optionIdValue = form[$"Options[{i}].OptionId"];
+                if (!string.IsNullOrEmpty(optionIdValue) && int.TryParse(optionIdValue, out int parsedId))
+                {
+                    optionId = parsedId;
+                }
+
+                // Convert dropdown value to boolean
+                bool isCorrect = (isCorrectValue?.ToLower() == "true");
+
+                options.Add(new Option
+                {
+                    OptionId = optionId,
+                    QuestionId = questionId,
+                    OptionText = optionText.Trim(),
+                    IsCorrect = isCorrect
+                });
+
+                i++;
+            }
+
+            return options;
         }
 
         // Delete question
