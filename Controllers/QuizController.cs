@@ -561,8 +561,9 @@ namespace QuizAppDotNetFrameWork.Controllers
             });
         }
 
-        // Display user's quiz results
-        public ActionResult Results()
+        
+
+        public ActionResult Results(string sortBy = "date", string sortOrder = "desc", int page = 1)
         {
             if (Session["UserId"] == null)
             {
@@ -570,16 +571,53 @@ namespace QuizAppDotNetFrameWork.Controllers
             }
 
             int userId = Convert.ToInt32(Session["UserId"]);
+            var allAttempts = quizRepo.GetUserQuizAttempts(userId);
 
-            // Get all quiz attempts for this user
-            var userAttempts = quizRepo.GetUserQuizAttempts(userId);
+            // Apply sorting
+            switch (sortBy.ToLower())
+            {
+                case "score":
+                    allAttempts = sortOrder == "desc" ?
+                        allAttempts.OrderByDescending(a => a.Percentage).ToList() :
+                        allAttempts.OrderBy(a => a.Percentage).ToList();
+                    break;
+                case "quiz":
+                    allAttempts = sortOrder == "desc" ?
+                        allAttempts.OrderByDescending(a => a.QuizTitle).ToList() :
+                        allAttempts.OrderBy(a => a.QuizTitle).ToList();
+                    break;
+                default: // date
+                    allAttempts = sortOrder == "desc" ?
+                        allAttempts.OrderByDescending(a => a.CompletedOn).ToList() :
+                        allAttempts.OrderBy(a => a.CompletedOn).ToList();
+                    break;
+            }
+
+            // Pagination
+            var pageSize = 10;
+            var totalItems = allAttempts.Count;
+            var totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+
+            // Ensure page is within valid range
+            page = Math.Max(1, Math.Min(page, totalPages));
+
+            var pagedAttempts = allAttempts
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
 
             // Calculate statistics
-            ViewBag.TotalAttempts = userAttempts.Count;
-            ViewBag.AverageScore = userAttempts.Count > 0 ? userAttempts.Average(a => a.Percentage) : 0;
-            ViewBag.BestScore = userAttempts.Count > 0 ? userAttempts.Max(a => a.Percentage) : 0;
+            ViewBag.TotalAttempts = totalItems;
+            ViewBag.AverageScore = allAttempts.Any() ? allAttempts.Average(a => a.Percentage) : 0;
+            ViewBag.BestScore = allAttempts.Any() ? allAttempts.Max(a => a.Percentage) : 0;
 
-            return View(userAttempts);
+            // Pagination info
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.SortBy = sortBy;
+            ViewBag.SortOrder = sortOrder;
+
+            return View(pagedAttempts);
         }
 
         private string GetGrade(double percentage)
@@ -593,55 +631,55 @@ namespace QuizAppDotNetFrameWork.Controllers
         }
 
         public ActionResult QuizResults(int quizId, int score, int totalQuestions, double percentage, string grade)
+{
+    if (Session["UserId"] == null)
+    {
+        return RedirectToAction("Login", "Users");
+    }
+
+    // ✅ FIX: Handle quizId=0 by finding the actual quiz from attempt data
+    Quiz quiz = null;
+    
+    if (quizId == 0)
+    {
+        // Try to find the most recent attempt for this user
+        var userAttempts = quizRepo.GetUserQuizAttempts((int)Session["UserId"]);
+        var recentAttempt = userAttempts
+            .Where(a => a.Score == score && a.TotalQuestions == totalQuestions)
+            .OrderByDescending(a => a.CompletedOn)
+            .FirstOrDefault();
+            
+        if (recentAttempt != null)
         {
-            if (Session["UserId"] == null)
-            {
-                return RedirectToAction("Login", "Users");
-            }
-
-            // ✅ FIX: Handle quizId=0 by finding the actual quiz from attempt data
-            Quiz quiz = null;
-
-            if (quizId == 0)
-            {
-                // Try to find the most recent attempt for this user
-                var userAttempts = quizRepo.GetUserQuizAttempts((int)Session["UserId"]);
-                var recentAttempt = userAttempts
-                    .Where(a => a.Score == score && a.TotalQuestions == totalQuestions)
-                    .OrderByDescending(a => a.CompletedOn)
-                    .FirstOrDefault();
-
-                if (recentAttempt != null)
-                {
-                    quizId = recentAttempt.QuizId;
-                    quiz = quizRepo.GetQuizById(quizId);
-                }
-            }
-            else
-            {
-                quiz = quizRepo.GetQuizById(quizId);
-            }
-
-            if (quiz == null)
-            {
-                // If quiz still not found, create a dummy quiz object to prevent errors
-                quiz = new Quiz
-                {
-                    QuizId = quizId,
-                    Title = "Quiz",
-                    Description = "Quiz results"
-                };
-                // Don't redirect - just show results with generic title
-            }
-
-            ViewBag.Quiz = quiz;
-            ViewBag.Score = score;
-            ViewBag.TotalQuestions = totalQuestions;
-            ViewBag.Percentage = percentage;
-            ViewBag.Grade = grade;
-
-            return View();
+            quizId = recentAttempt.QuizId;
+            quiz = quizRepo.GetQuizById(quizId);
         }
+    }
+    else
+    {
+        quiz = quizRepo.GetQuizById(quizId);
+    }
+
+    if (quiz == null)
+    {
+        // If quiz still not found, create a dummy quiz object to prevent errors
+        quiz = new Quiz 
+        { 
+            QuizId = quizId,
+            Title = "Quiz", 
+            Description = "Quiz results"
+        };
+        // Don't redirect - just show results with generic title
+    }
+
+    ViewBag.Quiz = quiz;
+    ViewBag.Score = score;
+    ViewBag.TotalQuestions = totalQuestions;
+    ViewBag.Percentage = percentage;
+    ViewBag.Grade = grade;
+
+    return View();
+}
 
         public ActionResult AssignedQuizzes()
         {

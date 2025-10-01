@@ -2,88 +2,296 @@
 @{
     ViewBag.Title = "My Quiz Results";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    // Pagination variables
+    var pageSize = 10;
+    var currentPage = ViewBag.CurrentPage ?? 1;
+    var totalPages = ViewBag.TotalPages ?? 1;
+    var sortBy = ViewBag.SortBy ?? "date";
+    var sortOrder = ViewBag.SortOrder ?? "desc";
+
+    // Calculate statistics
+    var totalAttempts = Model?.Count ?? 0;
+    var averageScore = Model?.Any() == true ? Model.Average(a => a.Percentage) : 0;
+    var bestScore = Model?.Any() == true ? Model.Max(a => a.Percentage) : 0;
 }
 
-<h2>My Quiz Results</h2>
-
-@if (Model == null || !Model.Any())
-{
-    <div class="alert alert-info">
-        <p>You haven't taken any quizzes yet.</p>
-        <a href="@Url.Action("Index")" class="btn btn-primary">Take a Quiz</a>
-    </div>
-}
-else
-{
+<div class="container mt-4">
+    <!-- Header -->
     <div class="row mb-4">
-        <div class="col-md-4">
-            <div class="card text-white bg-primary">
-                <div class="card-body">
-                    <h5 class="card-title">Total Attempts</h5>
-                    <p class="card-text display-4">@ViewBag.TotalAttempts</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card text-white bg-success">
-                <div class="card-body">
-                    <h5 class="card-title">Average Score</h5>
-                    <p class="card-text display-4">@ViewBag.AverageScore.ToString("0.0")%</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card text-white bg-info">
-                <div class="card-body">
-                    <h5 class="card-title">Best Score</h5>
-                    <p class="card-text display-4">@ViewBag.BestScore.ToString("0.0")%</p>
+        <div class="col-12">
+            <div class="card bg-gradient bg-dark border-light">
+                <div class="card-body py-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="card-title h2 mb-2 text-white fw-bold">
+                                <i class="bi bi-graph-up me-2"></i>My Quiz Results
+                            </h1>
+                            <p class="card-text mb-0 text-light opacity-90 fw-bold">
+                                Track your quiz performance and progress over time
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <a href="@Url.Action("Index", "Quiz")" class="btn btn-outline-light btn-sm fw-bold">
+                                <i class="bi bi-journals me-1"></i>Take More Quizzes
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="card">
-        <div class="card-header">
-            <h4>Quiz Attempt History</h4>
+    @if (Model == null || !Model.Any())
+    {
+        <div class="card border-light bg-dark text-light">
+            <div class="card-body text-center py-5">
+                <i class="bi bi-graph-up display-1 text-light opacity-75 d-block mb-3"></i>
+                <h4 class="text-white fw-bold mb-3">No Quiz Results Yet</h4>
+                <p class="text-light opacity-90 mb-4">You haven't taken any quizzes yet. Start your learning journey!</p>
+                <a href="@Url.Action("Index", "Quiz")" class="btn btn-primary btn-lg fw-bold">
+                    <i class="bi bi-play-circle me-2"></i>Take Your First Quiz
+                </a>
+            </div>
         </div>
-        <div class="card-body">
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Quiz Title</th>
-                        <th>Date Completed</th>
-                        <th>Score</th>
-                        <th>Grade</th>
-                        <th>Details</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var attempt in Model)
-                    {
-                        <tr>
-                            <td>@attempt.QuizTitle</td>
-                            <td>@attempt.CompletedOn.ToString("MMM dd, yyyy hh:mm tt")</td>
-                            <td>@attempt.Score / @attempt.TotalQuestions</td>
-                            <td>
-                                <span class="badge @(attempt.Grade == "F" ? "bg-danger" : "bg-success")">
-                                    @attempt.Grade
-                                </span>
-                            </td>
-                            <td>
-                                <a href="@Url.Action("QuizResults", new { 
-                                    quizId = attempt.QuizId, 
-                                    score = attempt.Score, 
-                                    totalQuestions = attempt.TotalQuestions, 
-                                    percentage = attempt.Percentage, 
-                                    grade = attempt.Grade 
-                                })" class="btn btn-sm btn-outline-primary">
-                                    View Details
+    }
+    else
+    {
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-md-4 mb-3">
+                <div class="card border-light bg-dark text-light shadow">
+                    <div class="card-body text-center py-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title text-light opacity-90 mb-1 fw-bold">Total Attempts</h6>
+                                <h3 class="text-primary mb-0 fw-bold display-6">@totalAttempts</h3>
+                            </div>
+                            <i class="bi bi-clock-history text-primary fs-1 opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card border-light bg-dark text-light shadow">
+                    <div class="card-body text-center py-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title text-light opacity-90 mb-1 fw-bold">Average Score</h6>
+                                <h3 class="text-success mb-0 fw-bold display-6">@averageScore.ToString("0.0")%</h3>
+                            </div>
+                            <i class="bi bi-graph-up text-success fs-1 opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card border-light bg-dark text-light shadow">
+                    <div class="card-body text-center py-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title text-light opacity-90 mb-1 fw-bold">Best Score</h6>
+                                <h3 class="text-info mb-0 fw-bold display-6">@bestScore.ToString("0.0")%</h3>
+                            </div>
+                            <i class="bi bi-trophy text-info fs-1 opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Table -->
+        <div class="card shadow-sm border-light bg-dark text-light">
+            <div class="card-header bg-dark border-light d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0 text-white fw-bold">
+                    <i class="bi bi-list-task me-2"></i>Quiz Attempt History
+                    <span class="badge bg-primary ms-2 fw-bold">@totalAttempts attempts</span>
+                </h5>
+
+                <!-- Sorting Controls -->
+                <div class="d-flex gap-2">
+                    <div class="dropdown">
+                        <button class="btn btn-outline-light btn-sm dropdown-toggle fw-bold" type="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-sort-down me-1"></i>
+                            @(sortBy == "date" ? "Date" : sortBy == "score" ? "Score" : "Quiz")
+                            (@(sortOrder == "desc" ? "Desc" : "Asc"))
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-dark">
+                            <li>
+                                <a class="dropdown-item text-light fw-bold @(sortBy == "date" && sortOrder == "desc" ? "active" : "")"
+                                   href="@Url.Action("Results", new { sortBy = "date", sortOrder = "desc", page = currentPage })">
+                                    <i class="bi bi-calendar me-2"></i>Date (Newest First)
                                 </a>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+                            </li>
+                            <li>
+                                <a class="dropdown-item text-light fw-bold @(sortBy == "date" && sortOrder == "asc" ? "active" : "")"
+                                   href="@Url.Action("Results", new { sortBy = "date", sortOrder = "asc", page = currentPage })">
+                                    <i class="bi bi-calendar me-2"></i>Date (Oldest First)
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item text-light fw-bold @(sortBy == "score" && sortOrder == "desc" ? "active" : "")"
+                                   href="@Url.Action("Results", new { sortBy = "score", sortOrder = "desc", page = currentPage })">
+                                    <i class="bi bi-graph-up me-2"></i>Score (Highest First)
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item text-light fw-bold @(sortBy == "score" && sortOrder == "asc" ? "active" : "")"
+                                   href="@Url.Action("Results", new { sortBy = "score", sortOrder = "asc", page = currentPage })">
+                                    <i class="bi bi-graph-down me-2"></i>Score (Lowest First)
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item text-light fw-bold @(sortBy == "quiz" && sortOrder == "asc" ? "active" : "")"
+                                   href="@Url.Action("Results", new { sortBy = "quiz", sortOrder = "asc", page = currentPage })">
+                                    <i class="bi bi-journals me-2"></i>Quiz (A-Z)
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item text-light fw-bold @(sortBy == "quiz" && sortOrder == "desc" ? "active" : "")"
+                                   href="@Url.Action("Results", new { sortBy = "quiz", sortOrder = "desc", page = currentPage })">
+                                    <i class="bi bi-journals me-2"></i>Quiz (Z-A)
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover">
+                        <thead>
+                            <tr>
+                                <th class="text-light fw-bold">Quiz Title</th>
+                                <th class="text-light fw-bold">Date Completed</th>
+                                <th class="text-light fw-bold">Score</th>
+                                <th class="text-light fw-bold">Percentage</th>
+                                <th class="text-light fw-bold">Grade</th>
+                                <th class="text-light fw-bold">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var attempt in Model)
+                            {
+                                <tr>
+                                    <td class="text-white fw-bold">@attempt.QuizTitle</td>
+                                    <td class="text-light">@attempt.CompletedOn.ToString("MMM dd, yyyy hh:mm tt")</td>
+                                    <td class="text-light fw-bold">@attempt.Score / @attempt.TotalQuestions</td>
+                                    <td>
+                                        <span class="fw-bold @(attempt.Percentage >= 80 ? "text-success" : attempt.Percentage >= 60 ? "text-warning" : "text-danger")">
+                                            @attempt.Percentage.ToString("0.0")%
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge @(attempt.Grade == "F" ? "bg-danger" : attempt.Grade == "A+" || attempt.Grade == "A" ? "bg-success" : "bg-warning") fw-bold">
+                                            @attempt.Grade
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="@Url.Action("QuizResults", new {
+                                            quizId = attempt.QuizId,
+                                            score = attempt.Score,
+                                            totalQuestions = attempt.TotalQuestions,
+                                            percentage = attempt.Percentage,
+                                            grade = attempt.Grade
+                                        })" class="btn btn-outline-info btn-sm fw-bold">
+                                            <i class="bi bi-eye me-1"></i>View Details
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                @if (totalPages > 1)
+                {
+                    <nav aria-label="Results pagination" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            <!-- Previous Page -->
+                            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                                <a class="page-link bg-dark text-light border-light fw-bold"
+                                   href="@Url.Action("Results", new { page = currentPage - 1, sortBy = sortBy, sortOrder = sortOrder })">
+                                    <i class="bi bi-chevron-left"></i> Previous
+                                </a>
+                            </li>
+
+                            <!-- Page Numbers -->
+                            @for (int i = 1; i <= totalPages; i++)
+                            {
+                                if (i == 1 || i == totalPages || (i >= currentPage - 2 && i <= currentPage + 2))
+                                {
+                                    <li class="page-item @(i == currentPage ? "active" : "")">
+                                        <a class="page-link @(i == currentPage ? "bg-primary border-primary" : "bg-dark text-light border-light") fw-bold"
+                                           href="@Url.Action("Results", new { page = i, sortBy = sortBy, sortOrder = sortOrder })">
+                                            @i
+                                        </a>
+                                    </li>
+                                }
+                                else if (i == currentPage - 3 || i == currentPage + 3)
+                                {
+                                    <li class="page-item disabled">
+                                        <span class="page-link bg-dark text-light border-light">...</span>
+                                    </li>
+                                }
+                            }
+
+                            <!-- Next Page -->
+                            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                                <a class="page-link bg-dark text-light border-light fw-bold"
+                                   href="@Url.Action("Results", new { page = currentPage + 1, sortBy = sortBy, sortOrder = sortOrder })">
+                                    Next <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                }
+
+                <!-- Page Info -->
+                <div class="text-center mt-3">
+                    <small class="text-light opacity-90 fw-bold">
+                        Showing page @currentPage of @totalPages -
+                        @totalAttempts total attempts
+                    </small>
+                </div>
+            </div>
         </div>
-    </div>
-} 
+    }
+</div>
+
+<style>
+    .bg-gradient {
+        background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%) !important;
+    }
+
+    .border-light {
+        border-color: #e2e8f0 !important;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #4a5568 !important;
+    }
+
+    .page-link {
+        transition: all 0.2s ease;
+    }
+
+        .page-link:hover {
+            background-color: #4a5568 !important;
+            border-color: #63b3ed !important;
+        }
+
+    .page-item.active .page-link {
+        background-color: #63b3ed !important;
+        border-color: #63b3ed !important;
+    }
+
+    .display-6 {
+        font-size: 2rem;
+        font-weight: 700;
+    }
+</style>
