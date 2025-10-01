@@ -87,20 +87,26 @@
                                             <td>
                                                 @if (assignment.IsCompleted && assignment.AttemptId.HasValue)
                                                 {
-                                                    <a href="@Url.Action("QuizResults", "Quiz", new {
-                                                        quizId = assignment.QuizId,
-                                                        score = 0, // You might want to fetch actual score
-                                                        totalQuestions = assignment.QuestionCount,
-                                                        percentage = 0,
-                                                        grade = "N/A"
-                                                    })"
-                                                       class="btn btn-outline-info btn-sm">
-                                                        <i class="bi bi-graph-up me-1"></i>Results
-                                                    </a>
-                                                }
-                                                else
-                                                {
-                                                    <span class="text-muted">No results yet</span>
+                                                    var quizRepo = new QuizAppDotNetFrameWork.Repositories.QuizRepository();
+                                                    var attempt = quizRepo.GetQuizAttemptById(assignment.AttemptId.Value);
+
+                                                    if (attempt != null)
+                                                    {
+                                                        <a href="@Url.Action("QuizResults", "Quiz", new {
+                                                                    quizId = attempt.QuizId,
+                                                                    score = attempt.Score,
+                                                                    totalQuestions = attempt.TotalQuestions,
+                                                                    percentage = attempt.Percentage,
+                                                                    grade = attempt.Grade
+                                                                    })"
+                                                        class="btn btn-outline-info btn-sm">
+                                                            <i class="bi bi-graph-up me-1"></i>Results
+                                                        </a>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">Results unavailable</span>
+                                                    }
                                                 }
                                             </td>
                                         </tr>

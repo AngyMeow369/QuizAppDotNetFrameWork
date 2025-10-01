@@ -29,19 +29,25 @@ namespace QuizAppDotNetFrameWork.Controllers
         }
 
         // Display questions for a selected quiz
-        public ActionResult Questions(int quizId)
+        public ActionResult Questions(int quizId, int? assignmentId = null)
         {
+            // Store assignment ID in session if provided (for assignment tracking)
+            if (assignmentId.HasValue)
+            {
+                Session["CurrentAssignmentId"] = assignmentId.Value;
+            }
+
             List<Question> questions = quizRepo.GetQuestionsWithOptions(quizId);
             ViewBag.QuizId = quizId;
             ViewBag.QuizTitle = quizRepo.GetQuizById(quizId)?.Title ?? "Quiz";
-            return View(questions);
-        }
 
-        // Display options for a question (partial view)
-        public ActionResult Options(int questionId)
-        {
-            List<Option> options = quizRepo.GetOptionsByQuestionId(questionId);
-            return PartialView(options);
+            // Add time limit calculation for assignments
+            ViewBag.TimeLimit = questions.Count * 1; // 1 minute per question
+
+            // Store if this is an assigned quiz for the timer
+            ViewBag.IsAssignedQuiz = assignmentId.HasValue;
+
+            return View(questions);
         }
 
         // -----------------------------------
@@ -525,7 +531,26 @@ namespace QuizAppDotNetFrameWork.Controllers
                 quizRepo.SaveUserResponse(userId, kvp.Key, kvp.Value, isCorrect, attemptId);
             }
 
-            // Redirect to results page
+            // ✅ NEW: SAFELY mark assignment as completed if this was an assigned quiz
+            // This WON'T affect regular quiz taking at all!
+            if (Session["CurrentAssignmentId"] != null)
+            {
+                try
+                {
+                    int assignmentId = (int)Session["CurrentAssignmentId"];
+                    quizRepo.CompleteQuizAssignment(assignmentId, attemptId);
+                    Session["CurrentAssignmentId"] = null; // Clear assignment ID
+                    System.Diagnostics.Debug.WriteLine($"✅ Assignment {assignmentId} marked as completed");
+                }
+                catch (Exception ex)
+                {
+                    // If assignment completion fails, don't break the quiz submission
+                    System.Diagnostics.Debug.WriteLine($"⚠️ Assignment completion failed: {ex.Message}");
+                    // Continue normally - don't throw error
+                }
+            }
+
+            // Redirect to results page (EXACTLY SAME AS BEFORE)
             return RedirectToAction("QuizResults", new
             {
                 quizId = quizId,
@@ -574,14 +599,39 @@ namespace QuizAppDotNetFrameWork.Controllers
                 return RedirectToAction("Login", "Users");
             }
 
-            // FIX: Get quiz by ID from repository
-            var quiz = quizRepo.GetQuizById(quizId);
+            // ✅ FIX: Handle quizId=0 by finding the actual quiz from attempt data
+            Quiz quiz = null;
+
+            if (quizId == 0)
+            {
+                // Try to find the most recent attempt for this user
+                var userAttempts = quizRepo.GetUserQuizAttempts((int)Session["UserId"]);
+                var recentAttempt = userAttempts
+                    .Where(a => a.Score == score && a.TotalQuestions == totalQuestions)
+                    .OrderByDescending(a => a.CompletedOn)
+                    .FirstOrDefault();
+
+                if (recentAttempt != null)
+                {
+                    quizId = recentAttempt.QuizId;
+                    quiz = quizRepo.GetQuizById(quizId);
+                }
+            }
+            else
+            {
+                quiz = quizRepo.GetQuizById(quizId);
+            }
 
             if (quiz == null)
             {
-                // If quiz not found, redirect to quiz list
-                TempData["ErrorMessage"] = "Quiz not found.";
-                return RedirectToAction("Index");
+                // If quiz still not found, create a dummy quiz object to prevent errors
+                quiz = new Quiz
+                {
+                    QuizId = quizId,
+                    Title = "Quiz",
+                    Description = "Quiz results"
+                };
+                // Don't redirect - just show results with generic title
             }
 
             ViewBag.Quiz = quiz;
@@ -592,5 +642,20 @@ namespace QuizAppDotNetFrameWork.Controllers
 
             return View();
         }
+
+        public ActionResult AssignedQuizzes()
+        {
+            if (Session["UserId"] == null)
+            {
+                return RedirectToAction("Login", "Users");
+            }
+
+            int userId = (int)Session["UserId"];
+            var assignments = quizRepo.GetAssignedQuizzesByUser(userId); // FIXED: use instance, not static
+            return View(assignments);
+        }
+
+
+
     }
 }

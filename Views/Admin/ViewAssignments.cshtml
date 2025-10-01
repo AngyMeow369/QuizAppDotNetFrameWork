@@ -69,17 +69,29 @@
                                                 <div class="btn-group btn-group-sm">
                                                     @if (assignment.IsCompleted && assignment.AttemptId.HasValue)
                                                     {
-                                                        <a href="@Url.Action("QuizResults", "Quiz", new {
-                                                            quizId = assignment.QuizId,
-                                                            score = 0, // You might want to fetch actual score
-                                                            totalQuestions = assignment.QuestionCount,
-                                                            percentage = 0,
-                                                            grade = "N/A"
-                                                        })"
-                                                           class="btn btn-outline-info"
-                                                           title="View Results">
-                                                            <i class="bi bi-graph-up"></i>
-                                                        </a>
+                                                        var quizRepo = new QuizAppDotNetFrameWork.Repositories.QuizRepository();
+                                                        var attempt = quizRepo.GetQuizAttemptById(assignment.AttemptId.Value);
+
+                                                        if (attempt != null)
+                                                        {
+                                                            <a href="@Url.Action("QuizResults", "Quiz", new {
+            quizId = attempt.QuizId,
+            score = attempt.Score,
+            totalQuestions = attempt.TotalQuestions,
+            percentage = attempt.Percentage,
+            grade = attempt.Grade
+        })"
+                                                               class="btn btn-outline-info"
+                                                               title="View Results">
+                                                                <i class="bi bi-graph-up"></i>
+                                                            </a>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="btn btn-outline-secondary btn-sm" title="Results not available">
+                                                                <i class="bi bi-graph-up"></i>
+                                                            </span>
+                                                        }
                                                     }
                                                     <a href="@Url.Action("QuizAssignments", new { quizId = assignment.QuizId })"
                                                        class="btn btn-outline-primary"

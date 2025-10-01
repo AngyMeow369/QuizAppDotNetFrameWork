@@ -1,0 +1,175 @@
+﻿@model List<QuizAppDotNetFrameWork.Models.UserQuizAssignment>
+@{
+    ViewBag.Title = "My Assigned Quizzes";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-gradient bg-dark border-secondary">
+                <div class="card-body py-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="card-title h2 mb-2 text-white">
+                                <i class="bi bi-list-check me-2"></i>My Assigned Quizzes
+                            </h1>
+                            <p class="card-text mb-0 text-light opacity-75">
+                                Complete your assigned quizzes before the due dates
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <a href="@Url.Action("Index", "Quiz")" class="btn btn-outline-light btn-sm">
+                                <i class="bi bi-journals me-1"></i>All Quizzes
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card border-secondary bg-dark text-light">
+                <div class="card-body text-center py-3">
+                    <h5 class="text-primary mb-1">@Model.Count</h5>
+                    <small class="text-muted">Total Assigned</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card border-secondary bg-dark text-light">
+                <div class="card-body text-center py-3">
+                    <h5 class="text-warning mb-1">@Model.Count(a => !a.IsCompleted && !a.IsOverdue)</h5>
+                    <small class="text-muted">Pending</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card border-secondary bg-dark text-light">
+                <div class="card-body text-center py-3">
+                    <h5 class="text-success mb-1">@Model.Count(a => a.IsCompleted)</h5>
+                    <small class="text-muted">Completed</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card border-secondary bg-dark text-light">
+                <div class="card-body text-center py-3">
+                    <h5 class="text-danger mb-1">@Model.Count(a => a.IsOverdue)</h5>
+                    <small class="text-muted">Overdue</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assigned Quizzes List -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm border-secondary bg-dark text-light">
+                <div class="card-header bg-dark border-secondary">
+                    <h5 class="card-title mb-0 text-light">
+                        <i class="bi bi-send-check me-2"></i>Your Assignments
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (Model != null && Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-dark table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Quiz</th>
+                                        <th>Questions</th>
+                                        <th>Time Limit</th>
+                                        <th>Assigned On</th>
+                                        <th>Due Date</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var assignment in Model)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <strong>@assignment.QuizTitle</strong>
+                                                @if (assignment.IsOverdue)
+                                                {
+                                                    <span class="badge bg-danger ms-1">OVERDUE</span>
+                                                }
+                                            </td>
+                                            <td>@assignment.QuestionCount</td>
+                                            <td>@assignment.TimeLimitMinutes minutes</td>
+                                            <td>@assignment.AssignedOn.ToString("MMM dd, yyyy")</td>
+                                            <td>
+                                                <span class="@(assignment.IsOverdue ? "text-danger fw-bold" : "text-warning")">
+                                                    @assignment.DueDate.ToString("MMM dd, yyyy hh:mm tt")
+                                                </span>
+                                            </td>
+                                            <td>
+                                                @if (assignment.IsCompleted)
+                                                {
+                                                    <span class="badge bg-success">Completed</span>
+                                                }
+                                                else if (assignment.IsOverdue)
+                                                {
+                                                    <span class="badge bg-danger">Overdue</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-warning">Pending</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (!assignment.IsCompleted)
+                                                {
+                                                    <a href="@Url.Action("Questions", "Quiz", new { quizId = assignment.QuizId, assignmentId = assignment.AssignmentId })"
+                                                       class="btn btn-success btn-sm">
+                                                        <i class="bi bi-play-circle me-1"></i>Start
+                                                    </a>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">Completed</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="bi bi-inbox display-1 text-muted"></i>
+                            <h4 class="text-light mt-3">No Assignments</h4>
+                            <p class="text-muted">You don't have any quiz assignments at the moment.</p>
+                            <a href="@Url.Action("Index", "Quiz")" class="btn btn-primary">
+                                <i class="bi bi-journals me-1"></i>Browse All Quizzes
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-gradient {
+        background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%) !important;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #4a5568 !important;
+    }
+
+    .badge {
+        font-size: 0.7em;
+    }
+</style>

@@ -9,11 +9,12 @@ namespace QuizAppDotNetFrameWork.Controllers
     public class UsersController : Controller
 
     {
-        //Repo object
+        //Repo objects
         private readonly UserRepository _userRepo = new UserRepository();
+        private readonly QuizRepository _quizRepo = new QuizRepository();
 
         // GET: User
-      
+
         //Get of Register
         public ActionResult Register()
         {
@@ -78,6 +79,18 @@ namespace QuizAppDotNetFrameWork.Controllers
                 return RedirectToAction("Index", "Quiz");
             }
         }
+
+        //public ActionResult AssignedQuizzes()
+        //{
+        //    if (Session["UserId"] == null)
+        //    {
+        //        return RedirectToAction("Login", "Users");
+        //    }
+
+        //    int userId = (int)Session["UserId"];
+        //    var assignments = _quizRepo.GetAssignedQuizzesByUser(userId); // Remove "QuizRepository." prefix
+        //    return View(assignments);
+        //}
 
         //logout
         public ActionResult Logout()

@@ -26,10 +26,13 @@
                             <li class="nav-item">@Html.ActionLink("Dashboard", "Index", "Admin", new { area = "" }, new { @class = "nav-link" })</li>
                             <li class="nav-item">@Html.ActionLink("Manage Quizzes", "ManageQuizzes", "Quiz", new { area = "" }, new { @class = "nav-link" })</li>
                             <li class="nav-item">@Html.ActionLink("Manage Users", "ManageUsers", "Admin", new { area = "" }, new { @class = "nav-link" })</li>
+                            <li class="nav-item">@Html.ActionLink("Assign Quiz", "AssignQuiz", "Admin", new { area = "" }, new { @class = "nav-link" })</li>
+                            <li class="nav-item">@Html.ActionLink("View Assignments", "ViewAssignments", "Admin", new { area = "" }, new { @class = "nav-link" })</li>
                         }
                         else // Regular user role
                         {
                             <li class="nav-item">@Html.ActionLink("My Quizzes", "Index", "Quiz", new { area = "" }, new { @class = "nav-link" })</li>
+                            <li class="nav-item">@Html.ActionLink("My Assignments", "AssignedQuizzes", "Quiz", new { area = "" }, new { @class = "nav-link" })</li>
                             <li class="nav-item">@Html.ActionLink("Results", "Results", "Quiz", new { area = "" }, new { @class = "nav-link" })</li>
                         }
                     }
@@ -64,7 +67,6 @@
                                     })
                                 </li>
                             </ul>
-
                         </li>
                     }
                 </ul>
@@ -74,17 +76,20 @@
 
     <style>
         .dropdown-item-black {
-            background-color: black; /* Set background color to black */
-            color: white; /* Set text color to white for contrast */
+            background-color: black;
+            color: white;
         }
 
             .dropdown-item-black:hover {
-                background-color: #333; /* Darker shade on hover */
-                color: white; /* Keep text color white on hover */
+                background-color: #333;
+                color: white;
             }
+
+        /* Highlight the My Assignments link when there are pending assignments */
+        .nav-item .nav-link[href*="AssignedQuizzes"] {
+            position: relative;
+        }
     </style>
-
-
 
     <!-- Success/Error Messages -->
     @if (TempData["SuccessMessage"] != null)
