@@ -607,6 +607,22 @@ namespace QuizAppDotNetFrameWork.Repositories
             return assignments;
         }
 
+        // Delete assignment
+        public void DeleteAssignment(int assignmentId)
+        {
+            string json = $@"{{ ""AssignmentId"": {assignmentId} }}";
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlCommand cmd = new SqlCommand("spDeleteAssignment", conn))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@json", json);
+
+                conn.Open();
+                cmd.ExecuteNonQuery();
+            }
+        }
+
 
     }
 }

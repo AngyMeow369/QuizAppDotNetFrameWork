@@ -1,7 +1,17 @@
 @model List<QuizAppDotNetFrameWork.Models.Quiz>
-
 @{
     ViewBag.Title = "Available Quizzes";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    // Calculate user statistics
+    var quizRepo = new QuizAppDotNetFrameWork.Repositories.QuizRepository();
+    var userId = Session["UserId"] != null ? (int)Session["UserId"] : 0;
+    var userAttempts = quizRepo.GetUserQuizAttempts(userId);
+    var completedQuizzes = userAttempts.Select(a => a.QuizId).Distinct().Count();
+    var averageScore = userAttempts.Any() ? userAttempts.Average(a => a.Percentage) : 0;
+    var assignedQuizzes = quizRepo.GetAssignedQuizzesByUser(userId);
+    var pendingAssignments = assignedQuizzes.Where(a => !a.IsCompleted && !a.IsOverdue).ToList();
+    var overdueAssignments = assignedQuizzes.Where(a => a.IsOverdue).ToList();
 }
 
 <div class="container mt-4">
@@ -19,8 +29,10 @@
                         </div>
                         <div class="col-md-4 text-md-end">
                             <div class="bg-dark bg-opacity-50 border border-secondary rounded p-3 d-inline-block">
-                                <small class="text-uppercase fw-bold text-light opacity-75">Status</small>
-                                <div class="h5 mb-0 text-success">Ready</div>
+                                <small class="text-uppercase fw-bold text-light opacity-75">Performance</small>
+                                <div class="h5 mb-0 @(averageScore >= 70 ? "text-success" : averageScore >= 50 ? "text-warning" : "text-danger")">
+                                    @averageScore.ToString("0")%
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -50,7 +62,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <h6 class="card-title text-muted mb-1">Total Questions</h6>
-                            <h3 class="text-info mb-0">@(Model.Sum(q => new QuizAppDotNetFrameWork.Repositories.QuizRepository().GetQuestionsByQuizId(q.QuizId).Count))</h3>
+                            <h3 class="text-info mb-0">@(Model.Sum(q => quizRepo.GetQuestionsByQuizId(q.QuizId).Count))</h3>
                         </div>
                         <i class="bi bi-question-circle text-info fs-1"></i>
                     </div>
@@ -63,9 +75,14 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <h6 class="card-title text-muted mb-1">Completed</h6>
-                            <h3 class="text-warning mb-0">0</h3>
+                            <h3 class="text-warning mb-0">@completedQuizzes</h3>
+                            <small class="text-muted">of @Model.Count</small>
                         </div>
                         <i class="bi bi-check-circle text-warning fs-1"></i>
+                    </div>
+                    <!-- Progress for completed quizzes -->
+                    <div class="progress mt-2" style="height: 6px;">
+                        <div class="progress-bar bg-warning" style="width: @(Model.Count > 0 ? (completedQuizzes * 100 / Model.Count) : 0)%"></div>
                     </div>
                 </div>
             </div>
@@ -76,9 +93,29 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <h6 class="card-title text-muted mb-1">Avg. Score</h6>
-                            <h3 class="text-success mb-0">--%</h3>
+                            <h3 class="text-success mb-0">@averageScore.ToString("0")%</h3>
+                            <small class="text-muted">@userAttempts.Count attempts</small>
                         </div>
                         <i class="bi bi-graph-up text-success fs-1"></i>
+                    </div>
+                    <!-- Performance indicator -->
+                    <div class="mt-2">
+                        @if (averageScore >= 80)
+                        {
+                            <span class="badge bg-success">Excellent</span>
+                        }
+                        else if (averageScore >= 60)
+                        {
+                            <span class="badge bg-warning">Good</span>
+                        }
+                        else if (averageScore > 0)
+                        {
+                            <span class="badge bg-danger">Needs Improvement</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">No attempts</span>
+                        }
                     </div>
                 </div>
             </div>
@@ -98,14 +135,6 @@
                     </a>
                 </div>
                 <div class="card-body">
-                    @{
-                        var quizRepo = new QuizAppDotNetFrameWork.Repositories.QuizRepository();
-                        var userId = Session["UserId"] != null ? (int)Session["UserId"] : 0;
-                        var assignedQuizzes = quizRepo.GetAssignedQuizzesByUser(userId);
-                        var pendingAssignments = assignedQuizzes.Where(a => !a.IsCompleted && !a.IsOverdue).ToList();
-                        var overdueAssignments = assignedQuizzes.Where(a => a.IsOverdue).ToList();
-                    }
-
                     @if (assignedQuizzes.Any())
                     {
                         <div class="row">
@@ -197,22 +226,26 @@
                             <i class="bi bi-filter me-1"></i>Sort By
                         </button>
                         <ul class="dropdown-menu dropdown-menu-dark">
-                            <li><a class="dropdown-item" href="#">Newest First</a></li>
-                            <li><a class="dropdown-item" href="#">Most Questions</a></li>
-                            <li><a class="dropdown-item" href="#">Alphabetical</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="sortQuizzes('newest')">Newest First</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="sortQuizzes('questions')">Most Questions</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="sortQuizzes('alphabetical')">Alphabetical</a></li>
                         </ul>
                     </div>
                 </div>
                 <div class="card-body">
                     @if (Model != null && Model.Count > 0)
                     {
-                        <div class="row">
+                        <div class="row" id="quizzesContainer">
                             @foreach (var quiz in Model)
                             {
-                                var questionCount = new QuizAppDotNetFrameWork.Repositories.QuizRepository().GetQuestionsByQuizId(quiz.QuizId).Count;
+                                var questionCount = quizRepo.GetQuestionsByQuizId(quiz.QuizId).Count;
                                 var estimatedTime = questionCount * 1; // 1 minute per question
+                                var quizAttempts = userAttempts.Where(a => a.QuizId == quiz.QuizId).ToList();
+                                var bestScore = quizAttempts.Any() ? quizAttempts.Max(a => a.Percentage) : 0;
+                                var attemptsCount = quizAttempts.Count;
+                                var isCompleted = quizAttempts.Any();
 
-                                <div class="col-xl-4 col-lg-6 mb-4">
+                                <div class="col-xl-4 col-lg-6 mb-4" data-quiz-id="@quiz.QuizId" data-questions="@questionCount" data-created="@quiz.CreatedOn.Ticks">
                                     <div class="card h-100 border-secondary bg-dark text-light quiz-card">
                                         <div class="card-header bg-dark border-secondary d-flex justify-content-between align-items-center">
                                             <h6 class="mb-0 text-truncate text-white">@quiz.Title</h6>
@@ -221,8 +254,19 @@
                                                     <i class="bi bi-three-dots"></i>
                                                 </button>
                                                 <ul class="dropdown-menu dropdown-menu-dark">
-                                                    <li><a class="dropdown-item" href="#"><i class="bi bi-info-circle me-2"></i>Quiz Details</a></li>
-                                                    <li><a class="dropdown-item" href="#"><i class="bi bi-clock me-2"></i>View History</a></li>
+                                                    <li>
+                                                        <a class="dropdown-item" href="#" onclick="showQuizDetails(@quiz.QuizId)">
+                                                            <i class="bi bi-info-circle me-2"></i>Quiz Details
+                                                        </a>
+                                                    </li>
+                                                    @if (attemptsCount > 0)
+                                                    {
+                                                        <li>
+                                                            <a class="dropdown-item" href="@Url.Action("Results", "Quiz")">
+                                                                <i class="bi bi-clock me-2"></i>View History
+                                                            </a>
+                                                        </li>
+                                                    }
                                                 </ul>
                                             </div>
                                         </div>
@@ -255,24 +299,47 @@
                                                     </div>
                                                     <div class="col-4">
                                                         <div class="border border-secondary rounded p-2">
-                                                            <small class="text-muted d-block">Difficulty</small>
-                                                            <strong class="text-warning">Medium</strong>
+                                                            <small class="text-muted d-block">Best Score</small>
+                                                            <strong class="@(bestScore >= 80 ? "text-success" : bestScore >= 60 ? "text-warning" : "text-danger")">
+                                                                @(isCompleted ? bestScore.ToString("0") + "%" : "--")
+                                                            </strong>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
 
-                                            <!-- Progress Bar (for attempted quizzes) -->
-                                            <div class="progress mb-2" style="height: 4px;">
-                                                <div class="progress-bar bg-success" style="width: 0%"></div>
+                                            <!-- Progress Bar -->
+                                            <div class="progress mb-2" style="height: 6px;">
+                                                <div class="progress-bar @(isCompleted ? "bg-success" : "bg-secondary")"
+                                                     style="width: @(isCompleted ? "100" : "0")%"></div>
                                             </div>
-                                            <small class="text-muted">Not attempted</small>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <small class="text-muted">
+                                                    @if (isCompleted)
+                                                    {
+                                                        <i class="bi bi-check-circle-fill text-success me-1"></i>
+                                                        <span>Completed (@attemptsCount attempt@(attemptsCount > 1 ? "s" : ""))</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <i class="bi bi-circle me-1"></i>
+                                                        <span>Not attempted</span>
+                                                    }
+                                                </small>
+                                                @if (isCompleted)
+                                                {
+                                                    <span class="badge @(bestScore >= 80 ? "bg-success" : bestScore >= 60 ? "bg-warning" : "bg-danger")">
+                                                        Best: @bestScore.ToString("0")%
+                                                    </span>
+                                                }
+                                            </div>
                                         </div>
                                         <div class="card-footer bg-dark border-secondary">
                                             <div class="d-grid gap-2">
                                                 <a href="@Url.Action("Questions", "Quiz", new { quizId = quiz.QuizId })"
-                                                   class="btn btn-success btn-sm">
-                                                    <i class="bi bi-play-circle me-1"></i>Start Quiz
+                                                   class="btn @(isCompleted ? "btn-outline-success" : "btn-success") btn-sm">
+                                                    <i class="bi bi-play-circle me-1"></i>
+                                                    @(isCompleted ? "Retry Quiz" : "Start Quiz")
                                                 </a>
                                             </div>
                                             <div class="mt-2 text-center">
@@ -320,6 +387,21 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quiz Details Modal -->
+<div class="modal fade" id="quizDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-light">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title">Quiz Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="quizDetailsContent">
+                <!-- Content will be loaded dynamically -->
             </div>
         </div>
     </div>
@@ -390,6 +472,31 @@
             border-color: #38a169;
         }
 
+    /* NEW STYLES I ADDED */
+    .progress-bar {
+        transition: width 0.5s ease;
+    }
+
+    .quiz-card {
+        position: relative;
+    }
+
+        .quiz-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #48bb78, #4299e1);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .quiz-card:hover::before {
+            opacity: 1;
+        }
+
     /* Responsive adjustments */
     @@media (max-width: 768px) {
         .card-header .dropdown {
@@ -411,15 +518,95 @@
             padding: 1rem;
         }
     }
+
+    .progress-bar {
+        transition: width 0.5s ease;
+    }
+
+    .quiz-card {
+        position: relative;
+    }
+
+        .quiz-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #48bb78, #4299e1);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .quiz-card:hover::before {
+            opacity: 1;
+        }
 </style>
 
 <script>
     // Add some interactivity
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         // Add click animation to quiz cards
         const quizCards = document.querySelectorAll('.quiz-card');
         quizCards.forEach(card => {
-            card.addEventListener('click', function(e) {
+            card.addEventListener('click', function (e) {
+                if (!e.target.closest('a') && !e.target.closest('.dropdown')) {
+                    this.style.transform = 'scale(0.98)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 150);
+                }
+            });
+        });
+    });
+
+    // Sorting functionality
+    function sortQuizzes(sortBy) {
+        const container = document.getElementById('quizzesContainer');
+        const quizzes = Array.from(container.children);
+
+        quizzes.sort((a, b) => {
+            switch (sortBy) {
+                case 'newest':
+                    return parseInt(b.dataset.created) - parseInt(a.dataset.created);
+                case 'questions':
+                    return parseInt(b.dataset.questions) - parseInt(a.dataset.questions);
+                case 'alphabetical':
+                    const titleA = a.querySelector('.card-header h6').textContent.toLowerCase();
+                    const titleB = b.querySelector('.card-header h6').textContent.toLowerCase();
+                    return titleA.localeCompare(titleB);
+                default:
+                    return 0;
+            }
+        });
+
+        // Clear and re-append sorted quizzes
+        container.innerHTML = '';
+        quizzes.forEach(quiz => container.appendChild(quiz));
+    }
+
+    function showQuizDetails(quizId) {
+        // This would typically fetch quiz details via AJAX
+        // For now, show a simple message
+        const content = `
+            <div class="text-center">
+                <i class="bi bi-info-circle display-1 text-primary mb-3"></i>
+                <h5>Quiz Details</h5>
+                <p class="text-muted">Detailed quiz information would be displayed here.</p>
+                <p class="small text-muted">Quiz ID: ${quizId}</p>
+            </div>
+        `;
+
+        document.getElementById('quizDetailsContent').innerHTML = content;
+        new bootstrap.Modal(document.getElementById('quizDetailsModal')).show();
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // Add click animation to quiz cards
+        const quizCards = document.querySelectorAll('.quiz-card');
+        quizCards.forEach(card => {
+            card.addEventListener('click', function (e) {
                 if (!e.target.closest('a') && !e.target.closest('.dropdown')) {
                     this.style.transform = 'scale(0.98)';
                     setTimeout(() => {
@@ -439,4 +626,45 @@
         setInterval(updateLocalTime, 60000);
         updateLocalTime();
     });
+
+    // Sorting functionality
+    function sortQuizzes(sortBy) {
+        const container = document.getElementById('quizzesContainer');
+        const quizzes = Array.from(container.children);
+
+        quizzes.sort((a, b) => {
+            switch (sortBy) {
+                case 'newest':
+                    return parseInt(b.dataset.created) - parseInt(a.dataset.created);
+                case 'questions':
+                    return parseInt(b.dataset.questions) - parseInt(a.dataset.questions);
+                case 'alphabetical':
+                    const titleA = a.querySelector('.card-header h6').textContent.toLowerCase();
+                    const titleB = b.querySelector('.card-header h6').textContent.toLowerCase();
+                    return titleA.localeCompare(titleB);
+                default:
+                    return 0;
+            }
+        });
+
+        // Clear and re-append sorted quizzes
+        container.innerHTML = '';
+        quizzes.forEach(quiz => container.appendChild(quiz));
+    }
+
+    function showQuizDetails(quizId) {
+        // This would typically fetch quiz details via AJAX
+        // For now, show a simple message
+        const content = `
+            <div class="text-center">
+                <i class="bi bi-info-circle display-1 text-primary mb-3"></i>
+                <h5>Quiz Details</h5>
+                <p class="text-muted">Detailed quiz information would be displayed here.</p>
+                <p class="small text-muted">Quiz ID: ${quizId}</p>
+            </div>
+        `;
+
+        document.getElementById('quizDetailsContent').innerHTML = content;
+        new bootstrap.Modal(document.getElementById('quizDetailsModal')).show();
+    }
 </script>

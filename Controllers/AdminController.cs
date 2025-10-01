@@ -151,5 +151,31 @@ namespace QuizAppDotNetFrameWork.Controllers
 
             return View(assignments);
         }
+
+        // POST: Delete Assignment
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult DeleteAssignment(int assignmentId)
+        {
+            if (Session["Role"] == null || Session["Role"].ToString() != "Admin")
+            {
+                return RedirectToAction("Login", "Users");
+            }
+
+            try
+            {
+                var quizRepo = new QuizRepository();
+                // You'll need to add this method to your QuizRepository
+                quizRepo.DeleteAssignment(assignmentId);
+
+                TempData["SuccessMessage"] = "Assignment deleted successfully!";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Error deleting assignment: " + ex.Message;
+            }
+
+            return RedirectToAction("ViewAssignments");
+        }
     }
 }
