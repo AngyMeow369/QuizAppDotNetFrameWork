@@ -25,12 +25,12 @@
                             <h1 class="card-title h2 mb-2 text-white">
                                 <i class="bi bi-journals me-2"></i>Available Quizzes
                             </h1>
-                            <p class="card-text mb-0 text-light opacity-75">Welcome, <strong class="text-warning">@ViewBag.Username</strong>. Choose a quiz to start your assessment.</p>
+                            <p class="card-text mb-0 text-light opacity-90">Welcome, <strong class="text-warning">@ViewBag.Username</strong>. Choose a quiz to start your assessment.</p>
                         </div>
                         <div class="col-md-4 text-md-end">
-                            <div class="bg-dark bg-opacity-50 border border-secondary rounded p-3 d-inline-block">
-                                <small class="text-uppercase fw-bold text-light opacity-75">Performance</small>
-                                <div class="h5 mb-0 @(averageScore >= 70 ? "text-success" : averageScore >= 50 ? "text-warning" : "text-danger")">
+                            <div class="bg-dark bg-opacity-75 border border-light rounded p-3 d-inline-block">
+                                <small class="text-uppercase fw-bold text-white opacity-90">Performance</small>
+                                <div class="h4 mb-0 fw-bold @(averageScore >= 70 ? "text-success" : averageScore >= 50 ? "text-warning" : "text-danger")">
                                     @averageScore.ToString("0")%
                                 </div>
                             </div>
@@ -44,77 +44,77 @@
     <!-- Quiz Statistics -->
     <div class="row mb-4">
         <div class="col-md-3 mb-3">
-            <div class="card border-secondary bg-dark text-light">
+            <div class="card border-light bg-dark text-light shadow">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="card-title text-muted mb-1">Available Quizzes</h6>
-                            <h3 class="text-primary mb-0">@Model.Count</h3>
+                            <h6 class="card-title text-light opacity-90 mb-1">Available Quizzes</h6>
+                            <h3 class="text-primary mb-0 fw-bold">@Model.Count</h3>
                         </div>
-                        <i class="bi bi-journals text-primary fs-1"></i>
+                        <i class="bi bi-journals text-primary fs-1 opacity-75"></i>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-md-3 mb-3">
-            <div class="card border-secondary bg-dark text-light">
+            <div class="card border-light bg-dark text-light shadow">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="card-title text-muted mb-1">Total Questions</h6>
-                            <h3 class="text-info mb-0">@(Model.Sum(q => quizRepo.GetQuestionsByQuizId(q.QuizId).Count))</h3>
+                            <h6 class="card-title text-light opacity-90 mb-1">Total Questions</h6>
+                            <h3 class="text-info mb-0 fw-bold">@(Model.Sum(q => quizRepo.GetQuestionsByQuizId(q.QuizId).Count))</h3>
                         </div>
-                        <i class="bi bi-question-circle text-info fs-1"></i>
+                        <i class="bi bi-question-circle text-info fs-1 opacity-75"></i>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-md-3 mb-3">
-            <div class="card border-secondary bg-dark text-light">
+            <div class="card border-light bg-dark text-light shadow">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="card-title text-muted mb-1">Completed</h6>
-                            <h3 class="text-warning mb-0">@completedQuizzes</h3>
-                            <small class="text-muted">of @Model.Count</small>
+                            <h6 class="card-title text-light opacity-90 mb-1">Completed</h6>
+                            <h3 class="text-warning mb-0 fw-bold">@completedQuizzes</h3>
+                            <small class="text-light opacity-75">of @Model.Count</small>
                         </div>
-                        <i class="bi bi-check-circle text-warning fs-1"></i>
+                        <i class="bi bi-check-circle text-warning fs-1 opacity-75"></i>
                     </div>
                     <!-- Progress for completed quizzes -->
-                    <div class="progress mt-2" style="height: 6px;">
+                    <div class="progress mt-2" style="height: 8px; background-color: #4a5568;">
                         <div class="progress-bar bg-warning" style="width: @(Model.Count > 0 ? (completedQuizzes * 100 / Model.Count) : 0)%"></div>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-md-3 mb-3">
-            <div class="card border-secondary bg-dark text-light">
+            <div class="card border-light bg-dark text-light shadow">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="card-title text-muted mb-1">Avg. Score</h6>
-                            <h3 class="text-success mb-0">@averageScore.ToString("0")%</h3>
-                            <small class="text-muted">@userAttempts.Count attempts</small>
+                            <h6 class="card-title text-light opacity-90 mb-1">Avg. Score</h6>
+                            <h3 class="text-success mb-0 fw-bold">@averageScore.ToString("0")%</h3>
+                            <small class="text-light opacity-75">@userAttempts.Count attempts</small>
                         </div>
-                        <i class="bi bi-graph-up text-success fs-1"></i>
+                        <i class="bi bi-graph-up text-success fs-1 opacity-75"></i>
                     </div>
                     <!-- Performance indicator -->
                     <div class="mt-2">
                         @if (averageScore >= 80)
                         {
-                            <span class="badge bg-success">Excellent</span>
+                            <span class="badge bg-success fs-6 px-2 py-1">Excellent</span>
                         }
                         else if (averageScore >= 60)
                         {
-                            <span class="badge bg-warning">Good</span>
+                            <span class="badge bg-warning fs-6 px-2 py-1">Good</span>
                         }
                         else if (averageScore > 0)
                         {
-                            <span class="badge bg-danger">Needs Improvement</span>
+                            <span class="badge bg-danger fs-6 px-2 py-1">Needs Improvement</span>
                         }
                         else
                         {
-                            <span class="badge bg-secondary">No attempts</span>
+                            <span class="badge bg-secondary fs-6 px-2 py-1">No attempts</span>
                         }
                     </div>
                 </div>
@@ -125,12 +125,12 @@
     <!-- Assigned Quizzes Quick Access -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="card border-warning bg-dark text-light">
+            <div class="card border-warning bg-dark text-light shadow">
                 <div class="card-header bg-dark border-warning d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0 text-warning">
+                    <h5 class="card-title mb-0 text-warning fw-bold">
                         <i class="bi bi-list-check me-2"></i>Your Assigned Quizzes
                     </h5>
-                    <a href="@Url.Action("AssignedQuizzes", "Quiz")" class="btn btn-warning btn-sm">
+                    <a href="@Url.Action("AssignedQuizzes", "Quiz")" class="btn btn-warning btn-sm fw-bold">
                         <i class="bi bi-arrow-right me-1"></i>View All
                     </a>
                 </div>
@@ -139,55 +139,55 @@
                     {
                         <div class="row">
                             <div class="col-md-4 mb-3">
-                                <div class="text-center p-3 border border-secondary rounded">
-                                    <h4 class="text-primary mb-1">@assignedQuizzes.Count</h4>
-                                    <small class="text-muted">Total Assigned</small>
+                                <div class="text-center p-3 border border-primary rounded bg-dark">
+                                    <h4 class="text-primary mb-1 fw-bold">@assignedQuizzes.Count</h4>
+                                    <small class="text-light opacity-90">Total Assigned</small>
                                 </div>
                             </div>
                             <div class="col-md-4 mb-3">
-                                <div class="text-center p-3 border border-warning rounded">
-                                    <h4 class="text-warning mb-1">@pendingAssignments.Count</h4>
-                                    <small class="text-muted">Pending</small>
+                                <div class="text-center p-3 border border-warning rounded bg-dark">
+                                    <h4 class="text-warning mb-1 fw-bold">@pendingAssignments.Count</h4>
+                                    <small class="text-light opacity-90">Pending</small>
                                 </div>
                             </div>
                             <div class="col-md-4 mb-3">
-                                <div class="text-center p-3 border border-danger rounded">
-                                    <h4 class="text-danger mb-1">@overdueAssignments.Count</h4>
-                                    <small class="text-muted">Overdue</small>
+                                <div class="text-center p-3 border border-danger rounded bg-dark">
+                                    <h4 class="text-danger mb-1 fw-bold">@overdueAssignments.Count</h4>
+                                    <small class="text-light opacity-90">Overdue</small>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Quick assignment list -->
                         <div class="mt-3">
-                            <h6 class="text-light mb-3">Recent Assignments:</h6>
+                            <h6 class="text-light mb-3 fw-bold">Recent Assignments:</h6>
                             <div class="list-group">
                                 @foreach (var assignment in assignedQuizzes.Take(3))
                                 {
-                                    <div class="list-group-item bg-dark border-secondary text-light">
+                                    <div class="list-group-item bg-dark border-light text-light mb-2">
                                         <div class="d-flex justify-content-between align-items-center">
-                                            <div>
-                                                <h6 class="mb-1">@assignment.QuizTitle</h6>
-                                                <small class="text-muted">
+                                            <div class="flex-grow-1">
+                                                <h6 class="mb-1 text-white fw-bold">@assignment.QuizTitle</h6>
+                                                <small class="text-light opacity-90">
                                                     Due: @assignment.DueDate.ToString("MMM dd, yyyy")
                                                     @if (assignment.IsOverdue)
                                                     {
-                                                        <span class="badge bg-danger ms-2">OVERDUE</span>
+                                                        <span class="badge bg-danger ms-2 fw-bold">OVERDUE</span>
                                                     }
                                                     else if (!assignment.IsCompleted)
                                                     {
-                                                        <span class="badge bg-warning ms-2">PENDING</span>
+                                                        <span class="badge bg-warning ms-2 fw-bold">PENDING</span>
                                                     }
                                                     else
                                                     {
-                                                        <span class="badge bg-success ms-2">COMPLETED</span>
+                                                        <span class="badge bg-success ms-2 fw-bold">COMPLETED</span>
                                                     }
                                                 </small>
                                             </div>
                                             @if (!assignment.IsCompleted)
                                             {
                                                 <a href="@Url.Action("Questions", "Quiz", new { quizId = assignment.QuizId, assignmentId = assignment.AssignmentId })"
-                                                   class="btn btn-success btn-sm">
+                                                   class="btn btn-success btn-sm fw-bold ms-3">
                                                     Start
                                                 </a>
                                             }
@@ -200,9 +200,9 @@
                     else
                     {
                         <div class="text-center py-3">
-                            <i class="bi bi-inbox text-muted fs-1 mb-2 d-block"></i>
-                            <p class="text-muted mb-3">No quiz assignments at the moment.</p>
-                            <a href="@Url.Action("AssignedQuizzes", "Quiz")" class="btn btn-outline-warning btn-sm">
+                            <i class="bi bi-inbox text-light fs-1 mb-2 d-block opacity-75"></i>
+                            <p class="text-light opacity-90 mb-3">No quiz assignments at the moment.</p>
+                            <a href="@Url.Action("AssignedQuizzes", "Quiz")" class="btn btn-outline-warning btn-sm fw-bold">
                                 Check for Assignments
                             </a>
                         </div>
@@ -215,20 +215,20 @@
     <!-- Quizzes List -->
     <div class="row">
         <div class="col-12">
-            <div class="card shadow-sm border-secondary bg-dark text-light">
-                <div class="card-header bg-dark border-secondary d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0 text-light">
+            <div class="card shadow-sm border-light bg-dark text-light">
+                <div class="card-header bg-dark border-light d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0 text-white fw-bold">
                         <i class="bi bi-list-task me-2"></i>Your Available Quizzes
-                        <span class="badge bg-primary ms-2">@Model.Count</span>
+                        <span class="badge bg-primary ms-2 fs-6">@Model.Count</span>
                     </h5>
                     <div class="dropdown">
-                        <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <button class="btn btn-outline-light btn-sm dropdown-toggle fw-bold" type="button" data-bs-toggle="dropdown">
                             <i class="bi bi-filter me-1"></i>Sort By
                         </button>
                         <ul class="dropdown-menu dropdown-menu-dark">
-                            <li><a class="dropdown-item" href="#" onclick="sortQuizzes('newest')">Newest First</a></li>
-                            <li><a class="dropdown-item" href="#" onclick="sortQuizzes('questions')">Most Questions</a></li>
-                            <li><a class="dropdown-item" href="#" onclick="sortQuizzes('alphabetical')">Alphabetical</a></li>
+                            <li><a class="dropdown-item text-light fw-bold" href="#" onclick="sortQuizzes('newest')">Newest First</a></li>
+                            <li><a class="dropdown-item text-light fw-bold" href="#" onclick="sortQuizzes('questions')">Most Questions</a></li>
+                            <li><a class="dropdown-item text-light fw-bold" href="#" onclick="sortQuizzes('alphabetical')">Alphabetical</a></li>
                         </ul>
                     </div>
                 </div>
@@ -246,23 +246,23 @@
                                 var isCompleted = quizAttempts.Any();
 
                                 <div class="col-xl-4 col-lg-6 mb-4" data-quiz-id="@quiz.QuizId" data-questions="@questionCount" data-created="@quiz.CreatedOn.Ticks">
-                                    <div class="card h-100 border-secondary bg-dark text-light quiz-card">
-                                        <div class="card-header bg-dark border-secondary d-flex justify-content-between align-items-center">
-                                            <h6 class="mb-0 text-truncate text-white">@quiz.Title</h6>
+                                    <div class="card h-100 border-light bg-dark text-light quiz-card shadow">
+                                        <div class="card-header bg-dark border-light d-flex justify-content-between align-items-center">
+                                            <h6 class="mb-0 text-truncate text-white fw-bold">@quiz.Title</h6>
                                             <div class="dropdown">
-                                                <button class="btn btn-sm btn-outline-secondary border-0" type="button" data-bs-toggle="dropdown">
+                                                <button class="btn btn-sm btn-outline-light border-0" type="button" data-bs-toggle="dropdown">
                                                     <i class="bi bi-three-dots"></i>
                                                 </button>
                                                 <ul class="dropdown-menu dropdown-menu-dark">
                                                     <li>
-                                                        <a class="dropdown-item" href="#" onclick="showQuizDetails(@quiz.QuizId)">
+                                                        <a class="dropdown-item text-light fw-bold" href="#" onclick="showQuizDetails(@quiz.QuizId)">
                                                             <i class="bi bi-info-circle me-2"></i>Quiz Details
                                                         </a>
                                                     </li>
                                                     @if (attemptsCount > 0)
                                                     {
                                                         <li>
-                                                            <a class="dropdown-item" href="@Url.Action("Results", "Quiz")">
+                                                            <a class="dropdown-item text-light fw-bold" href="@Url.Action("Results", "Quiz")">
                                                                 <i class="bi bi-clock me-2"></i>View History
                                                             </a>
                                                         </li>
@@ -271,14 +271,14 @@
                                             </div>
                                         </div>
                                         <div class="card-body">
-                                            <p class="card-text text-muted mb-3">
+                                            <p class="card-text text-light opacity-90 mb-3" style="min-height: 60px;">
                                                 @if (!string.IsNullOrEmpty(quiz.Description))
                                                 {
                                                     @quiz.Description
                                                 }
                                                 else
                                                 {
-                                                    <em>No description available</em>
+                                                    <em class="opacity-75">No description available</em>
                                                 }
                                             </p>
 
@@ -286,21 +286,21 @@
                                             <div class="quiz-meta mb-3">
                                                 <div class="row g-2 text-center">
                                                     <div class="col-4">
-                                                        <div class="border border-secondary rounded p-2">
-                                                            <small class="text-muted d-block">Questions</small>
-                                                            <strong class="text-white">@questionCount</strong>
+                                                        <div class="border border-light rounded p-2 bg-dark">
+                                                            <small class="text-light opacity-90 d-block fw-bold">Questions</small>
+                                                            <strong class="text-white fw-bold">@questionCount</strong>
                                                         </div>
                                                     </div>
                                                     <div class="col-4">
-                                                        <div class="border border-secondary rounded p-2">
-                                                            <small class="text-muted d-block">Time</small>
-                                                            <strong class="text-white">@estimatedTime min</strong>
+                                                        <div class="border border-light rounded p-2 bg-dark">
+                                                            <small class="text-light opacity-90 d-block fw-bold">Time</small>
+                                                            <strong class="text-white fw-bold">@estimatedTime min</strong>
                                                         </div>
                                                     </div>
                                                     <div class="col-4">
-                                                        <div class="border border-secondary rounded p-2">
-                                                            <small class="text-muted d-block">Best Score</small>
-                                                            <strong class="@(bestScore >= 80 ? "text-success" : bestScore >= 60 ? "text-warning" : "text-danger")">
+                                                        <div class="border border-light rounded p-2 bg-dark">
+                                                            <small class="text-light opacity-90 d-block fw-bold">Best Score</small>
+                                                            <strong class="@(bestScore >= 80 ? "text-success" : bestScore >= 60 ? "text-warning" : "text-danger") fw-bold">
                                                                 @(isCompleted ? bestScore.ToString("0") + "%" : "--")
                                                             </strong>
                                                         </div>
@@ -309,12 +309,12 @@
                                             </div>
 
                                             <!-- Progress Bar -->
-                                            <div class="progress mb-2" style="height: 6px;">
+                                            <div class="progress mb-2" style="height: 8px; background-color: #4a5568;">
                                                 <div class="progress-bar @(isCompleted ? "bg-success" : "bg-secondary")"
                                                      style="width: @(isCompleted ? "100" : "0")%"></div>
                                             </div>
                                             <div class="d-flex justify-content-between align-items-center">
-                                                <small class="text-muted">
+                                                <small class="text-light opacity-90 fw-bold">
                                                     @if (isCompleted)
                                                     {
                                                         <i class="bi bi-check-circle-fill text-success me-1"></i>
@@ -322,28 +322,28 @@
                                                     }
                                                     else
                                                     {
-                                                        <i class="bi bi-circle me-1"></i>
+                                                        <i class="bi bi-circle me-1 opacity-75"></i>
                                                         <span>Not attempted</span>
                                                     }
                                                 </small>
                                                 @if (isCompleted)
                                                 {
-                                                    <span class="badge @(bestScore >= 80 ? "bg-success" : bestScore >= 60 ? "bg-warning" : "bg-danger")">
+                                                    <span class="badge @(bestScore >= 80 ? "bg-success" : bestScore >= 60 ? "bg-warning" : "bg-danger") fw-bold">
                                                         Best: @bestScore.ToString("0")%
                                                     </span>
                                                 }
                                             </div>
                                         </div>
-                                        <div class="card-footer bg-dark border-secondary">
+                                        <div class="card-footer bg-dark border-light">
                                             <div class="d-grid gap-2">
                                                 <a href="@Url.Action("Questions", "Quiz", new { quizId = quiz.QuizId })"
-                                                   class="btn @(isCompleted ? "btn-outline-success" : "btn-success") btn-sm">
+                                                   class="btn @(isCompleted ? "btn-outline-success" : "btn-success") btn-sm fw-bold">
                                                     <i class="bi bi-play-circle me-1"></i>
                                                     @(isCompleted ? "Retry Quiz" : "Start Quiz")
                                                 </a>
                                             </div>
                                             <div class="mt-2 text-center">
-                                                <small class="text-muted">
+                                                <small class="text-light opacity-75">
                                                     <i class="bi bi-calendar me-1"></i>Created: @quiz.CreatedOn.ToString("MMM dd, yyyy")
                                                 </small>
                                             </div>
@@ -356,10 +356,10 @@
                     else
                     {
                         <div class="text-center py-5">
-                            <i class="bi bi-inbox fs-1 text-muted d-block mb-3"></i>
-                            <h5 class="text-light">No Quizzes Available</h5>
-                            <p class="text-muted">There are no quizzes assigned to you at the moment.</p>
-                            <small class="text-muted">Please check back later or contact your administrator.</small>
+                            <i class="bi bi-inbox fs-1 text-light d-block mb-3 opacity-75"></i>
+                            <h5 class="text-white fw-bold">No Quizzes Available</h5>
+                            <p class="text-light opacity-90">There are no quizzes assigned to you at the moment.</p>
+                            <small class="text-light opacity-75">Please check back later or contact your administrator.</small>
                         </div>
                     }
                 </div>
@@ -370,20 +370,20 @@
     <!-- Quick Actions -->
     <div class="row mt-4">
         <div class="col-12">
-            <div class="card border-secondary bg-dark text-light">
+            <div class="card border-light bg-dark text-light">
                 <div class="card-body text-center py-3">
                     <div class="row">
                         <div class="col-md-4 mb-2 mb-md-0">
                             <i class="bi bi-clock-history text-primary me-2"></i>
-                            <small class="text-muted">View your quiz history and results</small>
+                            <small class="text-light opacity-90 fw-bold">View your quiz history and results</small>
                         </div>
                         <div class="col-md-4 mb-2 mb-md-0">
                             <i class="bi bi-graph-up text-success me-2"></i>
-                            <small class="text-muted">Track your progress and scores</small>
+                            <small class="text-light opacity-90 fw-bold">Track your progress and scores</small>
                         </div>
                         <div class="col-md-4">
                             <i class="bi bi-info-circle text-info me-2"></i>
-                            <small class="text-muted">Need help? Contact administrator</small>
+                            <small class="text-light opacity-90 fw-bold">Need help? Contact administrator</small>
                         </div>
                     </div>
                 </div>
@@ -396,8 +396,8 @@
 <div class="modal fade" id="quizDetailsModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content bg-dark text-light">
-            <div class="modal-header border-secondary">
-                <h5 class="modal-title">Quiz Details</h5>
+            <div class="modal-header border-light">
+                <h5 class="modal-title text-white fw-bold">Quiz Details</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body" id="quizDetailsContent">
@@ -419,19 +419,19 @@
 
     .card {
         background-color: #2d3748;
-        border-color: #4a5568;
+        border-color: #e2e8f0 !important;
     }
 
     .text-light {
-        color: #e2e8f0 !important;
+        color: #f7fafc !important;
     }
 
-    .text-muted {
-        color: #a0aec0 !important;
+    .border-light {
+        border-color: #e2e8f0 !important;
     }
 
     .border-secondary {
-        border-color: #4a5568 !important;
+        border-color: #a0aec0 !important;
     }
 
     .quiz-card {
@@ -440,22 +440,23 @@
 
         .quiz-card:hover {
             transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            box-shadow: 0 8px 25px rgba(255,255,255,0.1) !important;
             border-color: #63b3ed !important;
         }
 
     .dropdown-menu-dark {
         background-color: #2d3748;
-        border: 1px solid #4a5568;
+        border: 1px solid #e2e8f0;
     }
 
     .dropdown-item {
-        color: #e2e8f0;
+        color: #f7fafc !important;
+        font-weight: 500;
     }
 
         .dropdown-item:hover {
             background-color: #4a5568;
-            color: #ffffff;
+            color: #ffffff !important;
         }
 
     .progress {
@@ -465,6 +466,7 @@
     .btn-success {
         background-color: #48bb78;
         border-color: #48bb78;
+        font-weight: 600;
     }
 
         .btn-success:hover {
@@ -472,7 +474,40 @@
             border-color: #38a169;
         }
 
-    /* NEW STYLES I ADDED */
+    .btn-outline-light {
+        border-color: #e2e8f0;
+        color: #e2e8f0;
+        font-weight: 600;
+    }
+
+        .btn-outline-light:hover {
+            background-color: #e2e8f0;
+            color: #2d3748;
+        }
+
+    /* Improved text visibility */
+    .text-muted {
+        color: #cbd5e0 !important;
+    }
+
+    .opacity-90 {
+        opacity: 0.9 !important;
+    }
+
+    .opacity-75 {
+        opacity: 0.75 !important;
+    }
+
+    .shadow {
+        box-shadow: 0 4px 6px rgba(255, 255, 255, 0.1) !important;
+    }
+
+    .list-group-item {
+        background-color: #2d3748 !important;
+        border-color: #e2e8f0 !important;
+    }
+
+    /* Progress bars */
     .progress-bar {
         transition: width 0.5s ease;
     }
@@ -506,48 +541,43 @@
         .quiz-meta .row .col-4 {
             margin-bottom: 0.5rem;
         }
+
+        .card-body {
+            padding: 1.25rem;
+        }
     }
 
     @@media (max-width: 576px) {
         .container {
-            padding-left: 10px;
-            padding-right: 10px;
+            padding-left: 15px;
+            padding-right: 15px;
         }
 
         .card-body {
             padding: 1rem;
         }
-    }
 
-    .progress-bar {
-        transition: width 0.5s ease;
-    }
-
-    .quiz-card {
-        position: relative;
-    }
-
-        .quiz-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, #48bb78, #4299e1);
-            opacity: 0;
-            transition: opacity 0.3s ease;
+        h1, h2, h3, h4, h5, h6 {
+            word-wrap: break-word;
         }
+    }
 
-        .quiz-card:hover::before {
-            opacity: 1;
-        }
+    /* Ensure text doesn't get cut off */
+    .text-truncate {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .card-text {
+        line-height: 1.5;
+        word-wrap: break-word;
+    }
 </style>
 
 <script>
-    // Add some interactivity
+    // JavaScript remains the same as your working version
     document.addEventListener('DOMContentLoaded', function () {
-        // Add click animation to quiz cards
         const quizCards = document.querySelectorAll('.quiz-card');
         quizCards.forEach(card => {
             card.addEventListener('click', function (e) {
@@ -561,109 +591,33 @@
         });
     });
 
-    // Sorting functionality
     function sortQuizzes(sortBy) {
         const container = document.getElementById('quizzesContainer');
         const quizzes = Array.from(container.children);
-
         quizzes.sort((a, b) => {
             switch (sortBy) {
-                case 'newest':
-                    return parseInt(b.dataset.created) - parseInt(a.dataset.created);
-                case 'questions':
-                    return parseInt(b.dataset.questions) - parseInt(a.dataset.questions);
+                case 'newest': return parseInt(b.dataset.created) - parseInt(a.dataset.created);
+                case 'questions': return parseInt(b.dataset.questions) - parseInt(a.dataset.questions);
                 case 'alphabetical':
                     const titleA = a.querySelector('.card-header h6').textContent.toLowerCase();
                     const titleB = b.querySelector('.card-header h6').textContent.toLowerCase();
                     return titleA.localeCompare(titleB);
-                default:
-                    return 0;
+                default: return 0;
             }
         });
-
-        // Clear and re-append sorted quizzes
         container.innerHTML = '';
         quizzes.forEach(quiz => container.appendChild(quiz));
     }
 
     function showQuizDetails(quizId) {
-        // This would typically fetch quiz details via AJAX
-        // For now, show a simple message
         const content = `
             <div class="text-center">
                 <i class="bi bi-info-circle display-1 text-primary mb-3"></i>
-                <h5>Quiz Details</h5>
-                <p class="text-muted">Detailed quiz information would be displayed here.</p>
-                <p class="small text-muted">Quiz ID: ${quizId}</p>
+                <h5 class="text-white fw-bold">Quiz Details</h5>
+                <p class="text-light opacity-90">Detailed quiz information would be displayed here.</p>
+                <p class="small text-light opacity-75">Quiz ID: ${quizId}</p>
             </div>
         `;
-
-        document.getElementById('quizDetailsContent').innerHTML = content;
-        new bootstrap.Modal(document.getElementById('quizDetailsModal')).show();
-    }
-
-    document.addEventListener('DOMContentLoaded', function () {
-        // Add click animation to quiz cards
-        const quizCards = document.querySelectorAll('.quiz-card');
-        quizCards.forEach(card => {
-            card.addEventListener('click', function (e) {
-                if (!e.target.closest('a') && !e.target.closest('.dropdown')) {
-                    this.style.transform = 'scale(0.98)';
-                    setTimeout(() => {
-                        this.style.transform = '';
-                    }, 150);
-                }
-            });
-        });
-
-        // Update local time
-        function updateLocalTime() {
-            const now = new Date();
-            document.getElementById('currentTime').textContent =
-                now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        }
-
-        setInterval(updateLocalTime, 60000);
-        updateLocalTime();
-    });
-
-    // Sorting functionality
-    function sortQuizzes(sortBy) {
-        const container = document.getElementById('quizzesContainer');
-        const quizzes = Array.from(container.children);
-
-        quizzes.sort((a, b) => {
-            switch (sortBy) {
-                case 'newest':
-                    return parseInt(b.dataset.created) - parseInt(a.dataset.created);
-                case 'questions':
-                    return parseInt(b.dataset.questions) - parseInt(a.dataset.questions);
-                case 'alphabetical':
-                    const titleA = a.querySelector('.card-header h6').textContent.toLowerCase();
-                    const titleB = b.querySelector('.card-header h6').textContent.toLowerCase();
-                    return titleA.localeCompare(titleB);
-                default:
-                    return 0;
-            }
-        });
-
-        // Clear and re-append sorted quizzes
-        container.innerHTML = '';
-        quizzes.forEach(quiz => container.appendChild(quiz));
-    }
-
-    function showQuizDetails(quizId) {
-        // This would typically fetch quiz details via AJAX
-        // For now, show a simple message
-        const content = `
-            <div class="text-center">
-                <i class="bi bi-info-circle display-1 text-primary mb-3"></i>
-                <h5>Quiz Details</h5>
-                <p class="text-muted">Detailed quiz information would be displayed here.</p>
-                <p class="small text-muted">Quiz ID: ${quizId}</p>
-            </div>
-        `;
-
         document.getElementById('quizDetailsContent').innerHTML = content;
         new bootstrap.Modal(document.getElementById('quizDetailsModal')).show();
     }

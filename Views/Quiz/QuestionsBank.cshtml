@@ -14,19 +14,19 @@
 <div class="container mt-4">
     <div class="row mb-4">
         <div class="col-12">
-            <div class="card bg-gradient bg-dark border-secondary">
+            <div class="card bg-gradient bg-dark border-light">
                 <div class="card-body py-4">
                     <div class="row align-items-center">
                         <div class="col-md-8">
-                            <h1 class="card-title h2 mb-2 text-white">
+                            <h1 class="card-title h2 mb-2 text-white fw-bold">
                                 <i class="bi bi-collection me-2"></i>Questions Bank
                             </h1>
-                            <p class="card-text mb-0 text-light opacity-75">
-                                Browse questions by quiz categories. Total: <strong>@Model.Count questions</strong> across <strong>@questionsByQuiz.Count quizzes</strong>.
+                            <p class="card-text mb-0 text-light opacity-90 fw-bold">
+                                Browse questions by quiz categories. Total: <strong class="text-warning">@Model.Count questions</strong> across <strong class="text-warning">@questionsByQuiz.Count quizzes</strong>.
                             </p>
                         </div>
                         <div class="col-md-4 text-md-end">
-                            <a href="@Url.Action("ManageQuizzes", "Quiz")" class="btn btn-outline-light btn-sm">
+                            <a href="@Url.Action("ManageQuizzes", "Quiz")" class="btn btn-outline-light btn-sm fw-bold">
                                 <i class="bi bi-arrow-left me-1"></i>Back to Quizzes
                             </a>
                         </div>
@@ -39,33 +39,33 @@
     <div class="row">
         <!-- Quiz Categories Sidebar -->
         <div class="col-md-3 mb-4">
-            <div class="card shadow-sm border-secondary bg-dark text-light">
-                <div class="card-header bg-dark border-secondary">
-                    <h5 class="card-title mb-0 text-light">
+            <div class="card shadow-sm border-light bg-dark text-light">
+                <div class="card-header bg-dark border-light">
+                    <h5 class="card-title mb-0 text-white fw-bold">
                         <i class="bi bi-folder me-2"></i>Quiz Categories
                     </h5>
                 </div>
                 <div class="card-body p-0">
                     <div class="list-group list-group-flush">
-                        <a href="javascript:void(0)" class="list-group-item list-group-item-action bg-dark text-light category-filter active" data-quiz-id="all">
+                        <a href="javascript:void(0)" class="list-group-item list-group-item-action bg-dark text-light category-filter active fw-bold" data-quiz-id="all">
                             <i class="bi bi-collection me-2"></i>All Questions
-                            <span class="badge bg-primary float-end">@Model.Count</span>
+                            <span class="badge bg-primary float-end fw-bold">@Model.Count</span>
                         </a>
                         @foreach (var quiz in allQuizzes)
                         {
                             var questionCount = questionsByQuiz.ContainsKey(quiz.QuizId) ? questionsByQuiz[quiz.QuizId].Count : 0;
                             if (questionCount > 0)
                             {
-                                <a href="javascript:void(0)" class="list-group-item list-group-item-action bg-dark text-light category-filter" data-quiz-id="@quiz.QuizId">
+                                <a href="javascript:void(0)" class="list-group-item list-group-item-action bg-dark text-light category-filter fw-bold" data-quiz-id="@quiz.QuizId">
                                     <i class="bi bi-file-text me-2"></i>@quiz.Title
-                                    <span class="badge bg-secondary float-end">@questionCount</span>
+                                    <span class="badge bg-secondary float-end fw-bold">@questionCount</span>
                                 </a>
                             }
                         }
                     </div>
                 </div>
-                <div class="card-footer bg-dark border-secondary">
-                    <small class="text-muted">
+                <div class="card-footer bg-dark border-light">
+                    <small class="text-light opacity-90 fw-bold">
                         <i class="bi bi-info-circle me-1"></i>
                         Click on a quiz to filter questions
                     </small>
@@ -73,32 +73,32 @@
             </div>
 
             <!-- Quick Stats -->
-            <div class="card shadow-sm border-secondary bg-dark text-light mt-3">
+            <div class="card shadow-sm border-light bg-dark text-light mt-3">
                 <div class="card-body text-center">
-                    <h6 class="text-primary mb-3">Quick Stats</h6>
+                    <h6 class="text-primary mb-3 fw-bold">Quick Stats</h6>
                     <div class="row">
                         <div class="col-6 mb-2">
-                            <div class="border border-secondary rounded p-2">
-                                <small class="text-muted d-block">Quizzes</small>
-                                <strong class="text-white">@questionsByQuiz.Count</strong>
+                            <div class="border border-light rounded p-2 bg-dark">
+                                <small class="text-light opacity-90 d-block fw-bold">Quizzes</small>
+                                <strong class="text-white fw-bold">@questionsByQuiz.Count</strong>
                             </div>
                         </div>
                         <div class="col-6 mb-2">
-                            <div class="border border-secondary rounded p-2">
-                                <small class="text-muted d-block">Questions</small>
-                                <strong class="text-white">@Model.Count</strong>
+                            <div class="border border-light rounded p-2 bg-dark">
+                                <small class="text-light opacity-90 d-block fw-bold">Questions</small>
+                                <strong class="text-white fw-bold">@Model.Count</strong>
                             </div>
                         </div>
                         <div class="col-6">
-                            <div class="border border-secondary rounded p-2">
-                                <small class="text-muted d-block">Avg/Quiz</small>
-                                <strong class="text-white">@(questionsByQuiz.Count > 0 ? (Model.Count / questionsByQuiz.Count) : 0)</strong>
+                            <div class="border border-light rounded p-2 bg-dark">
+                                <small class="text-light opacity-90 d-block fw-bold">Avg/Quiz</small>
+                                <strong class="text-white fw-bold">@(questionsByQuiz.Count > 0 ? (Model.Count / questionsByQuiz.Count) : 0)</strong>
                             </div>
                         </div>
                         <div class="col-6">
-                            <div class="border border-secondary rounded p-2">
-                                <small class="text-muted d-block">Options</small>
-                                <strong class="text-white">@Model.Sum(q => q.Options?.Count ?? 0)</strong>
+                            <div class="border border-light rounded p-2 bg-dark">
+                                <small class="text-light opacity-90 d-block fw-bold">Options</small>
+                                <strong class="text-white fw-bold">@Model.Sum(q => q.Options?.Count ?? 0)</strong>
                             </div>
                         </div>
                     </div>
@@ -108,20 +108,20 @@
 
         <!-- Questions Content -->
         <div class="col-md-9">
-            <div class="card shadow-sm border-secondary bg-dark text-light">
-                <div class="card-header bg-dark border-secondary d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0 text-light">
+            <div class="card shadow-sm border-light bg-dark text-light">
+                <div class="card-header bg-dark border-light d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0 text-white fw-bold">
                         <i class="bi bi-list-task me-2"></i>
                         <span id="currentCategory">All Questions</span>
-                        <span class="badge bg-primary ms-2" id="questionCount">@Model.Count</span>
+                        <span class="badge bg-primary ms-2 fw-bold" id="questionCount">@Model.Count</span>
                     </h5>
                     <div class="dropdown">
-                        <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <button class="btn btn-outline-light btn-sm dropdown-toggle fw-bold" type="button" data-bs-toggle="dropdown">
                             <i class="bi bi-sort-down me-1"></i>Sort
                         </button>
                         <ul class="dropdown-menu dropdown-menu-dark">
-                            <li><a class="dropdown-item sort-option active" href="#" data-sort="quiz">By Quiz</a></li>
-                            <li><a class="dropdown-item sort-option" href="#" data-sort="options">By Options Count</a></li>
+                            <li><a class="dropdown-item text-light fw-bold sort-option active" href="#" data-sort="quiz">By Quiz</a></li>
+                            <li><a class="dropdown-item text-light fw-bold sort-option" href="#" data-sort="options">By Options Count</a></li>
                         </ul>
                     </div>
                 </div>
@@ -134,32 +134,32 @@
                                 {
                                     var quiz = allQuizzes.FirstOrDefault(q => q.QuizId == question.QuizId);
                                     <div class="col-12 mb-3 question-item" data-quiz-id="@question.QuizId" data-options-count="@(question.Options?.Count ?? 0)">
-                                        <div class="card border-secondary bg-dark text-light question-card">
+                                        <div class="card border-light bg-dark text-light question-card">
                                             <div class="card-body">
                                                 <div class="d-flex justify-content-between align-items-start mb-2">
-                                                    <h6 class="card-title text-light mb-0">@question.QuestionText</h6>
-                                                    <span class="badge bg-secondary">@(question.Options?.Count ?? 0) options</span>
+                                                    <h6 class="card-title text-white mb-0 fw-bold">@question.QuestionText</h6>
+                                                    <span class="badge bg-secondary fw-bold">@(question.Options?.Count ?? 0) options</span>
                                                 </div>
 
                                                 <div class="question-meta mb-3">
-                                                    <small class="text-muted">
-                                                        <i class="bi bi-file-text me-1"></i>Quiz: <strong>@(quiz?.Title ?? "Unknown Quiz")</strong>
+                                                    <small class="text-light opacity-90 fw-bold">
+                                                        <i class="bi bi-file-text me-1"></i>Quiz: <strong class="text-warning">@(quiz?.Title ?? "Unknown Quiz")</strong>
                                                     </small>
                                                 </div>
 
                                                 @if (question.Options != null && question.Options.Count > 0)
                                                 {
                                                     <div class="options-container">
-                                                        <small class="text-muted d-block mb-2">Options:</small>
+                                                        <small class="text-light opacity-90 d-block mb-2 fw-bold">Options:</small>
                                                         <div class="row">
                                                             @foreach (var option in question.Options)
                                                             {
                                                                 <div class="col-md-6 mb-2">
-                                                                    <div class="border border-secondary rounded p-2 @(option.IsCorrect ? "border-success bg-success bg-opacity-10" : "")">
+                                                                    <div class="border border-light rounded p-2 bg-dark @(option.IsCorrect ? "border-success bg-success bg-opacity-25" : "")">
                                                                         <div class="form-check mb-0">
                                                                             <input class="form-check-input" type="radio" disabled
                                                                                    @(option.IsCorrect ? "checked" : "")>
-                                                                            <label class="form-check-label small @(option.IsCorrect ? "text-success fw-bold" : "text-light")">
+                                                                            <label class="form-check-label small @(option.IsCorrect ? "text-success fw-bold" : "text-light fw-bold")">
                                                                                 @option.OptionText
                                                                                 @if (option.IsCorrect)
                                                                                 {
@@ -175,22 +175,22 @@
                                                 }
                                                 else
                                                 {
-                                                    <div class="alert alert-warning bg-warning bg-opacity-10 border-warning">
-                                                        <small><i class="bi bi-exclamation-triangle me-1"></i>No options available for this question</small>
+                                                    <div class="alert alert-warning bg-warning bg-opacity-25 border-warning">
+                                                        <small class="fw-bold"><i class="bi bi-exclamation-triangle me-1"></i>No options available for this question</small>
                                                     </div>
                                                 }
                                             </div>
-                                            <div class="card-footer bg-dark border-secondary d-flex justify-content-between align-items-center">
-                                                <small class="text-muted">
+                                            <div class="card-footer bg-dark border-light d-flex justify-content-between align-items-center">
+                                                <small class="text-light opacity-90 fw-bold">
                                                     Quiz ID: @question.QuizId | Question ID: @question.QuestionId
                                                 </small>
                                                 <div class="btn-group btn-group-sm">
                                                     <a href="@Url.Action("EditQuestion", "Quiz", new { questionId = question.QuestionId })"
-                                                       class="btn btn-outline-warning btn-sm">
+                                                       class="btn btn-outline-warning btn-sm fw-bold">
                                                         <i class="bi bi-pencil-square"></i>
                                                     </a>
                                                     <a href="@Url.Action("ManageQuestions", "Quiz", new { quizId = question.QuizId })"
-                                                       class="btn btn-outline-info btn-sm">
+                                                       class="btn btn-outline-info btn-sm fw-bold">
                                                         <i class="bi bi-eye"></i>
                                                     </a>
                                                 </div>
@@ -203,10 +203,10 @@
                         else
                         {
                             <div class="text-center py-5">
-                                <i class="bi bi-collection fs-1 text-muted d-block mb-3"></i>
-                                <h5 class="text-light">No Questions Available</h5>
-                                <p class="text-muted">Questions will appear here as you add them to quizzes.</p>
-                                <a href="@Url.Action("ManageQuizzes", "Quiz")" class="btn btn-outline-primary">
+                                <i class="bi bi-collection fs-1 text-light opacity-75 d-block mb-3"></i>
+                                <h5 class="text-white fw-bold">No Questions Available</h5>
+                                <p class="text-light opacity-90 fw-bold">Questions will appear here as you add them to quizzes.</p>
+                                <a href="@Url.Action("ManageQuizzes", "Quiz")" class="btn btn-outline-primary fw-bold">
                                     <i class="bi bi-plus-circle me-2"></i>Add Questions to Quizzes
                                 </a>
                             </div>
@@ -223,14 +223,21 @@
         background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%) !important;
     }
 
+    .border-light {
+        border-color: #e2e8f0 !important;
+    }
+
     .list-group-item {
-        border-color: #4a5568 !important;
+        border-color: #e2e8f0 !important;
+        color: #f7fafc !important;
+        font-weight: 500;
     }
 
         .list-group-item.active {
             background-color: #63b3ed !important;
             border-color: #63b3ed !important;
             color: #1a202c !important;
+            font-weight: 600;
         }
 
         .list-group-item:hover:not(.active) {
@@ -244,7 +251,7 @@
 
         .question-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 15px rgba(255,255,255,0.1) !important;
             border-color: #63b3ed !important;
         }
 
@@ -256,6 +263,52 @@
     .options-container .border-success {
         border-color: #68d391 !important;
     }
+
+    .text-light {
+        color: #f7fafc !important;
+    }
+
+    .opacity-90 {
+        opacity: 0.9 !important;
+    }
+
+    .opacity-75 {
+        opacity: 0.75 !important;
+    }
+
+    .bg-success.bg-opacity-25 {
+        background-color: rgba(104, 211, 145, 0.25) !important;
+    }
+
+    .bg-warning.bg-opacity-25 {
+        background-color: rgba(251, 211, 141, 0.25) !important;
+    }
+
+    .dropdown-menu-dark {
+        background-color: #2d3748;
+        border: 1px solid #e2e8f0;
+    }
+
+    .dropdown-item {
+        color: #f7fafc !important;
+        font-weight: 500;
+    }
+
+        .dropdown-item:hover {
+            background-color: #4a5568;
+            color: #ffffff !important;
+        }
+
+    .btn-outline-light {
+        border-color: #e2e8f0;
+        color: #e2e8f0;
+        font-weight: 600;
+    }
+
+        .btn-outline-light:hover {
+            background-color: #e2e8f0;
+            color: #2d3748;
+        }
 </style>
 
 @section Scripts {
