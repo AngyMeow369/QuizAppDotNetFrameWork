@@ -11,9 +11,9 @@ namespace QuizAppDotNetFrameWork.Controllers
     {
         private readonly QuizRepository quizRepo = new QuizRepository();
 
-        // -----------------------------------
+
         // USER-FACING ACTIONS
-        // -----------------------------------
+        
 
         // Display all quizzes for users
         public ActionResult Index()
@@ -50,9 +50,9 @@ namespace QuizAppDotNetFrameWork.Controllers
             return View(questions);
         }
 
-        // -----------------------------------
+      
         // ADMIN QUIZ CRUD ACTIONS
-        // -----------------------------------
+        
 
         // Display all quizzes (admin)
         public ActionResult ManageQuizzes()
@@ -168,9 +168,8 @@ namespace QuizAppDotNetFrameWork.Controllers
             return RedirectToAction("ManageQuizzes");
         }
 
-        // -----------------------------------
         // QUESTION MANAGEMENT ACTIONS
-        // -----------------------------------
+     
 
         // FIXED: Manage questions for a quiz
         public ActionResult ManageQuestions(int? quizId)
@@ -426,9 +425,9 @@ namespace QuizAppDotNetFrameWork.Controllers
             return RedirectToAction("ManageQuizzes");
         }
 
-        // -----------------------------------
+        
         // OPTION MANAGEMENT ACTIONS (Partial)
-        // -----------------------------------
+ 
 
         // Add option (AJAX)
         [HttpPost]
@@ -531,8 +530,8 @@ namespace QuizAppDotNetFrameWork.Controllers
                 quizRepo.SaveUserResponse(userId, kvp.Key, kvp.Value, isCorrect, attemptId);
             }
 
-            // ✅ NEW: SAFELY mark assignment as completed if this was an assigned quiz
-            // This WON'T affect regular quiz taking at all!
+            //SAFELY mark assignment as completed if this was an assigned quiz
+
             if (Session["CurrentAssignmentId"] != null)
             {
                 try
