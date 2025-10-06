@@ -15,14 +15,14 @@
                     <small class="opacity-90">Quiz: @quiz.Title</small>
                 </div>
                 <div class="card-body">
-                    @using (Html.BeginForm("AddQuestion", "Quiz", FormMethod.Post))
+                    @using (Html.BeginForm("AddQuestion", "Quiz", FormMethod.Post, new { id = "questionForm" }))
                     {
                         @Html.AntiForgeryToken()
                         @Html.HiddenFor(model => model.QuizId)
 
                         <!-- Question Text -->
                         <div class="mb-4">
-                            <label class="form-label fw-bold">Question Text</label>
+                            <label class="form-label fw-bold">Question Text *</label>
                             @Html.TextAreaFor(model => model.QuestionText, new
                             {
                                 @class = "form-control",
@@ -36,7 +36,7 @@
                         <!-- Options Section -->
                         <div class="mb-4">
                             <div class="d-flex justify-content-between align-items-center mb-3">
-                                <label class="form-label fw-bold">Answer Options</label>
+                                <label class="form-label fw-bold">Answer Options *</label>
                                 <button type="button" class="btn btn-sm btn-outline-primary" onclick="addOption()">
                                     <i class="bi bi-plus me-1"></i>Add Option
                                 </button>
@@ -48,10 +48,10 @@
                                     <div class="row g-2">
                                         <div class="col-md-8">
                                             <input type="text" name="options[0].OptionText"
-                                                   class="form-control" placeholder="Option text" required>
+                                                   class="form-control option-text" placeholder="Option text" required>
                                         </div>
                                         <div class="col-md-3">
-                                            <select name="options[0].isCorrect" class="form-select">
+                                            <select name="options[0].IsCorrect" class="form-select correct-select" onchange="validateCorrectAnswers()">
                                                 <option value="false">Incorrect</option>
                                                 <option value="true">Correct Answer</option>
                                             </select>
@@ -69,10 +69,10 @@
                                     <div class="row g-2">
                                         <div class="col-md-8">
                                             <input type="text" name="options[1].OptionText"
-                                                   class="form-control" placeholder="Option text" required>
+                                                   class="form-control option-text" placeholder="Option text" required>
                                         </div>
                                         <div class="col-md-3">
-                                            <select name="options[1].isCorrect" class="form-select">
+                                            <select name="options[1].IsCorrect" class="form-select correct-select" onchange="validateCorrectAnswers()">
                                                 <option value="false">Incorrect</option>
                                                 <option value="true">Correct Answer</option>
                                             </select>
@@ -85,7 +85,16 @@
                                     </div>
                                 </div>
                             </div>
-                            <small class="text-muted">At least 2 options are required. Mark one option as correct.</small>
+
+                            <!-- Validation Messages -->
+                            <div id="optionValidation" class="mt-2" style="display: none;">
+                                <div class="alert alert-warning py-2">
+                                    <i class="bi bi-exclamation-triangle me-2"></i>
+                                    <span id="validationMessage"></span>
+                                </div>
+                            </div>
+
+                            <small class="text-muted">At least 2 options are required. Exactly ONE option must be marked as correct.</small>
                         </div>
 
                         <!-- Action Buttons -->
@@ -93,7 +102,7 @@
                             <a href="@Url.Action("ManageQuestions", new { quizId = quiz.QuizId })" class="btn btn-secondary me-md-2">
                                 <i class="bi bi-arrow-left me-2"></i>Cancel
                             </a>
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit" class="btn btn-primary" id="saveButton">
                                 <i class="bi bi-check-circle me-2"></i>Save Question
                             </button>
                         </div>
@@ -104,53 +113,138 @@
     </div>
 </div>
 
-<script>
-    let optionCount = 2;
+@section Scripts {
+    <script>
+        let optionCount = 2;
 
-    function addOption() {
-        const container = document.getElementById('optionsContainer');
-        const newOption = document.createElement('div');
-        newOption.className = 'option-row mb-3 p-3 border rounded';
-        newOption.innerHTML = `
-            <div class="row g-2">
-                <div class="col-md-8">
-                    <input type="text" name="options[${optionCount}].OptionText"
-                           class="form-control" placeholder="Option text" required>
-                </div>
-                <div class="col-md-3">
-                    <select name="options[${optionCount}].isCorrect" class="form-select">
-                        <option value="false">Incorrect</option>
-                        <option value="true">Correct Answer</option>
-                    </select>
-                </div>
-                <div class="col-md-1">
-                    <button type="button" class="btn btn-outline-danger w-100" onclick="removeOption(this)">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                </div>
-            </div>
-        `;
-        container.appendChild(newOption);
-        optionCount++;
-    }
-
-    function removeOption(button) {
-        const optionRow = button.closest('.option-row');
-        if (document.querySelectorAll('.option-row').length > 2) {
-            optionRow.remove();
-            // Reindex remaining options
-            const options = document.querySelectorAll('.option-row');
-            options.forEach((row, index) => {
-                const inputs = row.querySelectorAll('input, select');
-                inputs[0].name = `options[${index}].OptionText`;
-                inputs[1].name = `options[${index}].isCorrect`;
-            });
-            optionCount = options.length;
-        } else {
-            alert('At least 2 options are required.');
+        function addOption() {
+            const container = document.getElementById('optionsContainer');
+            const newOption = document.createElement('div');
+            newOption.className = 'option-row mb-3 p-3 border rounded';
+            newOption.innerHTML = `
+                    <div class="row g-2">
+                        <div class="col-md-8">
+                            <input type="text" name="options[${optionCount}].OptionText"
+                                   class="form-control option-text" placeholder="Option text" required>
+                        </div>
+                        <div class="col-md-3">
+                            <select name="options[${optionCount}].IsCorrect" class="form-select correct-select" onchange="validateCorrectAnswers()">
+                                <option value="false">Incorrect</option>
+                                <option value="true">Correct Answer</option>
+                            </select>
+                        </div>
+                        <div class="col-md-1">
+                            <button type="button" class="btn btn-outline-danger w-100" onclick="removeOption(this)">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            container.appendChild(newOption);
+            optionCount++;
+            validateCorrectAnswers();
         }
-    }
-</script>
+
+        function removeOption(button) {
+            const optionRow = button.closest('.option-row');
+            if (document.querySelectorAll('.option-row').length > 2) {
+                optionRow.remove();
+                // Reindex remaining options
+                const options = document.querySelectorAll('.option-row');
+                options.forEach((row, index) => {
+                    const inputs = row.querySelectorAll('input, select');
+                    inputs[0].name = `options[${index}].OptionText`;
+                    inputs[1].name = `options[${index}].IsCorrect`;
+                });
+                optionCount = options.length;
+                validateCorrectAnswers();
+            } else {
+                alert('At least 2 options are required.');
+            }
+        }
+
+        // Validate that exactly ONE correct answer is selected
+        function validateCorrectAnswers() {
+            const correctSelects = document.querySelectorAll('.correct-select');
+            const saveButton = document.getElementById('saveButton');
+            const validationDiv = document.getElementById('optionValidation');
+            const validationMessage = document.getElementById('validationMessage');
+
+            let correctCount = 0;
+            let hasEmptyOptions = false;
+
+            // Count correct answers and check for empty options
+            correctSelects.forEach((select, index) => {
+                const optionText = document.querySelectorAll('.option-text')[index];
+                if (select.value === 'true') {
+                    correctCount++;
+                }
+                if (!optionText.value.trim()) {
+                    hasEmptyOptions = true;
+                }
+            });
+
+            // Enable/disable save button based on validation
+            if (correctCount === 1 && !hasEmptyOptions) {
+                saveButton.disabled = false;
+                validationDiv.style.display = 'none';
+                saveButton.innerHTML = '<i class="bi bi-check-circle me-2"></i>Save Question';
+            } else {
+                saveButton.disabled = true;
+                validationDiv.style.display = 'block';
+
+                if (correctCount === 0) {
+                    validationMessage.textContent = 'Please mark ONE option as the correct answer.';
+                } else if (correctCount > 1) {
+                    validationMessage.textContent = 'Only ONE option can be marked as correct. Please select only one correct answer.';
+                } else if (hasEmptyOptions) {
+                    validationMessage.textContent = 'Please fill in all option texts.';
+                }
+
+                saveButton.innerHTML = '<i class="bi bi-x-circle me-2"></i>Fix Errors to Save';
+            }
+
+            return correctCount === 1 && !hasEmptyOptions;
+        }
+
+        // Real-time validation as user types
+        document.addEventListener('DOMContentLoaded', function () {
+            const optionTexts = document.querySelectorAll('.option-text');
+            optionTexts.forEach(text => {
+                text.addEventListener('input', validateCorrectAnswers);
+            });
+
+            // Initial validation
+            validateCorrectAnswers();
+
+            // Form submission validation
+            document.getElementById('questionForm').addEventListener('submit', function (e) {
+                if (!validateCorrectAnswers()) {
+                    e.preventDefault();
+                    alert('Please fix the validation errors before saving the question.');
+                    return false;
+                }
+
+                // Additional validation: at least 2 options
+                const optionRows = document.querySelectorAll('.option-row');
+                if (optionRows.length < 2) {
+                    e.preventDefault();
+                    alert('At least 2 options are required.');
+                    return false;
+                }
+
+                return true;
+            });
+        });
+
+        // Auto-validate when any option text changes
+        document.addEventListener('input', function (e) {
+            if (e.target.classList.contains('option-text')) {
+                validateCorrectAnswers();
+            }
+        });
+    </script>
+}
 
 <style>
     .option-row {
@@ -161,4 +255,21 @@
         .option-row:hover {
             background-color: #e9ecef;
         }
+
+    #saveButton:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .correct-select option[value="true"] {
+        background-color: #d4edda;
+        color: #155724;
+        font-weight: bold;
+    }
+
+    .alert-warning {
+        background-color: #fff3cd;
+        border-color: #ffeaa7;
+        color: #856404;
+    }
 </style>
