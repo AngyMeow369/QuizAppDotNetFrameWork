@@ -30,7 +30,7 @@ namespace QuizAppDotNetFrameWork.Controllers
             if (Session["Role"] == null || Session["Role"].ToString() != "Admin")
                 return RedirectToAction("Login", "Users");
 
-            var repo = new Repositories.UserRepository();   // or use DI later
+            var repo = new Repositories.UserRepository();   
             var users = repo.GetAllUsers() ?? new List<Models.User>();
             return View(users);                             // hand the list to the view
         }
