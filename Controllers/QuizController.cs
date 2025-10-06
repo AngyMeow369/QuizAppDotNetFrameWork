@@ -631,55 +631,55 @@ namespace QuizAppDotNetFrameWork.Controllers
         }
 
         public ActionResult QuizResults(int quizId, int score, int totalQuestions, double percentage, string grade)
-{
-    if (Session["UserId"] == null)
-    {
-        return RedirectToAction("Login", "Users");
-    }
-
-    // ✅ FIX: Handle quizId=0 by finding the actual quiz from attempt data
-    Quiz quiz = null;
-    
-    if (quizId == 0)
-    {
-        // Try to find the most recent attempt for this user
-        var userAttempts = quizRepo.GetUserQuizAttempts((int)Session["UserId"]);
-        var recentAttempt = userAttempts
-            .Where(a => a.Score == score && a.TotalQuestions == totalQuestions)
-            .OrderByDescending(a => a.CompletedOn)
-            .FirstOrDefault();
-            
-        if (recentAttempt != null)
         {
-            quizId = recentAttempt.QuizId;
-            quiz = quizRepo.GetQuizById(quizId);
+            if (Session["UserId"] == null)
+            {
+                return RedirectToAction("Login", "Users");
+            }
+
+            // ✅ FIX: Handle quizId=0 by finding the actual quiz from attempt data
+            Quiz quiz = null;
+    
+            if (quizId == 0)
+            {
+                // Try to find the most recent attempt for this user
+                var userAttempts = quizRepo.GetUserQuizAttempts((int)Session["UserId"]);
+                var recentAttempt = userAttempts
+                    .Where(a => a.Score == score && a.TotalQuestions == totalQuestions)
+                    .OrderByDescending(a => a.CompletedOn)
+                    .FirstOrDefault();
+            
+                if (recentAttempt != null)
+                {
+                    quizId = recentAttempt.QuizId;
+                    quiz = quizRepo.GetQuizById(quizId);
+                }
+            }
+            else
+            {
+                quiz = quizRepo.GetQuizById(quizId);
+            }
+
+            if (quiz == null)
+            {
+                // If quiz still not found, create a dummy quiz object to prevent errors
+                quiz = new Quiz 
+                { 
+                    QuizId = quizId,
+                    Title = "Quiz", 
+                    Description = "Quiz results"
+                };
+                // Don't redirect - just show results with generic title
+                }
+
+                    ViewBag.Quiz = quiz;
+                    ViewBag.Score = score;
+                    ViewBag.TotalQuestions = totalQuestions;
+                    ViewBag.Percentage = percentage;
+                    ViewBag.Grade = grade;
+
+                    return View();
         }
-    }
-    else
-    {
-        quiz = quizRepo.GetQuizById(quizId);
-    }
-
-    if (quiz == null)
-    {
-        // If quiz still not found, create a dummy quiz object to prevent errors
-        quiz = new Quiz 
-        { 
-            QuizId = quizId,
-            Title = "Quiz", 
-            Description = "Quiz results"
-        };
-        // Don't redirect - just show results with generic title
-    }
-
-    ViewBag.Quiz = quiz;
-    ViewBag.Score = score;
-    ViewBag.TotalQuestions = totalQuestions;
-    ViewBag.Percentage = percentage;
-    ViewBag.Grade = grade;
-
-    return View();
-}
 
         public ActionResult AssignedQuizzes()
         {

@@ -3,8 +3,6 @@ using QuizAppDotNetFrameWork.Models;
 using QuizAppDotNetFrameWork.Repositories;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 
 namespace QuizAppDotNetFrameWork.Controllers
@@ -17,7 +15,8 @@ namespace QuizAppDotNetFrameWork.Controllers
             // Protect this page so only admins can access
             if (Session["Role"] == null || Session["Role"].ToString() != "Admin")
             {
-                return RedirectToAction("Login", "Users");
+                //Action name and Controller Name
+                return RedirectToAction("Login", "Users"); 
             }
 
             ViewBag.Username = Session["Username"];
