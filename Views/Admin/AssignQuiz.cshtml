@@ -1,20 +1,21 @@
-﻿@{
-    ViewBag.Title = "Assign Quiz";
+﻿@model QuizAppDotNetFrameWork.Models.QuizAssignmentViewModel
+@{
+    ViewBag.Title = "Assign Multiple Quizzes";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <div class="container mt-4">
     <div class="row mb-4">
         <div class="col-12">
-            <div class="card bg-gradient bg-dark border-secondary">
+            <div class="card bg-gradient-primary bg-dark border-light">
                 <div class="card-body py-4">
                     <div class="row align-items-center">
                         <div class="col-md-8">
                             <h1 class="card-title h2 mb-2 text-white">
-                                <i class="bi bi-send-check me-2"></i>Assign Quiz to Users
+                                <i class="bi bi-send-check me-2"></i>Assign Multiple Quizzes
                             </h1>
-                            <p class="card-text mb-0 text-light opacity-75">
-                                Select a quiz and assign it to users with a due date
+                            <p class="card-text mb-0 text-white-90">
+                                Select users and assign multiple quizzes to each with a common due date
                             </p>
                         </div>
                         <div class="col-md-4 text-md-end">
@@ -29,11 +30,11 @@
     </div>
 
     <div class="row">
-        <div class="col-md-8">
-            <div class="card shadow-sm border-secondary bg-dark text-light">
-                <div class="card-header bg-dark border-secondary">
-                    <h5 class="card-title mb-0 text-light">
-                        <i class="bi bi-send-check me-2"></i>Assignment Details
+        <div class="col-12">
+            <div class="card shadow-sm border-light bg-dark text-light">
+                <div class="card-header bg-dark border-light">
+                    <h5 class="card-title mb-0 text-white">
+                        <i class="bi bi-send-check me-2"></i>Multiple Quiz Assignment
                     </h5>
                 </div>
                 <div class="card-body">
@@ -41,135 +42,187 @@
                     {
                         @Html.AntiForgeryToken()
 
-                        <!-- Quiz Selection -->
+                        <!-- Due Date Section -->
                         <div class="mb-4">
-                            <label for="quizId" class="form-label">Select Quiz *</label>
-                            <select class="form-select" id="quizId" name="quizId" required>
-                                <option value="">Choose a quiz...</option>
-                                @if (ViewBag.Quizzes != null)
-                                {
-                                    foreach (var quiz in ViewBag.Quizzes)
-                                    {
-                                        <option value="@quiz.QuizId">@quiz.Title</option>
-                                    }
-                                }
-                            </select>
-                            <div class="invalid-feedback">Please select a quiz.</div>
+                            <label for="DueDate" class="form-label text-white fw-bold">Common Due Date *</label>
+                            <input type="datetime-local" class="form-control bg-dark text-light border-secondary"
+                                   id="DueDate" name="DueDate"
+                                   value="@Model.DueDate.ToString("yyyy-MM-ddTHH:mm")" required>
+                            <div class="invalid-feedback text-warning">Please set a valid future date and time.</div>
+                            <small class="text-white-70">This due date will apply to all selected quiz assignments.</small>
                         </div>
 
-                        <!-- User Selection -->
+                        <!-- Users and Quizzes Assignment Section -->
                         <div class="mb-4">
-                            <label class="form-label">Select Users *</label>
-                            <div class="border border-secondary rounded p-3 bg-dark">
-                                @if (ViewBag.Users != null)
-                                {
-                                    foreach (var user in ViewBag.Users)
-                                    {
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox"
-                                                   name="userIds"
-                                                   value="@user.UserId"
-                                                   id="user_@user.UserId">
-                                            <label class="form-check-label text-light" for="user_@user.UserId">
-                                                @user.Username (@user.Role)
-                                            </label>
-                                        </div>
-                                    }
-                                }
-                                else
-                                {
-                                    <p class="text-muted mb-0">No users available.</p>
-                                }
+                            <label class="form-label text-white fw-bold">Select Users and Their Quizzes *</label>
+                            <div class="border border-light rounded p-3 bg-dark">
+                                <div class="table-responsive">
+                                    <table class="table table-dark table-hover">
+                                        <thead class="border-light">
+                                            <tr>
+                                                <th width="60" class="border-light">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="selectAllUsers">
+                                                        <label class="form-check-label text-white fw-bold" for="selectAllUsers">Select All</label>
+                                                    </div>
+                                                </th>
+                                                <th class="text-white fw-bold border-light">Username</th>
+                                                <th class="text-white fw-bold border-light">Role</th>
+                                                <th class="text-white fw-bold border-light">Select Quizzes</th>
+                                                <th class="text-white fw-bold border-light">Selected Count</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @for (int i = 0; i < Model.UserAssignments.Count; i++)
+                                            {
+                                                var userAssignment = Model.UserAssignments[i];
+                                                <tr class="user-assignment-row border-light">
+                                                    <td class="border-light">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input user-checkbox"
+                                                                   type="checkbox"
+                                                                   name="UserAssignments[@i].IsSelected"
+                                                                   value="true"
+                                                                   id="user_@userAssignment.UserId"
+                                                                   data-user-id="@userAssignment.UserId">
+                                                            @Html.HiddenFor(m => m.UserAssignments[i].UserId)
+                                                            @Html.HiddenFor(m => m.UserAssignments[i].Username)
+                                                            @Html.HiddenFor(m => m.UserAssignments[i].Role)
+                                                        </div>
+                                                    </td>
+                                                    <td class="border-light">
+                                                        <label class="form-check-label text-white fw-semibold" for="user_@userAssignment.UserId">
+                                                            @userAssignment.Username
+                                                        </label>
+                                                    </td>
+                                                    <td class="border-light">
+                                                        <span class="badge @(userAssignment.Role == "Admin" ? "bg-danger" : "bg-info") fw-bold">
+                                                            @userAssignment.Role
+                                                        </span>
+                                                    </td>
+                                                    <td class="border-light">
+                                                        <div class="quiz-selection" style="display: none;">
+                                                            <select class="form-select quiz-multiselect bg-dark text-light border-light"
+                                                                    multiple
+                                                                    name="UserAssignments[@i].SelectedQuizIds"
+                                                                    data-user-id="@userAssignment.UserId"
+                                                                    style="min-height: 120px;">
+                                                                @foreach (var quiz in Model.AvailableQuizzes)
+                                                                {
+                                                                    <option value="@quiz.QuizId" class="text-light">@quiz.Title</option>
+                                                                }
+                                                            </select>
+                                                            <small class="text-white-70">Hold Ctrl to select multiple quizzes</small>
+                                                        </div>
+                                                    </td>
+                                                    <td class="border-light">
+                                                        <span class="badge bg-warning text-dark fw-bold selected-count" data-user-id="@userAssignment.UserId">0</span>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
-                            <div class="invalid-feedback">Please select at least one user.</div>
+                            <div class="invalid-feedback text-warning">Please select at least one user and at least one quiz.</div>
                         </div>
 
-                        <!-- Due Date -->
-                        <div class="mb-4">
-                            <label for="dueDate" class="form-label">Due Date *</label>
-                            <input type="datetime-local" class="form-control" id="dueDate" name="dueDate" required>
-                            <div class="invalid-feedback">Please set a valid future date and time.</div>
-                            <small class="text-muted">Users will have until this date to complete the quiz.</small>
-                        </div>
-
-                        <!-- Auto Time Limit Info -->
-                        <div class="alert alert-info bg-dark border-info">
-                            <i class="bi bi-info-circle me-2"></i>
-                            <strong>Automatic Time Limit:</strong> Each question gets 1 minute.
-                            Time limit is calculated automatically based on question count.
+                        <!-- Assignment Summary -->
+                        <div class="alert alert-info bg-dark border-info mb-4">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-info-circle me-2 fs-5 text-info"></i>
+                                <div>
+                                    <strong class="text-info">Assignment Summary:</strong>
+                                    <span id="assignmentSummary" class="ms-2 fw-bold">No users selected</span>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Action Buttons -->
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-success">
-                                <i class="bi bi-send-check me-1"></i>Assign Quiz
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button type="submit" class="btn btn-success fw-bold">
+                                <i class="bi bi-send-check me-1"></i>Assign Selected Quizzes
                             </button>
-                            <a href="@Url.Action("Index", "Admin")" class="btn btn-outline-secondary">
+                            <a href="@Url.Action("Index", "Admin")" class="btn btn-outline-light fw-bold">
                                 <i class="bi bi-x-circle me-1"></i>Cancel
                             </a>
+                            <button type="button" class="btn btn-outline-warning fw-bold" id="clearSelection">
+                                <i class="bi bi-arrow-clockwise me-1"></i>Clear All
+                            </button>
                         </div>
                     }
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Sidebar Help -->
-        <div class="col-md-4">
-            <div class="card shadow-sm border-secondary bg-dark text-light">
-                <div class="card-header bg-dark border-secondary">
-                    <h5 class="card-title mb-0 text-light">
-                        <i class="bi bi-info-circle me-2"></i>Assignment Tips
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="mb-3">
-                        <h6 class="text-primary">Quiz Selection</h6>
-                        <small class="text-muted">Choose from all available quizzes in the system.</small>
-                    </div>
-                    <div class="mb-3">
-                        <h6 class="text-success">User Selection</h6>
-                        <small class="text-muted">Select multiple users to assign the same quiz.</small>
-                    </div>
-                    <div class="mb-3">
-                        <h6 class="text-warning">Due Dates</h6>
-                        <small class="text-muted">
-                            • Set realistic timeframes<br>
-                            • Consider user schedules<br>
-                            • Automatic reminders
-                        </small>
-                    </div>
-                    <div class="mb-3">
-                        <h6 class="text-info">Time Limits</h6>
-                        <small class="text-muted">
-                            • 1 minute per question<br>
-                            • Calculated automatically<br>
-                            • Ensures fair timing
-                        </small>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Quick Stats -->
-            <div class="card shadow-sm border-secondary bg-dark text-light mt-3">
-                <div class="card-header bg-dark border-secondary">
-                    <h5 class="card-title mb-0 text-light">
-                        <i class="bi bi-lightning-charge me-2"></i>Quick Stats
+    <!-- Quick Stats Sidebar -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-light bg-dark text-light">
+                <div class="card-header bg-dark border-light">
+                    <h5 class="card-title mb-0 text-white">
+                        <i class="bi bi-graph-up me-2"></i>Quick Stats
                     </h5>
                 </div>
                 <div class="card-body">
                     <div class="row text-center">
                         <div class="col-6 mb-3">
-                            <div class="border border-secondary rounded p-2">
-                                <small class="text-muted d-block">Available Quizzes</small>
-                                <strong class="text-white">@(ViewBag.Quizzes?.Count ?? 0)</strong>
+                            <div class="border border-info rounded p-2 bg-dark">
+                                <small class="text-info d-block fw-bold">Available Quizzes</small>
+                                <strong class="text-white fs-4">@(Model.AvailableQuizzes?.Count ?? 0)</strong>
+                                <div class="text-white-70 mt-1">Total quizzes in system</div>
                             </div>
                         </div>
                         <div class="col-6 mb-3">
-                            <div class="border border-secondary rounded p-2">
-                                <small class="text-muted d-block">Active Users</small>
-                                <strong class="text-white">@(ViewBag.Users?.Count ?? 0)</strong>
+                            <div class="border border-success rounded p-2 bg-dark">
+                                <small class="text-success d-block fw-bold">Total Users</small>
+                                <strong class="text-white fs-4">@(Model.UserAssignments?.Count ?? 0)</strong>
+                                <div class="text-white-70 mt-1">All registered users</div>
                             </div>
                         </div>
+                        <div class="col-6">
+                            <div class="border border-danger rounded p-2 bg-dark">
+                                <small class="text-danger d-block fw-bold">Admin Users</small>
+                                <strong class="text-white fs-4">@(Model.UserAssignments?.Count(u => u.Role == "Admin") ?? 0)</strong>
+                                <div class="text-white-70 mt-1">Users with admin access</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="border border-primary rounded p-2 bg-dark">
+                                <small class="text-primary d-block fw-bold">Regular Users</small>
+                                <strong class="text-white fs-4">@(Model.UserAssignments?.Count(u => u.Role == "User") ?? 0)</strong>
+                                <div class="text-white-70 mt-1">Standard quiz takers</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm border-light bg-dark text-light">
+                <div class="card-header bg-dark border-light">
+                    <h5 class="card-title mb-0 text-white">
+                        <i class="bi bi-lightbulb me-2"></i>Assignment Tips
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3 p-3 border-start border-success border-3">
+                        <h6 class="text-success fw-bold"><i class="bi bi-check-circle me-1"></i>Multiple Selection</h6>
+                        <div class="text-white-90">Select multiple users and assign different quizzes to each user individually.</div>
+                    </div>
+                    <div class="mb-3 p-3 border-start border-warning border-3">
+                        <h6 class="text-warning fw-bold"><i class="bi bi-clock me-1"></i>Due Dates</h6>
+                        <div class="text-white-90">All selected assignments will have the same due date for consistency.</div>
+                    </div>
+                    <div class="mb-3 p-3 border-start border-info border-3">
+                        <h6 class="text-info fw-bold"><i class="bi bi-collection me-1"></i>Quiz Bundles</h6>
+                        <div class="text-white-90">Create customized quiz bundles for different user groups and skill levels.</div>
+                    </div>
+                    <div class="p-3 border-start border-primary border-3">
+                        <h6 class="text-primary fw-bold"><i class="bi bi-eye me-1"></i>Progress Tracking</h6>
+                        <div class="text-white-90">Monitor completion status for each assigned quiz separately in View Assignments.</div>
                     </div>
                 </div>
             </div>
@@ -181,114 +234,441 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const form = document.getElementById('assignQuizForm');
-            const dueDateInput = document.getElementById('dueDate');
+            const dueDateInput = document.getElementById('DueDate');
+            const selectAllCheckbox = document.getElementById('selectAllUsers');
+            const userCheckboxes = document.querySelectorAll('.user-checkbox');
+            const clearSelectionBtn = document.getElementById('clearSelection');
+            const assignmentSummary = document.getElementById('assignmentSummary');
 
-            // Function to get current date-time in local timezone for datetime-local input
-            function getCurrentLocalDateTime() {
+            // BULLETPROOF: Set minimum date/time to current moment
+            function setMinDateTime() {
                 const now = new Date();
-                // Subtract timezone offset to get local time
-                const timezoneOffset = now.getTimezoneOffset() * 60000;
-                const localTime = new Date(now.getTime() - timezoneOffset);
-                return localTime.toISOString().slice(0, 16);
+
+                // Format for datetime-local input: YYYY-MM-DDTHH:MM
+                const year = now.getFullYear();
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const day = String(now.getDate()).padStart(2, '0');
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+
+                const minDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+                dueDateInput.min = minDateTime;
+
+                console.log('Minimum date/time set to:', minDateTime); // For debugging
             }
 
-            // Set minimum due date to current date and time
-            dueDateInput.min = getCurrentLocalDateTime();
-
-            // Custom validation for due date
+            // STRICT VALIDATION: No past dates allowed
             function validateDueDate() {
                 const dueDateValue = dueDateInput.value;
+
                 if (!dueDateValue) {
                     dueDateInput.setCustomValidity('Please set a due date.');
+                    dueDateInput.classList.add('is-invalid');
+                    dueDateInput.classList.remove('is-valid');
                     return false;
                 }
 
                 const selectedDate = new Date(dueDateValue);
                 const currentDate = new Date();
 
-                if (selectedDate <= currentDate) {
-                    dueDateInput.setCustomValidity('Due date must be in the future. Please select a future date and time.');
+                // Add 1 minute buffer to account for submission time
+                const bufferTime = 60 * 1000; // 1 minute in milliseconds
+                const effectiveCurrentDate = new Date(currentDate.getTime() + bufferTime);
+
+                console.log('Selected:', selectedDate);
+                console.log('Current:', effectiveCurrentDate);
+                console.log('Is valid:', selectedDate > effectiveCurrentDate);
+
+                if (selectedDate <= effectiveCurrentDate) {
+                    dueDateInput.setCustomValidity('Due date must be in the future. Please select a date/time that is at least 1 minute from now.');
+                    dueDateInput.classList.add('is-invalid');
+                    dueDateInput.classList.remove('is-valid');
                     return false;
                 }
 
                 dueDateInput.setCustomValidity('');
+                dueDateInput.classList.remove('is-invalid');
+                dueDateInput.classList.add('is-valid');
                 return true;
             }
 
-            // Validate due date on input change
-            dueDateInput.addEventListener('change', validateDueDate);
-            dueDateInput.addEventListener('input', validateDueDate);
+            // FORCE VALIDATION ON INPUT CHANGE
+            function enforceFutureDate() {
+                const dueDateValue = dueDateInput.value;
+                if (!dueDateValue) return;
 
-            form.addEventListener('submit', function (event) {
-                // Check if at least one user is selected
-                const selectedUsers = document.querySelectorAll('input[name="userIds"]:checked');
-                const userSelectionValid = selectedUsers.length > 0;
+                const selectedDate = new Date(dueDateValue);
+                const currentDate = new Date();
+                const bufferTime = 60 * 1000; // 1 minute buffer
+                const effectiveCurrentDate = new Date(currentDate.getTime() + bufferTime);
 
-                // Validate due date
-                const dueDateValid = validateDueDate();
+                // If user selects a past date, automatically reset to minimum
+                if (selectedDate <= effectiveCurrentDate) {
+                    // Set to current time + 1 hour as default future date
+                    const futureDate = new Date(currentDate.getTime() + (60 * 60 * 1000));
+                    const year = futureDate.getFullYear();
+                    const month = String(futureDate.getMonth() + 1).padStart(2, '0');
+                    const day = String(futureDate.getDate()).padStart(2, '0');
+                    const hours = String(futureDate.getHours()).padStart(2, '0');
+                    const minutes = String(futureDate.getMinutes()).padStart(2, '0');
 
-                // Custom user selection validation
-                if (!userSelectionValid) {
-                    event.preventDefault();
-                    event.stopPropagation();
+                    dueDateInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
 
-                    // Find the user selection container to show error
-                    const userContainer = document.querySelector('input[name="userIds"]').closest('.border');
-                    userContainer.style.borderColor = '#dc3545';
-
-                    alert('Please select at least one user.');
-                    return;
-                } else {
-                    const userContainer = document.querySelector('input[name="userIds"]').closest('.border');
-                    userContainer.style.borderColor = '';
+                    // Show warning
+                    alert('Past dates are not allowed. Due date has been set to 1 hour from now.');
                 }
 
-                if (!form.checkValidity() || !dueDateValid) {
-                    event.preventDefault();
-                    event.stopPropagation();
+                validateDueDate();
+            }
 
-                    // Show specific error for due date if invalid
-                    if (!dueDateValid) {
-                        dueDateInput.focus();
+            // Update assignment summary
+            function updateAssignmentSummary() {
+                const selectedUsers = document.querySelectorAll('.user-checkbox:checked');
+                let totalQuizzes = 0;
+
+                selectedUsers.forEach(userCheckbox => {
+                    const userId = userCheckbox.dataset.userId;
+                    const quizSelect = document.querySelector(`.quiz-multiselect[data-user-id="${userId}"]`);
+                    if (quizSelect) {
+                        totalQuizzes += quizSelect.selectedOptions.length;
+                    }
+                });
+
+                if (selectedUsers.length === 0) {
+                    assignmentSummary.textContent = 'No users selected';
+                    assignmentSummary.className = 'text-white-90';
+                } else if (totalQuizzes === 0) {
+                    assignmentSummary.textContent = `${selectedUsers.length} user(s) selected, but no quizzes assigned`;
+                    assignmentSummary.className = 'text-warning fw-bold';
+                } else {
+                    assignmentSummary.textContent = `${selectedUsers.length} user(s) selected, ${totalQuizzes} total quiz assignment(s)`;
+                    assignmentSummary.className = 'text-success fw-bold';
+                }
+            }
+
+            // Toggle quiz selection visibility
+            function toggleQuizSelection(userCheckbox) {
+                const userId = userCheckbox.dataset.userId;
+                const quizSelection = userCheckbox.closest('tr').querySelector('.quiz-selection');
+                const quizSelect = userCheckbox.closest('tr').querySelector('.quiz-multiselect');
+
+                if (userCheckbox.checked) {
+                    quizSelection.style.display = 'block';
+                    quizSelect.required = true;
+                    userCheckbox.closest('tr').classList.add('table-active');
+                } else {
+                    quizSelection.style.display = 'none';
+                    quizSelect.required = false;
+                    userCheckbox.closest('tr').classList.remove('table-active');
+                    // Clear selection when hidden
+                    Array.from(quizSelect.selectedOptions).forEach(option => option.selected = false);
+                    updateSelectedCount(userId);
+                }
+                updateAssignmentSummary();
+            }
+
+            // Update selected count badge
+            function updateSelectedCount(userId) {
+                const quizSelect = document.querySelector(`.quiz-multiselect[data-user-id="${userId}"]`);
+                const countBadge = document.querySelector(`.selected-count[data-user-id="${userId}"]`);
+                if (quizSelect && countBadge) {
+                    const selectedCount = quizSelect.selectedOptions.length;
+                    countBadge.textContent = selectedCount;
+                    if (selectedCount > 0) {
+                        countBadge.className = 'badge bg-success text-white fw-bold selected-count';
+                    } else {
+                        countBadge.className = 'badge bg-secondary text-white fw-bold selected-count';
                     }
                 }
+                updateAssignmentSummary();
+            }
 
+            // Select All functionality
+            selectAllCheckbox.addEventListener('change', function () {
+                userCheckboxes.forEach(checkbox => {
+                    checkbox.checked = this.checked;
+                    toggleQuizSelection(checkbox);
+                });
+            });
+
+            // Individual user checkbox handlers
+            userCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function () {
+                    toggleQuizSelection(this);
+                    // Update select all checkbox state
+                    const allChecked = Array.from(userCheckboxes).every(cb => cb.checked);
+                    const someChecked = Array.from(userCheckboxes).some(cb => cb.checked);
+                    selectAllCheckbox.checked = allChecked;
+                    selectAllCheckbox.indeterminate = !allChecked && someChecked;
+                });
+            });
+
+            // Quiz selection change handlers
+            document.querySelectorAll('.quiz-multiselect').forEach(select => {
+                select.addEventListener('change', function () {
+                    updateSelectedCount(this.dataset.userId);
+                });
+            });
+
+            // Clear selection button
+            clearSelectionBtn.addEventListener('click', function () {
+                userCheckboxes.forEach(checkbox => {
+                    checkbox.checked = false;
+                    toggleQuizSelection(checkbox);
+                });
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = false;
+
+                // Reset to default future date (1 hour from now)
+                const futureDate = new Date(Date.now() + (60 * 60 * 1000));
+                const year = futureDate.getFullYear();
+                const month = String(futureDate.getMonth() + 1).padStart(2, '0');
+                const day = String(futureDate.getDate()).padStart(2, '0');
+                const hours = String(futureDate.getHours()).padStart(2, '0');
+                const minutes = String(futureDate.getMinutes()).padStart(2, '0');
+
+                dueDateInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+                dueDateInput.classList.remove('is-valid', 'is-invalid');
+                updateAssignmentSummary();
+
+                // Reset all selected counts
+                document.querySelectorAll('.selected-count').forEach(badge => {
+                    badge.textContent = '0';
+                    badge.className = 'badge bg-secondary text-white fw-bold selected-count';
+                });
+            });
+
+            // FORM SUBMISSION - FINAL VALIDATION
+            form.addEventListener('submit', function (event) {
+                console.log('Form submission attempted...');
+
+                // 1. Validate due date FIRST
+                const dueDateValid = validateDueDate();
+                console.log('Due date valid:', dueDateValid);
+
+                if (!dueDateValid) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    dueDateInput.focus();
+                    alert('Please set a future due date before submitting.');
+                    return;
+                }
+
+                // 2. Check if at least one user is selected with at least one quiz
+                const selectedUsers = document.querySelectorAll('.user-checkbox:checked');
+                let hasValidAssignment = false;
+
+                selectedUsers.forEach(userCheckbox => {
+                    const userId = userCheckbox.dataset.userId;
+                    const quizSelect = document.querySelector(`.quiz-multiselect[data-user-id="${userId}"]`);
+                    if (quizSelect && quizSelect.selectedOptions.length > 0) {
+                        hasValidAssignment = true;
+                    }
+                });
+
+                if (!hasValidAssignment) {
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    // Show which users need quizzes
+                    selectedUsers.forEach(userCheckbox => {
+                        const userId = userCheckbox.dataset.userId;
+                        const quizSelect = document.querySelector(`.quiz-multiselect[data-user-id="${userId}"]`);
+                        if (!quizSelect || quizSelect.selectedOptions.length === 0) {
+                            const row = userCheckbox.closest('tr');
+                            row.classList.add('table-danger');
+                            setTimeout(() => row.classList.remove('table-danger'), 2000);
+                        }
+                    });
+
+                    alert('Please assign at least one quiz to each selected user.');
+                    return;
+                }
+
+                // 3. Final HTML5 validation check
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    alert('Please fix all validation errors before submitting.');
+                    return;
+                }
+
+                console.log('Form validation passed - submitting...');
                 form.classList.add('was-validated');
             });
 
-            // Real-time validation as user interacts
-            dueDateInput.addEventListener('blur', function () {
-                validateDueDate();
-            });
+            // REAL-TIME ENFORCEMENT
+            dueDateInput.addEventListener('change', enforceFutureDate);
+            dueDateInput.addEventListener('input', enforceFutureDate);
+            dueDateInput.addEventListener('blur', enforceFutureDate);
 
-            // Initialize with current time validation
+            // Initialize everything
+            setMinDateTime();
+            userCheckboxes.forEach(checkbox => toggleQuizSelection(checkbox));
+            updateAssignmentSummary();
             validateDueDate();
+
+            // Set initial future date if empty
+            if (!dueDateInput.value) {
+                const futureDate = new Date(Date.now() + (60 * 60 * 1000)); // 1 hour from now
+                const year = futureDate.getFullYear();
+                const month = String(futureDate.getMonth() + 1).padStart(2, '0');
+                const day = String(futureDate.getDate()).padStart(2, '0');
+                const hours = String(futureDate.getHours()).padStart(2, '0');
+                const minutes = String(futureDate.getMinutes()).padStart(2, '0');
+
+                dueDateInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+            }
         });
     </script>
 }
 
 <style>
-    .bg-gradient {
-        background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%) !important;
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%) !important;
+    }
+
+    /* Custom text color classes for better visibility */
+    .text-white-90 {
+        color: rgba(255, 255, 255, 0.95) !important;
+    }
+
+    .text-white-80 {
+        color: rgba(255, 255, 255, 0.85) !important;
+    }
+
+    .text-white-70 {
+        color: rgba(255, 255, 255, 0.75) !important;
+    }
+
+    .text-white-60 {
+        color: rgba(255, 255, 255, 0.65) !important;
+    }
+
+    .user-assignment-row:hover {
+        background-color: rgba(59, 130, 246, 0.1) !important;
+    }
+
+    .quiz-selection {
+        transition: all 0.3s ease-in-out;
     }
 
     .form-check-input:checked {
-        background-color: #68d391;
-        border-color: #68d391;
+        background-color: #10b981;
+        border-color: #10b981;
+        box-shadow: 0 0 0 0.2rem rgba(16, 185, 129, 0.25);
     }
 
-    .alert-info {
-        background-color: rgba(102, 217, 232, 0.1) !important;
-        border-color: #66d9e8 !important;
-        color: #66d9e8;
+    .table-dark {
+        --bs-table-bg: transparent;
+        --bs-table-border-color: #6b7280;
+        --bs-table-hover-bg: rgba(59, 130, 246, 0.1);
     }
 
-    /* Style for invalid due date */
-    #dueDate:invalid {
-        border-color: #dc3545;
+    .quiz-multiselect option:checked {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: #ffffff;
+        font-weight: bold;
     }
 
-    #dueDate:valid {
-        border-color: #198754;
+    .quiz-multiselect option:hover {
+        background-color: #3b82f6 !important;
+        color: #ffffff !important;
+    }
+
+    /* Custom scrollbar for multiselect */
+    .quiz-multiselect::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    .quiz-multiselect::-webkit-scrollbar-track {
+        background: #374151;
+        border-radius: 6px;
+    }
+
+    .quiz-multiselect::-webkit-scrollbar-thumb {
+        background: #6b7280;
+        border-radius: 6px;
+        border: 2px solid #374151;
+    }
+
+        .quiz-multiselect::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
+        }
+
+    /* Due date validation styles */
+    #DueDate.is-invalid {
+        border-color: #ef4444;
+        box-shadow: 0 0 0 0.2rem rgba(239, 68, 68, 0.25);
+    }
+
+    #DueDate.is-valid {
+        border-color: #10b981;
+        box-shadow: 0 0 0 0.2rem rgba(16, 185, 129, 0.25);
+    }
+
+    /* Badge styles */
+    .badge {
+        font-size: 0.8em;
+        padding: 0.5em 0.75em;
+    }
+
+    /* Table row highlights */
+    .table-active {
+        background-color: rgba(59, 130, 246, 0.15) !important;
+    }
+
+    .table-danger {
+        background-color: rgba(239, 68, 68, 0.15) !important;
+        transition: background-color 0.3s ease;
+    }
+
+    /* Card header improvements */
+    .card-header {
+        background: linear-gradient(135deg, #374151 0%, #4b5563 100%) !important;
+    }
+
+    /* Button enhancements */
+    .btn-success {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        border: none;
+        font-weight: 600;
+    }
+
+        .btn-success:hover {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+    /* Responsive improvements */
+    @@media (max-width: 768px) {
+        .table-responsive {
+            font-size: 0.875rem;
+        }
+
+        .btn {
+            font-size: 0.875rem;
+            padding: 0.5rem 1rem;
+        }
+
+        .card-body {
+            padding: 1rem;
+        }
+    }
+
+    /* Focus states for accessibility */
+    .form-control:focus,
+    .form-select:focus,
+    .form-check-input:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+    }
+
+    /* Selection states */
+    .quiz-multiselect option {
+        padding: 8px 12px;
+        margin: 2px 0;
+        border-radius: 4px;
     }
 </style>

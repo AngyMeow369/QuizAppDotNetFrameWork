@@ -1,100 +1,153 @@
-﻿@model QuizAppDotNetFrameWork.Models.Question
+﻿@model QuizAppDotNetFrameWork.Models.QuizAssignmentViewModel
 @{
-    ViewBag.Title = "Add Question";
-    var quiz = ViewBag.Quiz as QuizAppDotNetFrameWork.Models.Quiz;
+    ViewBag.Title = "Assign Multiple Quizzes";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <div class="container mt-4">
-    <div class="row justify-content-center">
-        <div class="col-md-10">
-            <div class="card shadow-sm border-0">
-                <div class="card-header text-white" style="background: linear-gradient(135deg, #4f86f7 0%, #3366cc 100%);">
-                    <h4 class="card-title mb-0">
-                        <i class="bi bi-plus-circle me-2"></i>Add New Question
-                    </h4>
-                    <small class="opacity-90">Quiz: @quiz.Title</small>
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-gradient-primary bg-dark border-light">
+                <div class="card-body py-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="card-title h2 mb-2 text-white">
+                                <i class="bi bi-send-check me-2"></i>Assign Multiple Quizzes
+                            </h1>
+                            <p class="card-text mb-0 text-light opacity-90">
+                                Select users and assign multiple quizzes to each with a common due date
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <a href="@Url.Action("ViewAssignments", "Admin")" class="btn btn-outline-light btn-sm">
+                                <i class="bi bi-list-check me-1"></i>View Assignments
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm border-light bg-dark text-light">
+                <div class="card-header bg-dark border-light">
+                    <h5 class="card-title mb-0 text-white">
+                        <i class="bi bi-send-check me-2"></i>Multiple Quiz Assignment
+                    </h5>
                 </div>
                 <div class="card-body">
-                    @using (Html.BeginForm("AddQuestion", "Quiz", FormMethod.Post))
+                    @using (Html.BeginForm("AssignQuiz", "Admin", FormMethod.Post, new { @class = "needs-validation", novalidate = "true", id = "assignQuizForm" }))
                     {
                         @Html.AntiForgeryToken()
-                        @Html.HiddenFor(model => model.QuizId)
 
-                        <!-- Question Text -->
+                        <!-- Due Date Section -->
                         <div class="mb-4">
-                            <label class="form-label fw-bold">Question Text</label>
-                            @Html.TextAreaFor(model => model.QuestionText, new
-                            {
-                                @class = "form-control",
-                                rows = "3",
-                                placeholder = "Enter your question here...",
-                                required = "required"
-                            })
-                            @Html.ValidationMessageFor(model => model.QuestionText, "", new { @class = "text-danger" })
+                            <label for="DueDate" class="form-label text-white fw-bold">Common Due Date *</label>
+                            <input type="datetime-local" class="form-control bg-dark text-light border-secondary"
+                                   id="DueDate" name="DueDate"
+                                   value="@Model.DueDate.ToString("yyyy-MM-ddTHH:mm")" required>
+                            <div class="invalid-feedback text-warning">Please set a valid future date and time.</div>
+                            <small class="text-light opacity-90">This due date will apply to all selected quiz assignments.</small>
                         </div>
 
-                        <!-- Options Section -->
+                        <!-- Users and Quizzes Assignment Section -->
                         <div class="mb-4">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <label class="form-label fw-bold">Answer Options</label>
-                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="addOption()">
-                                    <i class="bi bi-plus me-1"></i>Add Option
-                                </button>
-                            </div>
-
-                            <div id="optionsContainer">
-                                <!-- Option 1 -->
-                                <div class="option-row mb-3 p-3 border rounded">
-                                    <div class="row g-2">
-                                        <div class="col-md-8">
-                                            <input type="text" name="options[0].OptionText"
-                                                   class="form-control" placeholder="Option text" required>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <select name="options[0].isCorrect" class="form-select">
-                                                <option value="false">Incorrect</option>
-                                                <option value="true">Correct Answer</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-1">
-                                            <button type="button" class="btn btn-outline-danger w-100" onclick="removeOption(this)" disabled>
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </div>
-                                    </div>
+                            <label class="form-label text-white fw-bold">Select Users and Their Quizzes *</label>
+                            <div class="border border-light rounded p-3 bg-dark">
+                                <div class="table-responsive">
+                                    <table class="table table-dark table-hover">
+                                        <thead class="border-light">
+                                            <tr>
+                                                <th width="60" class="border-light">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="selectAllUsers">
+                                                        <label class="form-check-label text-white fw-bold" for="selectAllUsers">Select All</label>
+                                                    </div>
+                                                </th>
+                                                <th class="text-white fw-bold border-light">Username</th>
+                                                <th class="text-white fw-bold border-light">Role</th>
+                                                <th class="text-white fw-bold border-light">Select Quizzes</th>
+                                                <th class="text-white fw-bold border-light">Selected Count</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @for (int i = 0; i < Model.UserAssignments.Count; i++)
+                                            {
+                                                var userAssignment = Model.UserAssignments[i];
+                                                <tr class="user-assignment-row border-light">
+                                                    <td class="border-light">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input user-checkbox"
+                                                                   type="checkbox"
+                                                                   name="UserAssignments[@i].IsSelected"
+                                                                   value="true"
+                                                                   id="user_@userAssignment.UserId"
+                                                                   data-user-id="@userAssignment.UserId">
+                                                            @Html.HiddenFor(m => m.UserAssignments[i].UserId)
+                                                            @Html.HiddenFor(m => m.UserAssignments[i].Username)
+                                                            @Html.HiddenFor(m => m.UserAssignments[i].Role)
+                                                        </div>
+                                                    </td>
+                                                    <td class="border-light">
+                                                        <label class="form-check-label text-white fw-semibold" for="user_@userAssignment.UserId">
+                                                            @userAssignment.Username
+                                                        </label>
+                                                    </td>
+                                                    <td class="border-light">
+                                                        <span class="badge @(userAssignment.Role == "Admin" ? "bg-danger" : "bg-info") fw-bold">
+                                                            @userAssignment.Role
+                                                        </span>
+                                                    </td>
+                                                    <td class="border-light">
+                                                        <div class="quiz-selection" style="display: none;">
+                                                            <select class="form-select quiz-multiselect bg-dark text-light border-light"
+                                                                    multiple
+                                                                    name="UserAssignments[@i].SelectedQuizIds"
+                                                                    data-user-id="@userAssignment.UserId"
+                                                                    style="min-height: 120px;">
+                                                                @foreach (var quiz in Model.AvailableQuizzes)
+                                                                {
+                                                                    <option value="@quiz.QuizId" class="text-light">@quiz.Title</option>
+                                                                }
+                                                            </select>
+                                                            <small class="text-light opacity-90">Hold Ctrl to select multiple quizzes</small>
+                                                        </div>
+                                                    </td>
+                                                    <td class="border-light">
+                                                        <span class="badge bg-warning text-dark fw-bold selected-count" data-user-id="@userAssignment.UserId">0</span>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
                                 </div>
+                            </div>
+                            <div class="invalid-feedback text-warning">Please select at least one user and at least one quiz.</div>
+                        </div>
 
-                                <!-- Option 2 -->
-                                <div class="option-row mb-3 p-3 border rounded">
-                                    <div class="row g-2">
-                                        <div class="col-md-8">
-                                            <input type="text" name="options[1].OptionText"
-                                                   class="form-control" placeholder="Option text" required>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <select name="options[1].isCorrect" class="form-select">
-                                                <option value="false">Incorrect</option>
-                                                <option value="true">Correct Answer</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-1">
-                                            <button type="button" class="btn btn-outline-danger w-100" onclick="removeOption(this)">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </div>
-                                    </div>
+                        <!-- Assignment Summary -->
+                        <div class="alert alert-info bg-dark border-info mb-4">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-info-circle me-2 fs-5 text-info"></i>
+                                <div>
+                                    <strong class="text-info">Assignment Summary:</strong>
+                                    <span id="assignmentSummary" class="ms-2 fw-bold">No users selected</span>
                                 </div>
                             </div>
-                            <small class="text-muted">At least 2 options are required. Mark one option as correct.</small>
                         </div>
 
                         <!-- Action Buttons -->
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end border-top pt-3">
-                            <a href="@Url.Action("ManageQuestions", new { quizId = quiz.QuizId })" class="btn btn-secondary me-md-2">
-                                <i class="bi bi-arrow-left me-2"></i>Cancel
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button type="submit" class="btn btn-success fw-bold">
+                                <i class="bi bi-send-check me-1"></i>Assign Selected Quizzes
+                            </button>
+                            <a href="@Url.Action("Index", "Admin")" class="btn btn-outline-light fw-bold">
+                                <i class="bi bi-x-circle me-1"></i>Cancel
                             </a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-check-circle me-2"></i>Save Question
+                            <button type="button" class="btn btn-outline-warning fw-bold" id="clearSelection">
+                                <i class="bi bi-arrow-clockwise me-1"></i>Clear All
                             </button>
                         </div>
                     }
@@ -102,63 +155,431 @@
             </div>
         </div>
     </div>
-</div>
 
-<script>
-    let optionCount = 2;
-
-    function addOption() {
-        const container = document.getElementById('optionsContainer');
-        const newOption = document.createElement('div');
-        newOption.className = 'option-row mb-3 p-3 border rounded';
-        newOption.innerHTML = `
-            <div class="row g-2">
-                <div class="col-md-8">
-                    <input type="text" name="options[${optionCount}].OptionText"
-                           class="form-control" placeholder="Option text" required>
+    <!-- Quick Stats Sidebar -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-light bg-dark text-light">
+                <div class="card-header bg-dark border-light">
+                    <h5 class="card-title mb-0 text-white">
+                        <i class="bi bi-graph-up me-2"></i>Quick Stats
+                    </h5>
                 </div>
-                <div class="col-md-3">
-                    <select name="options[${optionCount}].isCorrect" class="form-select">
-                        <option value="false">Incorrect</option>
-                        <option value="true">Correct Answer</option>
-                    </select>
-                </div>
-                <div class="col-md-1">
-                    <button type="button" class="btn btn-outline-danger w-100" onclick="removeOption(this)">
-                        <i class="bi bi-trash"></i>
-                    </button>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6 mb-3">
+                            <div class="border border-info rounded p-2 bg-dark">
+                                <small class="text-info d-block fw-bold">Available Quizzes</small>
+                                <strong class="text-white fs-4">@(Model.AvailableQuizzes?.Count ?? 0)</strong>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="border border-success rounded p-2 bg-dark">
+                                <small class="text-success d-block fw-bold">Total Users</small>
+                                <strong class="text-white fs-4">@(Model.UserAssignments?.Count ?? 0)</strong>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="border border-danger rounded p-2 bg-dark">
+                                <small class="text-danger d-block fw-bold">Admin Users</small>
+                                <strong class="text-white fs-4">@(Model.UserAssignments?.Count(u => u.Role == "Admin") ?? 0)</strong>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="border border-primary rounded p-2 bg-dark">
+                                <small class="text-primary d-block fw-bold">Regular Users</small>
+                                <strong class="text-white fs-4">@(Model.UserAssignments?.Count(u => u.Role == "User") ?? 0)</strong>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        `;
-        container.appendChild(newOption);
-        optionCount++;
-    }
+        </div>
 
-    function removeOption(button) {
-        const optionRow = button.closest('.option-row');
-        if (document.querySelectorAll('.option-row').length > 2) {
-            optionRow.remove();
-            // Reindex remaining options
-            const options = document.querySelectorAll('.option-row');
-            options.forEach((row, index) => {
-                const inputs = row.querySelectorAll('input, select');
-                inputs[0].name = `options[${index}].OptionText`;
-                inputs[1].name = `options[${index}].isCorrect`;
+        <div class="col-md-6">
+            <div class="card shadow-sm border-light bg-dark text-light">
+                <div class="card-header bg-dark border-light">
+                    <h5 class="card-title mb-0 text-white">
+                        <i class="bi bi-lightbulb me-2"></i>Assignment Tips
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3 p-3 border-start border-success border-3">
+                        <h6 class="text-success fw-bold"><i class="bi bi-check-circle me-1"></i>Multiple Selection</h6>
+                        <small class="text-light opacity-90">Select multiple users and assign different quizzes to each user individually.</small>
+                    </div>
+                    <div class="mb-3 p-3 border-start border-warning border-3">
+                        <h6 class="text-warning fw-bold"><i class="bi bi-clock me-1"></i>Due Dates</h6>
+                        <small class="text-light opacity-90">All selected assignments will have the same due date for consistency.</small>
+                    </div>
+                    <div class="mb-3 p-3 border-start border-info border-3">
+                        <h6 class="text-info fw-bold"><i class="bi bi-collection me-1"></i>Quiz Bundles</h6>
+                        <small class="text-light opacity-90">Create customized quiz bundles for different user groups and skill levels.</small>
+                    </div>
+                    <div class="p-3 border-start border-primary border-3">
+                        <h6 class="text-primary fw-bold"><i class="bi bi-eye me-1"></i>Progress Tracking</h6>
+                        <small class="text-light opacity-90">Monitor completion status for each assigned quiz separately in View Assignments.</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('assignQuizForm');
+            const dueDateInput = document.getElementById('DueDate');
+            const selectAllCheckbox = document.getElementById('selectAllUsers');
+            const userCheckboxes = document.querySelectorAll('.user-checkbox');
+            const clearSelectionBtn = document.getElementById('clearSelection');
+            const assignmentSummary = document.getElementById('assignmentSummary');
+
+            // Initialize due date min value
+            function getCurrentLocalDateTime() {
+                const now = new Date();
+                const timezoneOffset = now.getTimezoneOffset() * 60000;
+                const localTime = new Date(now.getTime() - timezoneOffset);
+                return localTime.toISOString().slice(0, 16);
+            }
+
+            dueDateInput.min = getCurrentLocalDateTime();
+
+            // Due date validation
+            function validateDueDate() {
+                const dueDateValue = dueDateInput.value;
+                if (!dueDateValue) {
+                    dueDateInput.setCustomValidity('Please set a due date.');
+                    dueDateInput.classList.add('is-invalid');
+                    return false;
+                }
+
+                const selectedDate = new Date(dueDateValue);
+                const currentDate = new Date();
+
+                if (selectedDate <= currentDate) {
+                    dueDateInput.setCustomValidity('Due date must be in the future.');
+                    dueDateInput.classList.add('is-invalid');
+                    return false;
+                }
+
+                dueDateInput.setCustomValidity('');
+                dueDateInput.classList.remove('is-invalid');
+                dueDateInput.classList.add('is-valid');
+                return true;
+            }
+
+            // Update assignment summary
+            function updateAssignmentSummary() {
+                const selectedUsers = document.querySelectorAll('.user-checkbox:checked');
+                let totalQuizzes = 0;
+
+                selectedUsers.forEach(userCheckbox => {
+                    const userId = userCheckbox.dataset.userId;
+                    const quizSelect = document.querySelector(`.quiz-multiselect[data-user-id="${userId}"]`);
+                    if (quizSelect) {
+                        totalQuizzes += quizSelect.selectedOptions.length;
+                    }
+                });
+
+                if (selectedUsers.length === 0) {
+                    assignmentSummary.textContent = 'No users selected';
+                    assignmentSummary.className = 'text-light';
+                } else if (totalQuizzes === 0) {
+                    assignmentSummary.textContent = `${selectedUsers.length} user(s) selected, but no quizzes assigned`;
+                    assignmentSummary.className = 'text-warning';
+                } else {
+                    assignmentSummary.textContent = `${selectedUsers.length} user(s) selected, ${totalQuizzes} total quiz assignment(s)`;
+                    assignmentSummary.className = 'text-success fw-bold';
+                }
+            }
+
+            // Toggle quiz selection visibility
+            function toggleQuizSelection(userCheckbox) {
+                const userId = userCheckbox.dataset.userId;
+                const quizSelection = userCheckbox.closest('tr').querySelector('.quiz-selection');
+                const quizSelect = userCheckbox.closest('tr').querySelector('.quiz-multiselect');
+
+                if (userCheckbox.checked) {
+                    quizSelection.style.display = 'block';
+                    quizSelect.required = true;
+                    userCheckbox.closest('tr').classList.add('table-active');
+                } else {
+                    quizSelection.style.display = 'none';
+                    quizSelect.required = false;
+                    userCheckbox.closest('tr').classList.remove('table-active');
+                    // Clear selection when hidden
+                    Array.from(quizSelect.selectedOptions).forEach(option => option.selected = false);
+                    updateSelectedCount(userId);
+                }
+                updateAssignmentSummary();
+            }
+
+            // Update selected count badge
+            function updateSelectedCount(userId) {
+                const quizSelect = document.querySelector(`.quiz-multiselect[data-user-id="${userId}"]`);
+                const countBadge = document.querySelector(`.selected-count[data-user-id="${userId}"]`);
+                if (quizSelect && countBadge) {
+                    const selectedCount = quizSelect.selectedOptions.length;
+                    countBadge.textContent = selectedCount;
+                    if (selectedCount > 0) {
+                        countBadge.className = 'badge bg-success text-white fw-bold selected-count';
+                    } else {
+                        countBadge.className = 'badge bg-secondary text-light fw-bold selected-count';
+                    }
+                }
+                updateAssignmentSummary();
+            }
+
+            // Select All functionality
+            selectAllCheckbox.addEventListener('change', function () {
+                userCheckboxes.forEach(checkbox => {
+                    checkbox.checked = this.checked;
+                    toggleQuizSelection(checkbox);
+                });
             });
-            optionCount = options.length;
-        } else {
-            alert('At least 2 options are required.');
-        }
-    }
-</script>
+
+            // Individual user checkbox handlers
+            userCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function () {
+                    toggleQuizSelection(this);
+                    // Update select all checkbox state
+                    const allChecked = Array.from(userCheckboxes).every(cb => cb.checked);
+                    const someChecked = Array.from(userCheckboxes).some(cb => cb.checked);
+                    selectAllCheckbox.checked = allChecked;
+                    selectAllCheckbox.indeterminate = !allChecked && someChecked;
+                });
+            });
+
+            // Quiz selection change handlers
+            document.querySelectorAll('.quiz-multiselect').forEach(select => {
+                select.addEventListener('change', function () {
+                    updateSelectedCount(this.dataset.userId);
+                });
+            });
+
+            // Clear selection button
+            clearSelectionBtn.addEventListener('click', function () {
+                userCheckboxes.forEach(checkbox => {
+                    checkbox.checked = false;
+                    toggleQuizSelection(checkbox);
+                });
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = false;
+                dueDateInput.value = '';
+                dueDateInput.classList.remove('is-valid', 'is-invalid');
+                updateAssignmentSummary();
+
+                // Reset all selected counts
+                document.querySelectorAll('.selected-count').forEach(badge => {
+                    badge.textContent = '0';
+                    badge.className = 'badge bg-secondary text-light fw-bold selected-count';
+                });
+            });
+
+            // Form submission validation
+            form.addEventListener('submit', function (event) {
+                // Validate due date
+                const dueDateValid = validateDueDate();
+
+                // Check if at least one user is selected with at least one quiz
+                const selectedUsers = document.querySelectorAll('.user-checkbox:checked');
+                let hasValidAssignment = false;
+
+                selectedUsers.forEach(userCheckbox => {
+                    const userId = userCheckbox.dataset.userId;
+                    const quizSelect = document.querySelector(`.quiz-multiselect[data-user-id="${userId}"]`);
+                    if (quizSelect && quizSelect.selectedOptions.length > 0) {
+                        hasValidAssignment = true;
+                    }
+                });
+
+                if (!hasValidAssignment) {
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    // Show which users need quizzes
+                    selectedUsers.forEach(userCheckbox => {
+                        const userId = userCheckbox.dataset.userId;
+                        const quizSelect = document.querySelector(`.quiz-multiselect[data-user-id="${userId}"]`);
+                        if (!quizSelect || quizSelect.selectedOptions.length === 0) {
+                            const row = userCheckbox.closest('tr');
+                            row.classList.add('table-danger');
+                            setTimeout(() => row.classList.remove('table-danger'), 2000);
+                        }
+                    });
+
+                    alert('Please assign at least one quiz to each selected user.');
+                    return;
+                }
+
+                if (!form.checkValidity() || !dueDateValid) {
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    if (!dueDateValid) {
+                        dueDateInput.focus();
+                    }
+                }
+
+                form.classList.add('was-validated');
+            });
+
+            // Real-time due date validation
+            dueDateInput.addEventListener('change', validateDueDate);
+            dueDateInput.addEventListener('input', validateDueDate);
+
+            // Initialize
+            userCheckboxes.forEach(checkbox => toggleQuizSelection(checkbox));
+            updateAssignmentSummary();
+            validateDueDate();
+        });
+    </script>
+}
 
 <style>
-    .option-row {
-        background-color: #f8f9fa;
-        transition: background-color 0.2s ease;
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%) !important;
     }
 
-        .option-row:hover {
-            background-color: #e9ecef;
+    .user-assignment-row:hover {
+        background-color: rgba(59, 130, 246, 0.1) !important;
+    }
+
+    .quiz-selection {
+        transition: all 0.3s ease-in-out;
+    }
+
+    .form-check-input:checked {
+        background-color: #10b981;
+        border-color: #10b981;
+        box-shadow: 0 0 0 0.2rem rgba(16, 185, 129, 0.25);
+    }
+
+    .table-dark {
+        --bs-table-bg: transparent;
+        --bs-table-border-color: #6b7280;
+        --bs-table-hover-bg: rgba(59, 130, 246, 0.1);
+    }
+
+    .quiz-multiselect option:checked {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: #ffffff;
+        font-weight: bold;
+    }
+
+    .quiz-multiselect option:hover {
+        background-color: #3b82f6 !important;
+        color: #ffffff !important;
+    }
+
+    /* Custom scrollbar for multiselect */
+    .quiz-multiselect::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    .quiz-multiselect::-webkit-scrollbar-track {
+        background: #374151;
+        border-radius: 6px;
+    }
+
+    .quiz-multiselect::-webkit-scrollbar-thumb {
+        background: #6b7280;
+        border-radius: 6px;
+        border: 2px solid #374151;
+    }
+
+        .quiz-multiselect::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
         }
+
+    /* Due date validation styles */
+    #DueDate.is-invalid {
+        border-color: #ef4444;
+        box-shadow: 0 0 0 0.2rem rgba(239, 68, 68, 0.25);
+    }
+
+    #DueDate.is-valid {
+        border-color: #10b981;
+        box-shadow: 0 0 0 0.2rem rgba(16, 185, 129, 0.25);
+    }
+
+    /* Badge styles */
+    .badge {
+        font-size: 0.8em;
+        padding: 0.5em 0.75em;
+    }
+
+    /* Table row highlights */
+    .table-active {
+        background-color: rgba(59, 130, 246, 0.15) !important;
+    }
+
+    .table-danger {
+        background-color: rgba(239, 68, 68, 0.15) !important;
+        transition: background-color 0.3s ease;
+    }
+
+    /* Card header improvements */
+    .card-header {
+        background: linear-gradient(135deg, #374151 0%, #4b5563 100%) !important;
+    }
+
+    /* Text visibility enhancements */
+    .text-light {
+        color: #f8fafc !important;
+    }
+
+    .text-muted {
+        color: #cbd5e1 !important;
+    }
+
+    .opacity-90 {
+        opacity: 0.9 !important;
+    }
+
+    /* Button enhancements */
+    .btn-success {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        border: none;
+        font-weight: 600;
+    }
+
+        .btn-success:hover {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+    /* Responsive improvements */
+    @@media (max-width: 768px) {
+        .table-responsive {
+            font-size: 0.875rem;
+        }
+
+        .btn {
+            font-size: 0.875rem;
+            padding: 0.5rem 1rem;
+        }
+
+        .card-body {
+            padding: 1rem;
+        }
+    }
+
+    /* Focus states for accessibility */
+    .form-control:focus,
+    .form-select:focus,
+    .form-check-input:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+    }
+
+    /* Selection states */
+    .quiz-multiselect option {
+        padding: 8px 12px;
+        margin: 2px 0;
+        border-radius: 4px;
+    }
 </style>

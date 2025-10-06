@@ -3,6 +3,7 @@ using QuizAppDotNetFrameWork.Models;
 using QuizAppDotNetFrameWork.Repositories;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Web.Mvc;
 
 namespace QuizAppDotNetFrameWork.Controllers
@@ -78,7 +79,7 @@ namespace QuizAppDotNetFrameWork.Controllers
 
         // ========== QUIZ ASSIGNMENT ACTIONS ==========
 
-        // GET: Assign Quiz to Users
+        // GET: Assign Multiple Quizzes to Users
         public ActionResult AssignQuiz()
         {
             if (Session["Role"] == null || Session["Role"].ToString() != "Admin")
@@ -87,41 +88,60 @@ namespace QuizAppDotNetFrameWork.Controllers
             var quizRepo = new QuizRepository();
             var userRepo = new UserRepository();
 
-            ViewBag.Quizzes = quizRepo.GetAllQuizzes();
-            ViewBag.Users = userRepo.GetAllUsers();
+            var viewModel = new QuizAssignmentViewModel
+            {
+                DueDate = DateTime.Now.AddDays(7), // Default due date: 1 week from now
+                AvailableQuizzes = quizRepo.GetAllQuizzes(),
+                UserAssignments = userRepo.GetAllUsers().Select(u => new UserQuizAssignmentItem
+                {
+                    UserId = u.UserId,
+                    Username = u.Username,
+                    Role = u.Role,
+                    SelectedQuizIds = new List<int>(),
+                    IsSelected = false
+                }).ToList()
+            };
 
-            return View();
+            return View(viewModel);
         }
 
-        // POST: Assign Quiz to Users
+        // POST: Assign Multiple Quizzes to Multiple Users
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult AssignQuiz(int quizId, int[] userIds, DateTime dueDate)
+        public ActionResult AssignQuiz(QuizAssignmentViewModel model)
         {
             if (Session["Role"] == null || Session["Role"].ToString() != "Admin")
                 return RedirectToAction("Login", "Users");
 
-            if (userIds == null || userIds.Length == 0)
-            {
-                TempData["ErrorMessage"] = "Please select at least one user.";
-                return RedirectToAction("AssignQuiz");
-            }
-
             try
             {
                 var quizRepo = new QuizRepository();
+                int assignmentCount = 0;
 
-                foreach (var userId in userIds)
+                // Process each user assignment
+                foreach (var userAssignment in model.UserAssignments.Where(ua => ua.IsSelected && ua.SelectedQuizIds != null && ua.SelectedQuizIds.Any()))
                 {
-                    quizRepo.AssignQuizToUser(userId, quizId, dueDate);
+                    foreach (var quizId in userAssignment.SelectedQuizIds)
+                    {
+                        quizRepo.AssignQuizToUser(userAssignment.UserId, quizId, model.DueDate);
+                        assignmentCount++;
+                    }
                 }
 
-                TempData["SuccessMessage"] = $"Quiz assigned to {userIds.Length} user(s) successfully!";
-                return RedirectToAction("ViewAssignments");
+                if (assignmentCount > 0)
+                {
+                    TempData["SuccessMessage"] = $"Successfully created {assignmentCount} quiz assignment(s)!";
+                    return RedirectToAction("ViewAssignments");
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Please select at least one user and one quiz combination.";
+                    return RedirectToAction("AssignQuiz");
+                }
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "Error assigning quiz: " + ex.Message;
+                TempData["ErrorMessage"] = "Error assigning quizzes: " + ex.Message;
                 return RedirectToAction("AssignQuiz");
             }
         }
