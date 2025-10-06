@@ -11,7 +11,7 @@ namespace QuizAppDotNetFrameWork.Controllers
     {
         //Repo objects
         private readonly UserRepository _userRepo = new UserRepository();
-        private readonly QuizRepository _quizRepo = new QuizRepository();
+        //private readonly QuizRepository _quizRepo = new QuizRepository();
 
         // GET: User
 
