@@ -8,7 +8,7 @@ namespace QuizAppDotNetFrameWork.Models
         public int UserId { get; set; }
         public int QuestionId { get; set; }
         public int SelectedOptionId { get; set; }
-        public DateTime submittedOn { get; set; }
+        public DateTime SubmittedOn { get; set; }
 
         // Add this:
         public bool IsCorrect { get; set; }  // Track if answer was correct

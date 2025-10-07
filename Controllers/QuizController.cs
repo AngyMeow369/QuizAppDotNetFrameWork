@@ -479,7 +479,7 @@ namespace QuizAppDotNetFrameWork.Controllers
                     selectedOptions[questionId] = selectedOptionId;
 
                     // Debug output
-                    System.Diagnostics.Debug.WriteLine($"Found answer: Q{questionId} -> Option{selectedOptionId}");
+                    //System.Diagnostics.Debug.WriteLine($"Found answer: Q{questionId} -> Option{selectedOptionId}");
                 }
             }
 
