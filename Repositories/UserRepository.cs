@@ -43,22 +43,7 @@ namespace QuizAppDotNetFrameWork.Repositories
             return users;   // never null
         }
 
-        //public int AddUser(string username, string passwordHash, string role)
-        //{
-        //    using(SqlConnection conn = new SqlConnection(connectionString))
-        //    using (SqlCommand cmd = new SqlCommand("AddUser", conn))
-        //    {
-        //        cmd.CommandType = CommandType.StoredProcedure;
-        //        cmd.Parameters.AddWithValue("@Username", username);
-        //        cmd.Parameters.AddWithValue ("@PasswordHash", passwordHash);
-        //        cmd.Parameters.AddWithValue("@Role", role);
-
-        //        conn.Open();
-        //        return Convert.ToInt32(cmd.ExecuteScalar());
-
-        //    }
-
-        //}
+      
 
         //Acts as a register or login form using Stored procedure
         public int AddUser(string username, string passwordHash, string role)
@@ -78,23 +63,6 @@ namespace QuizAppDotNetFrameWork.Repositories
 
 
 
-        //public void UpdateUser(int userId, string username, string passwordHash, string role)
-        //{
-
-        //    using(SqlConnection conn = new SqlConnection(connectionString))
-        //    using (SqlCommand cmd = new SqlCommand("UpdateUser", conn))
-        //    {
-        //        cmd.CommandType = CommandType.StoredProcedure;
-        //        cmd.Parameters.AddWithValue("@UserId", userId);
-        //        cmd.Parameters.AddWithValue("@Username", username);
-        //        cmd.Parameters.AddWithValue("@PasswordHash", passwordHash);
-        //        cmd.Parameters.AddWithValue("@Role", role);
-
-        //        conn.Open();
-        //        cmd.ExecuteNonQuery();
-
-        //    }
-        //}
 
         //Updating existing users
         public void UpdateUser(int userId, string username, string passwordHash, string role)
@@ -130,24 +98,6 @@ namespace QuizAppDotNetFrameWork.Repositories
         }
 
 
-        //public void DeleteUser(int userId)
-        //{
-        //    {
-        //        using (SqlConnection conn = new SqlConnection(connectionString))
-        //        using (SqlCommand cmd = new SqlCommand("DeleteUser", conn))
-        //        {
-        //            cmd.CommandType = CommandType.StoredProcedure;
-        //            cmd.Parameters.AddWithValue("@UserId", userId);
-        //            conn.Open();
-
-        //            cmd.ExecuteNonQuery();
-
-        //        }
-        //    }
-        //}
-
-
-        //Get used by Id
         public User GetUserById(int userId)
         {
             string json = $@"{{ ""UserId"": {userId} }}";
@@ -176,34 +126,7 @@ namespace QuizAppDotNetFrameWork.Repositories
         }
 
 
-        //public User GetUserById(int userId)
-        //{
-        //    using (SqlConnection conn = new SqlConnection(connectionString))
-        //    using (SqlCommand cmd = new SqlCommand("GetUserById", conn))
-        //    {
-        //        cmd.CommandType = CommandType.StoredProcedure;
-        //        cmd.Parameters.AddWithValue("@UserId", userId);
-
-        //        conn.Open();
-
-        //        using(SqlDataReader reader = cmd.ExecuteReader())
-        //        {
-        //            if(reader.Read())
-        //            {
-        //                return new User
-        //                {
-        //                    UserId = Convert.ToInt32(reader["UserId"]),
-        //                    Username = reader["Username"].ToString(),
-        //                    Role = reader["Role"].ToString()
-        //                };
-        //            }
-        //        }
-        //    }
-
-        //    return null;
-        //}
-
-        //get userbyname
+        
         public User GetUserByName(string name)
         {
             string json = $@"{{ ""Username"": ""{name}"" }}";
@@ -233,32 +156,7 @@ namespace QuizAppDotNetFrameWork.Repositories
         }
 
 
-        //public User GetUserByName(String name)
-        //{
-        //    using (SqlConnection conn = new SqlConnection(connectionString))
-        //    using (SqlCommand cmd = new SqlCommand("GetUserByUserName", conn))
-        //    {
-        //        cmd.CommandType = CommandType.StoredProcedure;
-        //        cmd.Parameters.AddWithValue ("@Username", name);
-
-        //        conn.Open();
-
-        //        using (SqlDataReader reader = cmd.ExecuteReader())
-        //        {
-        //            if (reader.Read())
-        //            {
-        //                return new User
-        //                {
-        //                    UserId = Convert.ToInt32(reader["UserId"]),
-        //                    Username = reader["Username"].ToString(),
-        //                    PasswordHash = reader["PasswordHash"].ToString(),
-        //                    Role = reader["Role"].ToString()
-        //                };
-        //            }
-        //        }
-        //    }
-        //    return null;
-        //}
+        
 
     }
 }
