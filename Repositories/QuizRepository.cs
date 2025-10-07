@@ -69,15 +69,20 @@ namespace QuizAppDotNetFrameWork.Repositories
         }
 
         // Update quiz
+        // Update quiz - FIXED to use JSON parameter
         public void UpdateQuiz(Quiz quiz)
         {
+            string json = $@"{{
+            ""QuizId"": {quiz.QuizId},
+            ""Title"": ""{quiz.Title.Replace("\"", "\\\"")}"",
+            ""Description"": ""{quiz.Description?.Replace("\"", "\\\"")}""
+        }}";
+
             using (SqlConnection conn = new SqlConnection(connectionString))
             using (SqlCommand cmd = new SqlCommand("spUpdateQuiz", conn))
             {
                 cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@QuizId", quiz.QuizId);
-                cmd.Parameters.AddWithValue("@Title", quiz.Title);
-                cmd.Parameters.AddWithValue("@Description", quiz.Description ?? (object)DBNull.Value);
+                cmd.Parameters.AddWithValue("@json", json); // 🆕 Use JSON parameter like other methods
 
                 conn.Open();
                 cmd.ExecuteNonQuery();
