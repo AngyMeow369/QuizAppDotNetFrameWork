@@ -166,9 +166,20 @@ namespace QuizAppDotNetFrameWork.Repositories
         }
 
         // Add new question
+        // Add new question - FIXED JSON ESCAPING
         public int AddQuestion(Question question)
         {
-            string json = $@"{{ ""QuizId"": {question.QuizId}, ""QuestionText"": ""{question.QuestionText.Replace("\"", "\\\"")}"" }}";
+            // 🆕 PROPER JSON ESCAPING
+            string escapedQuestionText = question.QuestionText
+                .Replace("\\", "\\\\")  // Escape backslashes first
+                .Replace("\"", "\\\"")  // Escape quotes
+                .Replace("\n", "\\n")   // Escape newlines
+                .Replace("\r", "\\r")   // Escape carriage returns
+                .Replace("\t", "\\t");  // Escape tabs
+
+            string json = $@"{{ ""QuizId"": {question.QuizId}, ""QuestionText"": ""{escapedQuestionText}"" }}";
+
+            System.Diagnostics.Debug.WriteLine($"JSON being sent: {json}");
 
             using (SqlConnection conn = new SqlConnection(connectionString))
             using (SqlCommand cmd = new SqlCommand("spAddQuestion", conn))

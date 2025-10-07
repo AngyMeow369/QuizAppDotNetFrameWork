@@ -246,36 +246,72 @@ namespace QuizAppDotNetFrameWork.Controllers
                 return RedirectToAction("Login", "Users");
             }
 
-            if (ModelState.IsValid)
+            // 🆕 DEBUG: Check what's coming in
+            System.Diagnostics.Debug.WriteLine($"AddQuestion - QuizId: {question.QuizId}, QuestionText: {question.QuestionText}");
+            if (options != null)
+            {
+                for (int i = 0; i < options.Count; i++)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Option {i}: '{options[i]?.OptionText}', Correct: {options[i]?.IsCorrect}");
+                }
+            }
+
+            // 🆕 FIX: Validate options
+            bool hasValidOptions = options != null && options.Count(o => !string.IsNullOrWhiteSpace(o?.OptionText)) >= 2;
+            bool hasSingleCorrect = options?.Count(o => o.IsCorrect) == 1;
+
+            if (!hasValidOptions)
+            {
+                ModelState.AddModelError("", "At least 2 options are required.");
+            }
+            else if (!hasSingleCorrect)
+            {
+                ModelState.AddModelError("", "Exactly one option must be marked as correct.");
+            }
+
+            // 🆕 FIX: Only proceed if ALL validations pass
+            if (ModelState.IsValid && hasValidOptions && hasSingleCorrect)
             {
                 try
                 {
-                    // Add the question
+                    // Add the question first
                     int questionId = quizRepo.AddQuestion(question);
+                    System.Diagnostics.Debug.WriteLine($"Question added with ID: {questionId}");
 
                     // Add options for this question
-                    if (options != null)
+                    int addedOptions = 0;
+                    foreach (var option in options.Where(o => !string.IsNullOrWhiteSpace(o.OptionText)))
                     {
-                        foreach (var option in options)
-                        {
-                            if (!string.IsNullOrEmpty(option.OptionText))
-                            {
-                                option.QuestionId = questionId;
-                                quizRepo.AddOption(option);
-                            }
-                        }
+                        option.QuestionId = questionId;
+                        quizRepo.AddOption(option);
+                        addedOptions++;
+                        System.Diagnostics.Debug.WriteLine($"Added option: '{option.OptionText}', Correct: {option.IsCorrect}");
                     }
+
+                    System.Diagnostics.Debug.WriteLine($"Total options added: {addedOptions}");
 
                     TempData["SuccessMessage"] = "Question and options added successfully!";
                     return RedirectToAction("ManageQuestions", new { quizId = question.QuizId });
                 }
                 catch (Exception ex)
                 {
+                    System.Diagnostics.Debug.WriteLine($"ERROR: {ex.Message}");
                     ModelState.AddModelError("", "Error adding question: " + ex.Message);
                 }
             }
+            else
+            {
+                // 🆕 FIX: Show what validation failed
+                var errors = ModelState.Values.SelectMany(v => v.Errors);
+                foreach (var error in errors)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Validation Error: {error.ErrorMessage}");
+                }
+            }
 
+            // 🆕 FIX: Re-populate ViewBag and options if validation fails
             ViewBag.Quiz = quizRepo.GetQuizById(question.QuizId);
+            question.Options = options ?? new List<Option>();
             return View(question);
         }
 
