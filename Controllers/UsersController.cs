@@ -1,7 +1,9 @@
-﻿using System;
-using System.Web.Mvc;
-using QuizAppDotNetFrameWork.Helpers;
+﻿using QuizAppDotNetFrameWork.Helpers;
+using QuizAppDotNetFrameWork.Models;
 using QuizAppDotNetFrameWork.Repositories;
+using System;
+using System.Configuration;
+using System.Web.Mvc;
 
 
 namespace QuizAppDotNetFrameWork.Controllers
@@ -98,7 +100,53 @@ namespace QuizAppDotNetFrameWork.Controllers
             Session.Clear();
             return RedirectToAction("Login");
         }
-        
+
+        [HttpPost]
+        public ActionResult LoginJwt(LoginRequest request)
+        {
+            var user = _userRepo.GetUserByName(request.Username);
+            if (user == null)
+            {
+                return Json(new { success = false, message = "Invalid username or password" });
+            }
+
+            bool isPassWordValid = PasswordHelper.VerifyPassword(request.Password, user.PasswordHash);
+            if (!isPassWordValid)
+            {
+                return Json(new { success = false, message = "Invalid username or password" });
+            }
+
+            // ✅ JWT: Generate token
+            var jwtSettings = new JwtSettings
+            {
+                Secret = ConfigurationManager.AppSettings["Jwt:Secret"],
+                Issuer = ConfigurationManager.AppSettings["Jwt:Issuer"],
+                Audience = ConfigurationManager.AppSettings["Jwt:Audience"],
+                ExpireMinutes = int.Parse(ConfigurationManager.AppSettings["Jwt:ExpireMinutes"] ?? "60")
+            };
+
+            var jwtService = new JwtService(jwtSettings);
+            var token = jwtService.GenerateToken(user);
+
+            // ✅ Also set session for backward compatibility
+            Session["UserId"] = user.UserId;
+            Session["Username"] = user.Username;
+            Session["Role"] = user.Role;
+
+            return Json(new
+            {
+                success = true,
+                token = token,
+                user = new
+                {
+                    userId = user.UserId,
+                    username = user.Username,
+                    role = user.Role
+                },
+                redirectUrl = user.Role == "Admin" ? "/Admin/Index" : "/Quiz/Index"
+            });
+        }
+
 
     }
 }
