@@ -160,7 +160,6 @@
                                 </div>
                             </div>
                         </div>
-
                         <!-- Quick assignment list -->
                         <div class="mt-3">
                             <h6 class="text-light mb-3 fw-bold">Recent Assignments:</h6>
@@ -172,7 +171,8 @@
                                             <div class="flex-grow-1">
                                                 <h6 class="mb-1 text-white fw-bold">@assignment.QuizTitle</h6>
                                                 <small class="text-light opacity-90">
-                                                    Due: @assignment.DueDate.ToString("MMM dd, yyyy")
+                                                    <!-- ?? ADDED TIME -->
+                                                    Due: @assignment.DueDate.ToString("MMM dd, yyyy 'at' hh:mm tt")
                                                     @if (assignment.IsOverdue)
                                                     {
                                                         <span class="badge bg-danger ms-2 fw-bold">OVERDUE</span>

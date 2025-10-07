@@ -638,16 +638,17 @@ namespace QuizAppDotNetFrameWork.Controllers
 
             // ✅ FIX: Handle quizId=0 by finding the actual quiz from attempt data
             Quiz quiz = null;
-    
+            int userId = (int)Session["UserId"];
+
             if (quizId == 0)
             {
                 // Try to find the most recent attempt for this user
-                var userAttempts = quizRepo.GetUserQuizAttempts((int)Session["UserId"]);
+                var userAttempts = quizRepo.GetUserQuizAttempts(userId);
                 var recentAttempt = userAttempts
                     .Where(a => a.Score == score && a.TotalQuestions == totalQuestions)
                     .OrderByDescending(a => a.CompletedOn)
                     .FirstOrDefault();
-            
+
                 if (recentAttempt != null)
                 {
                     quizId = recentAttempt.QuizId;
@@ -662,22 +663,53 @@ namespace QuizAppDotNetFrameWork.Controllers
             if (quiz == null)
             {
                 // If quiz still not found, create a dummy quiz object to prevent errors
-                quiz = new Quiz 
-                { 
+                quiz = new Quiz
+                {
                     QuizId = quizId,
-                    Title = "Quiz", 
+                    Title = "Quiz",
                     Description = "Quiz results"
                 };
-                // Don't redirect - just show results with generic title
+            }
+
+            // 🆕 GET USER ANSWERS AND QUESTIONS FOR ANSWER REVIEW
+            List<UserResponse> userAnswers = new List<UserResponse>();
+            List<Question> questions = new List<Question>();
+
+            try
+            {
+                // Get the most recent quiz attempt for this user and quiz
+                var userAttempts = quizRepo.GetUserQuizAttempts(userId);
+                var recentAttempt = userAttempts
+                    .Where(a => a.QuizId == quizId)
+                    .OrderByDescending(a => a.CompletedOn)
+                    .FirstOrDefault();
+
+                if (recentAttempt != null)
+                {
+                    // Get user responses for this attempt
+                    userAnswers = quizRepo.GetUserResponsesByAttempt(recentAttempt.AttemptId);
+
+                    // Get questions with options for this quiz
+                    questions = quizRepo.GetQuestionsWithOptions(quizId);
                 }
+            }
+            catch (Exception ex)
+            {
+                // If there's an error getting the answer data, continue without it
+                System.Diagnostics.Debug.WriteLine($"Error loading answer review: {ex.Message}");
+            }
 
-                    ViewBag.Quiz = quiz;
-                    ViewBag.Score = score;
-                    ViewBag.TotalQuestions = totalQuestions;
-                    ViewBag.Percentage = percentage;
-                    ViewBag.Grade = grade;
+            ViewBag.Quiz = quiz;
+            ViewBag.Score = score;
+            ViewBag.TotalQuestions = totalQuestions;
+            ViewBag.Percentage = percentage;
+            ViewBag.Grade = grade;
 
-                    return View();
+            // 🆕 PASS THE ANSWER REVIEW DATA
+            ViewBag.UserAnswers = userAnswers;
+            ViewBag.Questions = questions;
+
+            return View();
         }
 
         public ActionResult AssignedQuizzes()

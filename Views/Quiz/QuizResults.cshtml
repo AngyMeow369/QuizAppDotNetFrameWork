@@ -2,6 +2,9 @@
     ViewBag.Title = "Quiz Results";
     var quiz = ViewBag.Quiz as QuizAppDotNetFrameWork.Models.Quiz;
     var isAdmin = Session["Role"]?.ToString() == "Admin";
+    // 🆕 ADD THESE - You'll need to pass them from your controller
+    var userAnswers = ViewBag.UserAnswers as List<QuizAppDotNetFrameWork.Models.UserResponse>;
+    var questions = ViewBag.Questions as List<QuizAppDotNetFrameWork.Models.Question>;
 }
 
 <div class="container mt-4">
@@ -46,8 +49,87 @@
                         }
                     </div>
 
+                    <!-- 🆕 ANSWER REVIEW SECTION -->
+                    <div class="mt-5 text-start">
+                        <h5 class="border-bottom pb-2">
+                            <i class="bi bi-list-check me-2"></i>Answer Review
+                        </h5>
+
+                        @if (questions != null && userAnswers != null)
+                        {
+                            for (int i = 0; i < questions.Count; i++)
+                            {
+                                var question = questions[i];
+                                var userAnswer = userAnswers.FirstOrDefault(ua => ua.QuestionId == question.QuestionId);
+                                var userSelectedOption = question.Options.FirstOrDefault(o => o.OptionId == userAnswer?.SelectedOptionId);
+                                var correctOption = question.Options.FirstOrDefault(o => o.IsCorrect);
+
+                                <div class="card mb-3 @(userAnswer?.IsCorrect == true ? "border-success" : "border-danger")">
+                                    <div class="card-header @(userAnswer?.IsCorrect == true ? "bg-success text-white" : "bg-danger text-white")">
+                                        <strong>Question @(i + 1):</strong> @question.QuestionText
+                                        <span class="badge @(userAnswer?.IsCorrect == true ? "bg-light text-success" : "bg-warning text-dark") float-end">
+                                            @(userAnswer?.IsCorrect == true ? "✓ Correct" : "✗ Incorrect")
+                                        </span>
+                                    </div>
+                                    <div class="card-body">
+                                        <!-- User's Answer -->
+                                        <div class="mb-2">
+                                            <strong>Your Answer:</strong>
+                                            <span class="@(userAnswer?.IsCorrect == true ? "text-success fw-bold" : "text-danger")">
+                                                @(userSelectedOption?.OptionText ?? "Not answered")
+                                            </span>
+                                        </div>
+
+                                        <!-- Correct Answer (Show only if wrong) -->
+                                        @if (userAnswer?.IsCorrect == false)
+                                        {
+                                            <div class="mb-2">
+                                                <strong>Correct Answer:</strong>
+                                                <span class="text-success fw-bold">
+                                                    @correctOption?.OptionText
+                                                </span>
+                                            </div>
+                                        }
+
+                                        <!-- Options List -->
+                                        <div class="small text-muted mt-2">
+                                            <strong>All Options:</strong>
+                                            <ul class="list-unstyled mt-1">
+                                                @foreach (var option in question.Options)
+                                                {
+                                                    <li class="@(option.IsCorrect ? "text-success fw-bold" : "") @(option.OptionId == userAnswer?.SelectedOptionId && !option.IsCorrect ? "text-danger" : "")">
+                                                        @if (option.IsCorrect)
+                                                        {
+                                                            <i class="bi bi-check-circle-fill me-1"></i>
+                                                        }
+                                                        else if (option.OptionId == userAnswer?.SelectedOptionId)
+                                                        {
+                                                            <i class="bi bi-x-circle-fill me-1"></i>
+                                                        }
+                                                        else
+                                                        {
+                                                            <i class="bi bi-circle me-1"></i>
+                                                        }
+                                                        @option.OptionText
+                                                    </li>
+                                                }
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="alert alert-warning">
+                                <i class="bi bi-exclamation-triangle me-2"></i>
+                                Answer review not available for this attempt.
+                            </div>
+                        }
+                    </div>
+
                     <!-- Action Buttons -->
-                    <div class="d-grid gap-2 d-md-flex justify-content-center">
+                    <div class="d-grid gap-2 d-md-flex justify-content-center mt-4">
                         @if (!isAdmin)
                         {
                             <a href="@Url.Action("Questions", new { quizId = quiz.QuizId })" class="btn btn-warning me-md-2">
@@ -68,8 +150,6 @@
                             </a>
                         }
                     </div>
-
-
                 </div>
             </div>
         </div>

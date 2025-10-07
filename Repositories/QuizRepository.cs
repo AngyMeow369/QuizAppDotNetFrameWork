@@ -47,6 +47,8 @@ namespace QuizAppDotNetFrameWork.Repositories
         }
         #endregion
 
+
+
         // Add new quiz
         public int AddQuiz(Quiz quiz)
         {
@@ -658,6 +660,37 @@ namespace QuizAppDotNetFrameWork.Repositories
                 }
             }
             return attempts;
+        }
+
+        // Get user responses by attempt ID - ADD THIS METHOD
+        public List<UserResponse> GetUserResponsesByAttempt(int attemptId)
+        {
+            var responses = new List<UserResponse>();
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlCommand cmd = new SqlCommand("spGetUserResponsesByAttempt", conn))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@AttemptId", attemptId);
+
+                conn.Open();
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        responses.Add(new UserResponse
+                        {
+                            ResponseId = Convert.ToInt32(reader["ResponseId"]),
+                            UserId = Convert.ToInt32(reader["UserId"]),
+                            QuestionId = Convert.ToInt32(reader["QuestionId"]),
+                            SelectedOptionId = Convert.ToInt32(reader["SelectedOptionId"]),
+                            IsCorrect = Convert.ToBoolean(reader["IsCorrect"]),
+                            AttemptId = Convert.ToInt32(reader["AttemptId"])
+                        });
+                    }
+                }
+            }
+            return responses;
         }
 
 
