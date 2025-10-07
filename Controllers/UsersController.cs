@@ -13,8 +13,7 @@ namespace QuizAppDotNetFrameWork.Controllers
     {
         //Repo objects
         private readonly UserRepository _userRepo = new UserRepository();
-        //private readonly QuizRepository _quizRepo = new QuizRepository();
-
+       
         // GET: User
 
         //Get of Register
@@ -36,7 +35,7 @@ namespace QuizAppDotNetFrameWork.Controllers
             string hashedPassword = PasswordHelper.HashPassword(password);
 
             //saves to the Db
-            //UserRepository userRepo = new UserRepository();
+            
             int newUserId = _userRepo.AddUser(username, hashedPassword, role);
 
             ViewBag.Message = "Registered successfully! User Name" + username;
@@ -82,17 +81,6 @@ namespace QuizAppDotNetFrameWork.Controllers
             }
         }
 
-        //public ActionResult AssignedQuizzes()
-        //{
-        //    if (Session["UserId"] == null)
-        //    {
-        //        return RedirectToAction("Login", "Users");
-        //    }
-
-        //    int userId = (int)Session["UserId"];
-        //    var assignments = _quizRepo.GetAssignedQuizzesByUser(userId); // Remove "QuizRepository." prefix
-        //    return View(assignments);
-        //}
 
         //logout
         public ActionResult Logout()
