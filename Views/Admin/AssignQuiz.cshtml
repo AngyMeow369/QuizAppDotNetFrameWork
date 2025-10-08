@@ -7,7 +7,7 @@
 <div class="container mt-4">
     <div class="row mb-4">
         <div class="col-12">
-            <div class="card bg-gradient-primary bg-dark border-light">
+            <div class="card bg-gradient bg-dark border-light">
                 <div class="card-body py-4">
                     <div class="row align-items-center">
                         <div class="col-md-8">
@@ -524,8 +524,13 @@
 }
 
 <style>
+    body {
+        background-color: #1a1a1a;
+        color: #ffffff;
+    }
+
     .bg-gradient-primary {
-        background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%) !important;
+        background: linear-gradient(135deg, #065f46 0%, #059669 100%) !important;
     }
 
     /* Custom text color classes for better visibility */
@@ -546,7 +551,7 @@
     }
 
     .user-assignment-row:hover {
-        background-color: rgba(59, 130, 246, 0.1) !important;
+        background-color: rgba(16, 185, 129, 0.08) !important;
     }
 
     .quiz-selection {
@@ -562,7 +567,7 @@
     .table-dark {
         --bs-table-bg: transparent;
         --bs-table-border-color: #6b7280;
-        --bs-table-hover-bg: rgba(59, 130, 246, 0.1);
+        --bs-table-hover-bg: rgba(16, 185, 129, 0.1);
     }
 
     .quiz-multiselect option:checked {
@@ -572,7 +577,7 @@
     }
 
     .quiz-multiselect option:hover {
-        background-color: #3b82f6 !important;
+        background-color: #059669 !important;
         color: #ffffff !important;
     }
 
@@ -615,7 +620,7 @@
 
     /* Table row highlights */
     .table-active {
-        background-color: rgba(59, 130, 246, 0.15) !important;
+        background-color: rgba(16, 185, 129, 0.12) !important;
     }
 
     .table-danger {
@@ -625,7 +630,7 @@
 
     /* Card header improvements */
     .card-header {
-        background: linear-gradient(135deg, #374151 0%, #4b5563 100%) !important;
+        background: linear-gradient(135deg, #064e3b 0%, #065f46 100%) !important;
     }
 
     /* Button enhancements */
@@ -661,8 +666,8 @@
     .form-control:focus,
     .form-select:focus,
     .form-check-input:focus {
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+        border-color: #10b981;
+        box-shadow: 0 0 0 0.2rem rgba(16, 185, 129, 0.25);
     }
 
     /* Selection states */
@@ -670,5 +675,32 @@
         padding: 8px 12px;
         margin: 2px 0;
         border-radius: 4px;
+    }
+
+    /* Updated badge colors to match green theme */
+    .badge.bg-info {
+        background-color: #0d9488 !important;
+    }
+
+    .badge.bg-primary {
+        background-color: #059669 !important;
+    }
+
+    /* Updated border colors for better consistency */
+    .border-primary {
+        border-color: #059669 !important;
+    }
+
+    .border-info {
+        border-color: #0d9488 !important;
+    }
+
+    /* Updated text colors */
+    .text-primary {
+        color: #10b981 !important;
+    }
+
+    .text-info {
+        color: #0d9488 !important;
     }
 </style>

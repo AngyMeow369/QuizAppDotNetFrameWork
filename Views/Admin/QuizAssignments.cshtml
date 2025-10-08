@@ -7,13 +7,13 @@
 <div class="container mt-4">
     <div class="row">
         <div class="col-12">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h4 class="card-title mb-0">
+            <div class="card bg-dark border-light">
+                <div class="card-header bg-dark border-light d-flex justify-content-between align-items-center">
+                    <h4 class="card-title mb-0 text-white">
                         <i class="bi bi-people me-2"></i>Assignments for: @ViewBag.QuizTitle
                     </h4>
                     <div>
-                        <a href="@Url.Action("ViewAssignments")" class="btn btn-outline-secondary btn-sm">
+                        <a href="@Url.Action("ViewAssignments")" class="btn btn-outline-light btn-sm">
                             <i class="bi bi-arrow-left me-1"></i>All Assignments
                         </a>
                         <a href="@Url.Action("AssignQuiz")" class="btn btn-success btn-sm">
@@ -21,36 +21,36 @@
                         </a>
                     </div>
                 </div>
-                <div class="card-body">
+                <div class="card-body bg-dark">
                     @if (Model != null && Model.Any())
                     {
                         <div class="table-responsive">
-                            <table class="table table-striped">
-                                <thead class="table-dark">
+                            <table class="table table-dark table-hover">
+                                <thead class="border-light">
                                     <tr>
-                                        <th>User</th>
-                                        <th>Assigned On</th>
-                                        <th>Due Date</th>
-                                        <th>Status</th>
-                                        <th>Score</th>
-                                        <th>Time Taken</th>
-                                        <th>Actions</th>
+                                        <th class="border-light text-white">User</th>
+                                        <th class="border-light text-white">Assigned On</th>
+                                        <th class="border-light text-white">Due Date</th>
+                                        <th class="border-light text-white">Status</th>
+                                        <th class="border-light text-white">Score</th>
+                                        <th class="border-light text-white">Time Taken</th>
+                                        <th class="border-light text-white">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach (var assignment in Model)
                                     {
-                                        <tr>
-                                            <td>
-                                                <strong>@assignment.Username</strong>
+                                        <tr class="border-light">
+                                            <td class="border-light">
+                                                <strong class="text-white">@assignment.Username</strong>
                                             </td>
-                                            <td>@assignment.AssignedOn.ToString("MMM dd, yyyy")</td>
-                                            <td>
-                                                <span class="@(assignment.IsOverdue ? "text-danger fw-bold" : "")">
+                                            <td class="border-light text-white-80">@assignment.AssignedOn.ToString("MMM dd, yyyy")</td>
+                                            <td class="border-light">
+                                                <span class="@(assignment.IsOverdue ? "text-danger fw-bold" : "text-white-90")">
                                                     @assignment.DueDate.ToString("MMM dd, yyyy hh:mm tt")
                                                 </span>
                                             </td>
-                                            <td>
+                                            <td class="border-light">
                                                 @if (assignment.IsCompleted)
                                                 {
                                                     <span class="badge bg-success">Completed</span>
@@ -61,30 +61,30 @@
                                                 }
                                                 else
                                                 {
-                                                    <span class="badge bg-warning">Pending</span>
+                                                    <span class="badge bg-warning text-dark">Pending</span>
                                                 }
                                             </td>
-                                            <td>
+                                            <td class="border-light">
                                                 @if (assignment.IsCompleted && assignment.AttemptId.HasValue)
                                                 {
-                                                    <span class="fw-bold text-primary">View Results</span>
+                                                    <span class="fw-bold text-info">View Results</span>
                                                 }
                                                 else
                                                 {
-                                                    <span class="text-muted">--</span>
+                                                    <span class="text-white-60">--</span>
                                                 }
                                             </td>
-                                            <td>
+                                            <td class="border-light">
                                                 @if (assignment.IsCompleted)
                                                 {
                                                     <span class="text-success">Completed</span>
                                                 }
                                                 else
                                                 {
-                                                    <span class="text-muted">--</span>
+                                                    <span class="text-white-60">--</span>
                                                 }
                                             </td>
-                                            <td>
+                                            <td class="border-light">
                                                 @if (assignment.IsCompleted && assignment.AttemptId.HasValue)
                                                 {
                                                     var quizRepo = new QuizAppDotNetFrameWork.Repositories.QuizRepository();
@@ -99,13 +99,13 @@
                                                                     percentage = attempt.Percentage,
                                                                     grade = attempt.Grade
                                                                     })"
-                                                        class="btn btn-outline-info btn-sm">
+                                                           class="btn btn-outline-info btn-sm border-info text-info">
                                                             <i class="bi bi-graph-up me-1"></i>Results
                                                         </a>
                                                     }
                                                     else
                                                     {
-                                                        <span class="text-muted">Results unavailable</span>
+                                                        <span class="text-white-60">Results unavailable</span>
                                                     }
                                                 }
                                             </td>
@@ -118,25 +118,25 @@
                         <!-- Quiz Summary -->
                         <div class="row mt-4">
                             <div class="col-md-12">
-                                <div class="card bg-light">
+                                <div class="card bg-dark border-light">
                                     <div class="card-body">
-                                        <h6 class="card-title">Quiz Summary</h6>
+                                        <h6 class="card-title text-white">Quiz Summary</h6>
                                         <div class="row text-center">
                                             <div class="col-md-3">
-                                                <h4>@Model.Count</h4>
-                                                <small class="text-muted">Total Assigned</small>
+                                                <h4 class="text-white">@Model.Count</h4>
+                                                <small class="text-white-70">Total Assigned</small>
                                             </div>
                                             <div class="col-md-3">
                                                 <h4 class="text-success">@Model.Count(a => a.IsCompleted)</h4>
-                                                <small class="text-muted">Completed</small>
+                                                <small class="text-white-70">Completed</small>
                                             </div>
                                             <div class="col-md-3">
                                                 <h4 class="text-warning">@Model.Count(a => !a.IsCompleted && !a.IsOverdue)</h4>
-                                                <small class="text-muted">Pending</small>
+                                                <small class="text-white-70">Pending</small>
                                             </div>
                                             <div class="col-md-3">
                                                 <h4 class="text-danger">@Model.Count(a => a.IsOverdue)</h4>
-                                                <small class="text-muted">Overdue</small>
+                                                <small class="text-white-70">Overdue</small>
                                             </div>
                                         </div>
                                     </div>
@@ -147,9 +147,9 @@
                     else
                     {
                         <div class="text-center py-5">
-                            <i class="bi bi-people display-1 text-muted"></i>
-                            <h4 class="text-muted mt-3">No Assignments for This Quiz</h4>
-                            <p class="text-muted">This quiz hasn't been assigned to any users yet.</p>
+                            <i class="bi bi-people display-1 text-white-50"></i>
+                            <h4 class="text-white mt-3">No Assignments for This Quiz</h4>
+                            <p class="text-white-70">This quiz hasn't been assigned to any users yet.</p>
                             <a href="@Url.Action("AssignQuiz")" class="btn btn-success">
                                 <i class="bi bi-plus-circle me-1"></i>Assign This Quiz
                             </a>
@@ -160,3 +160,73 @@
         </div>
     </div>
 </div>
+
+<style>
+    body {
+        background-color: #1a1a1a;
+        color: #ffffff;
+    }
+
+    /* Custom text color classes for better visibility */
+    .text-white-90 {
+        color: rgba(255, 255, 255, 0.95) !important;
+    }
+
+    .text-white-80 {
+        color: rgba(255, 255, 255, 0.85) !important;
+    }
+
+    .text-white-70 {
+        color: rgba(255, 255, 255, 0.75) !important;
+    }
+
+    .text-white-60 {
+        color: rgba(255, 255, 255, 0.65) !important;
+    }
+
+    .text-white-50 {
+        color: rgba(255, 255, 255, 0.55) !important;
+    }
+
+    .table-dark {
+        --bs-table-bg: transparent;
+        --bs-table-border-color: #6b7280;
+        --bs-table-hover-bg: rgba(59, 130, 246, 0.08);
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(59, 130, 246, 0.08) !important;
+        transform: translateY(-1px);
+        transition: all 0.2s ease;
+    }
+
+    .card {
+        border: 1px solid #6b7280;
+    }
+
+    .btn-outline-info:hover {
+        background-color: #0dcaf0;
+        border-color: #0dcaf0;
+        color: white !important;
+    }
+
+    .badge {
+        font-size: 0.75em;
+        font-weight: 600;
+    }
+
+    @@media (max-width: 768px) {
+        .table-responsive {
+            font-size: 0.875rem;
+        }
+
+        .btn-sm {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+        }
+
+        .display-1 {
+            font-size: 3rem;
+        }
+    }
+</style>

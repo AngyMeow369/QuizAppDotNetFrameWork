@@ -316,7 +316,6 @@ namespace QuizAppDotNetFrameWork.Controllers
         }
 
         // Edit question (GET)
-        // Edit question (GET) - ADD THIS!
         public ActionResult EditQuestion(int questionId)
         {
             if (Session["Role"] == null || Session["Role"].ToString() != "Admin")
