@@ -61,7 +61,7 @@ namespace QuizAppDotNetFrameWork.Controllers
             // keep old hash if admin left box empty
             string hash = string.IsNullOrWhiteSpace(newPassword)
                           ? existing.PasswordHash
-                          : PasswordHelper.HashPassword(newPassword);   // or your own hash method
+                          : PasswordHelper.HashPassword(newPassword);   // or our own hash method
 
             repo.UpdateUser(model.UserId, model.Username, hash, model.Role);
             return RedirectToAction("ManageUsers");
