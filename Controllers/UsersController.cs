@@ -49,6 +49,53 @@ namespace QuizAppDotNetFrameWork.Controllers
             return View();
         }
 
+        // New login jwt based auth used here as per learning purpose. works with token. 
+        [HttpPost]
+        public ActionResult LoginJwt(LoginRequest request)
+        {
+            var user = _userRepo.GetUserByName(request.Username);
+            if (user == null)
+            {
+                return Json(new { success = false, message = "Invalid username or password" });
+            }
+
+            bool isPassWordValid = PasswordHelper.VerifyPassword(request.Password, user.PasswordHash);
+            if (!isPassWordValid)
+            {
+                return Json(new { success = false, message = "Invalid username or password" });
+            }
+
+            //  JWT: Generate token
+            var jwtSettings = new JwtSettings
+            {
+                Secret = ConfigurationManager.AppSettings["Jwt:Secret"],
+                Issuer = ConfigurationManager.AppSettings["Jwt:Issuer"],
+                Audience = ConfigurationManager.AppSettings["Jwt:Audience"],
+                ExpireMinutes = int.Parse(ConfigurationManager.AppSettings["Jwt:ExpireMinutes"] ?? "60")
+            };
+
+            var jwtService = new JwtService(jwtSettings);
+            var token = jwtService.GenerateToken(user);
+
+            //  Also set session for backward compatibility
+            Session["UserId"] = user.UserId;
+            Session["Username"] = user.Username;
+            Session["Role"] = user.Role;
+
+            return Json(new
+            {
+                success = true,
+                token = token,
+                user = new
+                {
+                    userId = user.UserId,
+                    username = user.Username,
+                    role = user.Role
+                },
+                redirectUrl = user.Role == "Admin" ? "/Admin/Index" : "/Quiz/Index"
+            });
+        }
+
         //Post of Login with just Session authentication only, no longer using. kept for learning purposes.Jwt used instead.
         //[HttpPost]
         //public ActionResult Login(string username, string password)
@@ -89,52 +136,7 @@ namespace QuizAppDotNetFrameWork.Controllers
             return RedirectToAction("Login");
         }
 
-        //New login jwt based auth used here as per learning purpose. works with token. 
-        [HttpPost]
-        public ActionResult LoginJwt(LoginRequest request)
-        {
-            var user = _userRepo.GetUserByName(request.Username);
-            if (user == null)
-            {
-                return Json(new { success = false, message = "Invalid username or password" });
-            }
-
-            bool isPassWordValid = PasswordHelper.VerifyPassword(request.Password, user.PasswordHash);
-            if (!isPassWordValid)
-            {
-                return Json(new { success = false, message = "Invalid username or password" });
-            }
-
-            // ✅ JWT: Generate token
-            var jwtSettings = new JwtSettings
-            {
-                Secret = ConfigurationManager.AppSettings["Jwt:Secret"],
-                Issuer = ConfigurationManager.AppSettings["Jwt:Issuer"],
-                Audience = ConfigurationManager.AppSettings["Jwt:Audience"],
-                ExpireMinutes = int.Parse(ConfigurationManager.AppSettings["Jwt:ExpireMinutes"] ?? "60")
-            };
-
-            var jwtService = new JwtService(jwtSettings);
-            var token = jwtService.GenerateToken(user);
-
-            // ✅ Also set session for backward compatibility
-            Session["UserId"] = user.UserId;
-            Session["Username"] = user.Username;
-            Session["Role"] = user.Role;
-
-            return Json(new
-            {
-                success = true,
-                token = token,
-                user = new
-                {
-                    userId = user.UserId,
-                    username = user.Username,
-                    role = user.Role
-                },
-                redirectUrl = user.Role == "Admin" ? "/Admin/Index" : "/Quiz/Index"
-            });
-        }
+        
 
 
     }
