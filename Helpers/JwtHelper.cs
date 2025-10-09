@@ -11,6 +11,11 @@ public static class JwtHelper
         {
             var handler = new JwtSecurityTokenHandler();
             var jwtToken = handler.ReadJwtToken(token);
+
+            // Quick expiration check
+            if (jwtToken.ValidTo < DateTime.UtcNow)
+                return -1;
+
             var userIdClaim = jwtToken.Claims.First(claim => claim.Type == "UserId");
             return int.Parse(userIdClaim.Value);
         }
