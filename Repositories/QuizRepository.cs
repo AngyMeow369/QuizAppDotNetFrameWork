@@ -18,7 +18,7 @@ namespace QuizAppDotNetFrameWork.Repositories
 
         // ========== QUIZ CRUD METHODS ==========
 
-        #region Returning all the quizes
+        
         public List<Quiz> GetAllQuizzes()
         {
             var quizzes = new List<Quiz>();
@@ -45,9 +45,7 @@ namespace QuizAppDotNetFrameWork.Repositories
             }
             return quizzes;
         }
-        #endregion
-
-
+        
 
         // Add new quiz
         public int AddQuiz(Quiz quiz)
@@ -166,7 +164,6 @@ namespace QuizAppDotNetFrameWork.Repositories
         }
 
         // Add new question
-        // Add new question - FIXED JSON ESCAPING
         public int AddQuestion(Question question)
         {
             // 🆕 PROPER JSON ESCAPING
@@ -210,7 +207,6 @@ namespace QuizAppDotNetFrameWork.Repositories
         }
 
         // Delete question
-        // Delete question - FIXED to use JSON
         public void DeleteQuestion(int questionId)
         {
             string json = $@"{{ ""QuestionId"": {questionId} }}";
@@ -323,7 +319,6 @@ namespace QuizAppDotNetFrameWork.Repositories
         }
 
         // Delete option
-        // Delete option - FIXED to use JSON
         public void DeleteOption(int optionId)
         {
             string json = $@"{{ ""OptionId"": {optionId} }}";
@@ -472,10 +467,10 @@ namespace QuizAppDotNetFrameWork.Repositories
         public void AssignQuizToUser(int userId, int quizId, DateTime dueDate)
         {
             string json = $@"{{
-        ""UserId"": {userId},
-        ""QuizId"": {quizId},
-        ""DueDate"": ""{dueDate:yyyy-MM-dd HH:mm:ss}""
-    }}";
+                ""UserId"": {userId},
+                ""QuizId"": {quizId},
+                ""DueDate"": ""{dueDate:yyyy-MM-dd HH:mm:ss}""
+            }}";
 
             using (SqlConnection conn = new SqlConnection(connectionString))
             using (SqlCommand cmd = new SqlCommand("spAssignQuizToUser", conn))
