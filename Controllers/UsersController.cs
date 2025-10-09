@@ -49,37 +49,37 @@ namespace QuizAppDotNetFrameWork.Controllers
             return View();
         }
 
-        //Post of Login
-        [HttpPost]
-        public ActionResult Login(string username, string password)
-        {
-            var user = _userRepo.GetUserByName(username);
-            if(user == null)
-            {
-                ViewBag.Message = "Invalid Username or password";
-                return View();
-            }
+        //Post of Login with just Session authentication only, no longer using. kept for learning purposes.Jwt used instead.
+        //[HttpPost]
+        //public ActionResult Login(string username, string password)
+        //{
+        //    var user = _userRepo.GetUserByName(username);
+        //    if(user == null)
+        //    {
+        //        ViewBag.Message = "Invalid Username or password";
+        //        return View();
+        //    }
 
-            bool isPassWordValid = PasswordHelper.VerifyPassword(password, user.PasswordHash);
-            if(!isPassWordValid)
-            {
-                ViewBag.Message = "Invalid Username or password";
-                return View();
-            }
+        //    bool isPassWordValid = PasswordHelper.VerifyPassword(password, user.PasswordHash);
+        //    if(!isPassWordValid)
+        //    {
+        //        ViewBag.Message = "Invalid Username or password";
+        //        return View();
+        //    }
 
-            //setting session
-            Session["UserId"] = user.UserId;
-            Session["Username"] = user.Username;
-            Session["Role"] = user.Role;
+        //    //setting session
+        //    Session["UserId"] = user.UserId;
+        //    Session["Username"] = user.Username;
+        //    Session["Role"] = user.Role;
 
-            if(user.Role == "Admin")
-            {
-                return RedirectToAction("Index", "Admin");
-            } else
-            {
-                return RedirectToAction("Index", "Quiz");
-            }
-        }
+        //    if(user.Role == "Admin")
+        //    {
+        //        return RedirectToAction("Index", "Admin");
+        //    } else
+        //    {
+        //        return RedirectToAction("Index", "Quiz");
+        //    }
+        //}
 
 
         //logout
@@ -89,6 +89,7 @@ namespace QuizAppDotNetFrameWork.Controllers
             return RedirectToAction("Login");
         }
 
+        //New login jwt based auth used here as per learning purpose. works with token. 
         [HttpPost]
         public ActionResult LoginJwt(LoginRequest request)
         {
