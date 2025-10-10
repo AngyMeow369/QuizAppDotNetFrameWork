@@ -90,7 +90,7 @@ namespace QuizAppDotNetFrameWork.Controllers
 
             var viewModel = new QuizAssignmentViewModel
             {
-                DueDate = DateTime.Now.AddDays(7), // Default due date: 1 week from now
+                DueDate = DateTime.Now.AddDays(3), // Default due date: 3 days from now
                 AvailableQuizzes = quizRepo.GetAllQuizzes(),
                 UserAssignments = userRepo.GetAllUsers().Select(u => new UserQuizAssignmentItem
                 {
@@ -196,5 +196,7 @@ namespace QuizAppDotNetFrameWork.Controllers
 
             return RedirectToAction("ViewAssignments");
         }
+
+
     }
 }

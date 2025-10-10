@@ -64,7 +64,7 @@ namespace QuizAppDotNetFrameWork.Repositories
 
 
 
-        //Updating existing users
+        // Updating existing users
         public void UpdateUser(int userId, string username, string passwordHash, string role)
         {
             string json = $@"{{ ""UserId"": {userId}, ""Username"": ""{username}"", ""PasswordHash"": ""{passwordHash}"", ""Role"": ""{role}"" }}";
